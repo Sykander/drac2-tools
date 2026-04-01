@@ -18,7 +18,7 @@ char = character()
 def modify_bag(
     item: str,
     count: int = 1,
-    bag: str = "Equipment"
+    bag: str = "Equipment",
     char = char,
 ) -> Tuple[bool, str]:
     bags = load_json(char.get_cvar(bags_code)) if char.get_cvar(bags_code) else []
