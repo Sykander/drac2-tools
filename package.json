@@ -1,0 +1,14 @@
+{
+  "name": "drac2-tools",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "node utils/deploy.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "publish-avrae": "^1.0.3"
+  }
+}

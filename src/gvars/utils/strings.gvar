@@ -1,0 +1,60 @@
+# Strings
+# A place to store reusable string functions
+
+def get_readable_list(items: list[str], delim: str = ", ", final_delim: str = " and ") -> str:
+    items = list(items)
+    if len(items) == 0:
+        items_str = ""
+    elif len(items) == 1:
+        items_str = items[0]
+    else:
+        items_str = final_delim.join([delim.join(items[:-1]), items[-1]])
+
+    return items_str
+
+def get_ordinal_index(index: int) -> str:
+    if index == 11:
+        return "11th"
+
+    if index == 12:
+        return "12th"
+
+    if index == 13:
+        return "13th"
+
+    index_str = str(index)
+
+    if index_str.endswith("1"):
+        return f"{index}st"
+
+    if index_str.endswith("2"):
+        return f"{index}nd"
+
+    if index_str.endswith("3"):
+        return f"{index}rd"
+
+    return f"{index}th"
+
+def replace_all(given_string: str, search: str, replace: str) -> str:
+    parts = given_string.split(search)
+    return replace.join(parts)
+
+def replace(given_string: str, search: str, replace: str) -> str:
+    if search not in given_string:
+        return given_string
+
+    parts = given_string.split(search)
+
+    if len(parts) == 2:
+        return replace.join(parts)
+
+    return search.join(
+        [replace.join(parts[0:1])] + parts[2:]
+    )
+
+def is_str(maybe_str) -> bool:
+    try:
+        return maybe_str == str(maybe_str)
+    except:
+        return False
+

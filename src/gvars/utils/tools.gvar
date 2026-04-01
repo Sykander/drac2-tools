@@ -1,0 +1,84 @@
+tool_prof_code = "pTools"
+tool_exp_code = "eTools"
+
+tools_list = [
+    "Alchemist's Supplies",
+    "Brewer's Supplies",
+    "Calligrapher's Supplies",
+    "Carpenter's Tools",
+    "Cartographer's Tools",
+    "Cobbler's Tools",
+    "Cook's Utensils",
+    "Glassblower's Tools",
+    "Jeweler's Tools",
+    "Leatherworker's Tools",
+    "Mason's Tools",
+    "Painter's Supplies",
+    "Potter's Tools",
+    "Smith's Tools",
+    "Tinker's Tools",
+    "Weaver's Tools",
+    "Woodcarver's Tools",
+    "Dice Set",
+    "Dragonchess Set",
+    "Playing Card Set",
+    "Three-Dragon Ante Set",
+    "Bagpipes",
+    "Birdpipes",
+    "Drum",
+    "Dulcimer",
+    "Flute",
+    "Glaur",
+    "Hand Drum",
+    "Horn",
+    "Longhorn",
+    "Lute",
+    "Lyre",
+    "Pan Flute",
+    "Shawm",
+    "Songhorn",
+    "Tantan",
+    "Thelarr",
+    "Tocken",
+    "Viol",
+    "Wargong",
+    "Yarting",
+    "Zulkoon",
+    "Disguise Kit",
+    "Forgery Kit",
+    "Herbalism Kit",
+    "Navigator's Tools",
+    "Poisoner's Kit",
+    "Thieves' Tools",
+    "Land Vehicles",
+    "Water Vehicles",
+]
+
+char = character()
+
+def search_for_tool(toolname):
+    return lists.search_list(tools_list, toolname)
+
+# Returns true if the character has expertise or proficiency in the given tool
+def get_has_proficiency(
+    toolname: str,
+    char = char
+) -> bool:
+    if toolname not in tools_list:
+        return False
+
+    tool_prof = ch.get_cvar(bags.tool_prof_code, "")
+    tool_exp = ch.get_cvar(bags.tool_exp_code, "")
+
+    return toolname in tool_prof or toolname in tool_exp
+
+def get_has_expertise(
+    toolname: str,
+    char = char
+) -> bool:
+    if toolname not in tools_list:
+        return False
+
+    tool_exp = ch.get_cvar(bags.tool_exp_code, "")
+
+    return toolname in tool_exp

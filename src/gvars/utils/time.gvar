@@ -1,0 +1,47 @@
+# time
+#
+# A library for dealing with timestamps and converting time
+
+SECOND = 1
+MINUTE = 60 * SECOND
+HOUR = 60 * MINUTE
+DAY = 24 * HOUR
+
+ROUND = 6 * SECOND
+
+def get_ts_from_combat():
+    try:
+        com_rounds = combat().round_num
+    except:
+        com_rounds = 0
+    
+    return float(com_rounds * ROUND)
+
+def get_time(ts: float = time()) -> dict[str, int]:
+    days = floor(ts / DAY)
+    hours = floor((ts % DAY) / HOUR)
+    minutes = floor((ts % HOUR) / MINUTE)
+    seconds = floor(ts % MINUTE)
+
+    return {
+        "days": days,
+        "hours": hours,
+        "minutes": minutes,
+        "seconds": seconds
+    }
+
+def get_readable_time(ts: float = time()):
+    time = get_time(ts)
+    days_part = time.days + " days " if time.days != 0 else ""
+    hours_part = time.hours + " hours " if time.hours != 0 else ""
+    minutes_part = time.minutes + " minutes " if time.minutes != 0 else ""
+    seconds_part = time.seconds + " seconds " if time.seconds != 0 else ""
+
+    if days_part == "" and hours_part == "" and minutes_part == "":
+        seconds_part = time.seconds + " seconds "
+
+    return f"{days_part}{hours_part}{minutes_part}{seconds_part}".strip()
+
+def get_discord_timestamp(ts: float = time()):
+    ts = floor(ts) # md can't handle decimals
+    return f"<t:{ts}><t:{ts}:R>"

@@ -1,0 +1,45 @@
+# commands
+# a reuseable command string library
+# avoids adding the ctx.prefix except on multilines, you're expected to add this yourself if necessary (normally isn't necessary)
+
+MULTILINE_BASE = "multiline "
+
+# get_multiline
+#
+# commands - a list of commands for the multiline
+#
+# returns a multiline command string
+def get_multiline(commands: list[str]) -> str:
+    return MULTILINE_BASE + ctx.prefix + ("\n" + ctx.prefix).join(commands)
+
+# get_quotes
+# encodes a given value with quotes for commands
+#
+# value - the value to wrap in quotes
+#
+# returns the value wrapped in quotes
+def get_quotes(value: str) -> str:
+    if " " not in value and "\t" not in value and "\n" not in value:
+        return value
+
+    if '"' not in value:
+        return f'"{value}"'
+
+    if "'" not in value:
+        return f"'{value}'"
+
+    return f"《{value}》"
+
+# get_command
+# 
+# actions - list of actions for the command eg. ["init", "attack", "longsword"]
+# args - OPTIONAL a dict of the args on the command eg. { "-t": "GO1" }
+#
+# returns the command string
+def get_command(actions: list[str], args: dict | None = None) -> str:
+    command = " ".join([get_quotes(action) for action in actions])
+
+    if args != None:
+        command += " " + " ".join([f"{key}{' ' + get_quotes(value) if value != True else ''}" for key, value in args.items()])
+
+    return command

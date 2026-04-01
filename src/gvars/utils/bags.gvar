@@ -1,0 +1,60 @@
+# Bags
+# A reusable library for interacting with bags
+# https://avrae.io/dashboard/workshop/6296b723c964982e890e5315
+
+bags_code = "bags"
+
+char = character()
+
+# modify_bag
+# modifies the characters bag
+#
+# item - the name of the item
+# count - OPTIONAL 1 - the amount to add or remove
+# bag - OPTIONAL Equipment - the bag to modify
+# char - OPTIONAL the active character - the character to modify bags for
+#
+# returns a Tuple [did_update, update_message]
+def modify_bag(
+    item: str,
+    count: int = 1,
+    bag: str = "Equipment"
+    char = char,
+) -> Tuple[bool, str]:
+    bags = load_json(char.get_cvar(bags_code)) if char.get_cvar(bags_code) else []
+
+    bag_contents = None
+    bag_index = None
+    i = 0
+    for test_bag in bags:
+        if test_bag[0] == bag:
+            bag_contents = test_bag[1]
+            bag_index = i
+            break
+        i += 1
+
+    if bag_contents == None:
+        bag_contents = {}
+        bags.append([bag, bag_contents])
+        bag_index = len(bags) - 1
+
+    found_item = False
+    for key in bag_contents.keys():
+        if key == item:
+            current_count = bag_contents[key]
+            new_count = current_count + count
+            bags[bag_index][1][key] = new_count
+            found_item = True
+            break
+
+    if not found_item:
+        new_count = count
+        bags[bag_index][1][item] = count
+        found_item = True
+
+    if new_count < 0:
+        return False, f"Couldn't update {char.name}'s bag '{bag}' with {count}x {item} because the new count would be {new_count}."
+
+    char.set_cvar(bags_code, dump_json(bags))
+
+    return True, f"""{f"{abs(count)}x " if count != 1 else ""}{item} {"added to" if count > 0 else "removed from"} {character.name}'s bag '{bag}'."""
