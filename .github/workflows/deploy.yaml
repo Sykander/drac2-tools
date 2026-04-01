@@ -1,13 +1,13 @@
 name: Deploy
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
     inputs:
       ENVIRONMENT:
         description: 'Environment to deploy to'
         required: true
-        default: 'Development' 
+        default: 'Development'
 jobs:
   sourcemap-tests:
     runs-on: ubuntu-latest
@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          cache: "npm"
+          cache: 'npm'
       - run: npm ci
       - name: Test Sourcemaps
         run: npm run test-sourcemaps
@@ -38,7 +38,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          version: "0.9.26"
+          version: '0.9.26'
       - run: uv tool install avrae-ls
       - name: Test
         run: avrae-ls --run-tests src --log-level INFO
@@ -57,7 +57,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          cache: "npm"
+          cache: 'npm'
       - run: npm ci
       - name: Deploy
         run: npm run deploy

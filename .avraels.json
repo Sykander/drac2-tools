@@ -3,7 +3,5 @@
   "avraeService": {
     "token": "$AVRAE_TOKEN"
   },
-  "varFiles": [
-    ".varfile.json"
-  ]
+  "varFiles": [".varfile.json"]
 }

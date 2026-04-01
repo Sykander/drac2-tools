@@ -2,9 +2,8 @@ const { deploy } = require('publish-avrae');
 const prodSourceMap = require('./sourcemap.prod.json');
 const devSourceMap = require('./sourcemap.dev.json');
 
-const sourceMap = process.env.ENVIRONMENT === "Production"
-  ? prodSourceMap
-  : devSourceMap;
+const sourceMap =
+  process.env.ENVIRONMENT === 'Production' ? prodSourceMap : devSourceMap;
 
 console.log('Starting Deployment');
 deploy(sourceMap)
