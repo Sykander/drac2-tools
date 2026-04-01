@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "deploy": "node utils/deploy.js"
+    "deploy": "node utils/deploy.js",
+    "generate-env": "node utils/generate-env.js",
+    "generate-vars": "node utils/generate-vars.js",
+    "test": "node utils/sourcemap-test.js"
   },
   "author": "",
   "license": "ISC",

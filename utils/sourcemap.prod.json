@@ -1,0 +1,67 @@
+{
+    "workshop": {
+        "environment": "62b98ae7-61d7-4f2d-a6f8-01e722e4ec6d"
+    },
+    "gvars": [
+        {
+            "name": "env",
+            "file": "src/gvars/env.prod.gvar",
+            "id": "62b98ae7-61d7-4f2d-a6f8-01e722e4ec6d"
+        },
+        {
+            "name": "bags",
+            "file": "src/gvars/utils/bags/bags.gvar",
+            "id": "38756442-20f6-4773-ab67-340895f79224"
+        },
+        {
+            "name": "commands",
+            "file": "src/gvars/utils/commands/commands.gvar",
+            "id": "4eb91b72-d65d-49a1-9f92-d804772546b0"
+        },
+        {
+            "name": "dicts",
+            "file": "src/gvars/utils/dicts/dicts.gvar",
+            "id": "9ce4d5ba-9dc2-45b0-938d-ab434f6f70ad"
+        },
+        {
+            "name": "embeds",
+            "file": "src/gvars/utils/embeds/embeds.gvar",
+            "id": "ef9ccbb2-5aed-4231-a5d2-773d6a3039d9"
+        },
+        {
+            "name": "lists",
+            "file": "src/gvars/utils/lists/lists.gvar",
+            "id": "be56beeb-512b-4cc3-93e3-e3b9a8d2b70c"
+        },
+        {
+            "name": "notes",
+            "file": "src/gvars/utils/notes/notes.gvar",
+            "id": "b0a504fa-568a-44ca-a899-807660980ee5"
+        },
+        {
+            "name": "random",
+            "file": "src/gvars/utils/random/random.gvar",
+            "id": "9ddcdac4-2fb8-4d3b-bc4c-1cde24936dc5"
+        },
+        {
+            "name": "rolls",
+            "file": "src/gvars/utils/rolls/rolls.gvar",
+            "id": "b6fe8f32-72ee-4179-a5b2-6fe79c77f372"
+        },
+        {
+            "name": "strings",
+            "file": "src/gvars/utils/strings/strings.gvar",
+            "id": "58d3892c-170c-4f7a-95a2-8a5d4fb50b0d"
+        },
+        {
+            "name": "time",
+            "file": "src/gvars/utils/time/time.gvar",
+            "id": "623a1bb0-6b04-4757-bb6e-0c8beeb9ba20"
+        },
+        {
+            "name": "tools",
+            "file": "src/gvars/utils/tools/tools.gvar",
+            "id": "254cb78d-e9ae-4b03-afc5-d2cbc93bb27e"
+        }
+    ]
+}
