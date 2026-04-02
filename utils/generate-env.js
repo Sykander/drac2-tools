@@ -25,16 +25,9 @@ const envDict = gvars.reduce((acc, { id, name }) => {
   return acc;
 }, {});
 
-const jsonEnvDict = JSON.stringify(envDict);
+const newEnvFileContents = `ENV = "${environmentToUpdate}"
 
-const envFileContents = readFileSync(envFile).toString();
-
-const gvarRegex = /gvars\s=\s\{.*\}/gi;
-
-const newEnvFileContents = envFileContents.replace(
-  gvarRegex,
-  `gvars = ${jsonEnvDict}`,
-);
+gvars = ${JSON.stringify(envDict)}`;
 
 writeFileSync(envFile, newEnvFileContents);
 

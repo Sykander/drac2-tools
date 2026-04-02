@@ -1,7 +1,33 @@
 !test <drac2>
 using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
-using(embeds=env.get_gvar_id_by_name("embeds"))
+using(embeds=env.gvars.embeds)
 </drac2>
 ---
 ---
 name: embeds gvar loads
+
+!test <drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(embeds=env.gvars.embeds)
+return embeds.get_embed(
+  desc = "Hello World!",
+  title = "Title",
+  footer = "Footer",
+  fields = ["Field"],
+  color = "#A1A1A1",
+  timeout = 60,
+  image = "test",
+  thumb = "test"
+)
+</drac2>
+---
+description: Hello World!
+title: Title
+footer: Footer
+field: Field
+color: "#A1A1A1"
+timeout: 60
+image: test
+thumb: test
+---
+name: embeds: get_embed accepts embed properties

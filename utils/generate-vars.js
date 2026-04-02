@@ -22,17 +22,7 @@ const varDict = gvars.reduce((acc, { file, id }) => {
   return acc;
 }, {});
 
-const jsonVarDict = JSON.stringify(varDict);
-
-const varFileContents = readFileSync(varFile).toString();
-
-const gvarRegex = /"gvars"\s*:\s*\{.*\}/gi;
-
-const newVarFileContents = varFileContents.replace(
-  gvarRegex,
-  `"gvars": ${jsonVarDict}`,
-);
-
+const newVarFileContents = JSON.stringify({ gvars: varDict });
 writeFileSync(varFile, newVarFileContents);
 
 console.log(`${environmentToUpdate} var file updated.`);

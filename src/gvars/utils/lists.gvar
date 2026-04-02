@@ -3,7 +3,7 @@
 
 using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
 using(
-    random = env.get_gvar_id_by_name("random")
+    random = env.gvars.random
 )
 
 def to_dict(items: list, key: string) -> dict:
