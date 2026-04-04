@@ -56,12 +56,12 @@ def get_readable_name_for_skill(skill_name, ability_name = None, is_passive = Fa
         readable_skill_name = skill_name.capitalize()
 
     using_default_ability = ability_name == None or get_default_ability_for_skill(skill_name) == ability_name
-    type_of_check = "Passive Check" if is_passive else "Check"
+    passive_text = "Passive " if is_passive else ""
 
     if using_default_ability:
-        return f'{readable_skill_name} {type_of_check}'
+        return f'{passive_text}{readable_skill_name} Check'
     else:
-        return f'{ability_name.capitalize()} ({readable_skill_name}) {type_of_check}'
+        return f'{passive_text}{ability_name.capitalize()} ({readable_skill_name}) Check'
 
 def get_readable_name_for_save(save_name, ability_name = None):
     readable_save_name = save_name.capitalize()
@@ -113,18 +113,20 @@ def join_advantage(advantage_a, advantage_b):
     else:
         return advantage_a
 
-def get_d20(adv: bool | None = None, eadv: bool = False):
+def get_d20(adv: bool | None = None, eadv: bool = False, mi: int | None = None, ma: int | None = None, ro: list[int] = [] ):
     if adv == None:
-        return "1d20"
+        based20 "1d20"
+    elif adv == True and eadv == True:
+        based20 "3d20kh1"
+    elif adv == True:
+        based20 "2d20kh1"
+    elif adv == False:
+        based20 "2d20kl1"
 
-    if adv == True and eadv == True:
-        return "3d20kh1"
-
-    if adv == True:
-        return "2d20kh1"
-
-    if adv == False:
-        return "2d20kl1"
+    mi_text = "" if mi == None else f"mi{mi}"
+    ma_text = "" if ma == None else f"mi{ma}"
+    ro_text = "" if len(ro) == 0 else "".join([f"ro{r}" for r in ro])
+    return based20 + mi_text + ma_text + ro_text
 
 # Joins a list of roll strings together
 # roll_strings - the list of rolls to join
@@ -179,7 +181,7 @@ def get_skill_check(
     has_indomitable_might = character_has_indomitable_might(character)
     using_strength = ability_name == "strength" or ability_name == None and get_default_ability_for_skill(skill_name) == "strength"
 
-    mod_override = None
+    mod_override = 0
     if ability_name != None:
         ability_mod = character.stats.get_mod(ability_name)
         if (ability_mod == None):
@@ -191,20 +193,21 @@ def get_skill_check(
         else:
             ability_to_replace_mod = character.stats.get_mod(ability_to_replace)
 
-        mod_override = skill.value + ability_mod - ability_to_replace_mod
+        mod_override = ability_mod - ability_to_replace_mod
 
     base_adv = join_advantage(adv, skill.adv)
+    base_mod = skill.value + mod_override
 
-    based20 = skill.d20(
-        base_adv = base_adv,
-        reroll = 1 if has_halfling_luck else None,
-        min_val = 10 if has_reliable_talent else None,
-        mod_override = mod_override
+    based20 = get_d20(
+        adv = base_adv,
+        mi = 10 if has_reliable_talent else None,
+        ro = [1] if has_halfling_luck else []
     )
-    
-    base_roll = join_roll_strings([based20] + bonuses)
+
+    base_roll = join_roll_strings([based20, base_mod] + bonuses)
     if using_strength and has_indomitable_might:
         return f'({base_roll}, {character.stats.get_mod("strength")})kh1'
+
     return base_roll
 
 # Get a roll string for a character using a specific save
@@ -251,14 +254,14 @@ def get_saving_throw(
         mod_override = save.value + ability_mod - ability_to_replace_mod
 
     base_adv = join_advantage(adv, save.adv)
+    base_mod = skill.value + mod_override
 
-    based20 = save.d20(
-        base_adv = base_adv,
-        reroll = 1 if has_halfling_luck else None,
-        min_val = None,
-        mod_override = mod_override
+    based20 = get_d20(
+        adv = base_adv,
+        ro = [1] if has_halfling_luck else []
     )
-    return join_roll_strings([based20] + bonuses)
+
+    return join_roll_strings([based20, base_mod] + bonuses)
 
 def get_attack_roll(
     character,
@@ -349,7 +352,6 @@ def get_passive_roll(
     if using_strength and has_indomitable_might:
         return f'({base_roll}, {character.stats.get_mod("strength")})kh1'
     return base_roll
-
 
 def get_damage_roll(
     damage_dice: str,

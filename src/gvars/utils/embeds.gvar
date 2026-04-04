@@ -20,11 +20,6 @@ def get_field(title, text = "", inline = False):
 
 # get_embed
 # check `!help embed -here`
-#
-# desc - OPTIONAL "" - the desc
-# title - OPTIONAL "" - the title
-# fields - OPTIONAL [] - list of fields
-# footer 
 def get_embed(
     desc: str | None = None,
     title: str | None = None,
@@ -70,16 +65,7 @@ def configure_get_embed(
     color: str | None = None,
     timeout: int | None = None
 ):
-    return lambda
-        desc = desc 
-        title = title 
-        fields = fields 
-        footer = footer 
-        image = image 
-        thumb = thumb 
-        color = color 
-        timeout = timeout
-    : get_embed(
+    return lambda desc = desc, title = title, fields = fields, footer = footer, image = image, thumb = thumb, color = color, timeout = timeout: get_embed(
         desc = desc,
         fields = fields,
         title = title,
