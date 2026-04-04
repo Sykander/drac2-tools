@@ -1,0 +1,29 @@
+!bags
+---
+---
+name: bags gvar loads
+
+!bags -testcase "modify_bag should run without error"
+---
+---
+name: modify_bag should run without error
+
+!bags -testcase "modify_bag should return false if it can't modify the bag"
+---
+---
+name: modify_bag should return false if it can't modify the bag
+
+!bags -testcase "modify_bag should default to Equipment if bag not given"
+---
+---
+name: modify_bag should default to Equipment if bag not given
+
+!bags -testcase "modify_bag should default to 1 if count not given"
+---
+---
+name: modify_bag should default to 1 if count not given
+
+!bags -testcase "modify_bag should add and remove items"
+---
+---
+name: modify_bag should add and remove items

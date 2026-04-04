@@ -1,0 +1,89 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    bags = env.gvars.bags,
+    expect = env.gvars.expect,
+)
+
+expect = expect.expect
+
+args = argparse(&ARGS&)
+
+testcase = args.last("testcase", None)
+
+char_name = "Aelar Wyn"
+
+if testcase == "modify_bag should run without error":
+    item = "Shortsword"
+    count = 1
+    bag = "Equipment"
+    expected_modified = True
+    expected_message = f"{item} added to {char_name}'s bag {bag}."
+
+    modified, message = bags.modify_bag(item, count, bag)
+
+    expect(modified).to.be(expected_modified)
+    expect(message).to.be(expected_message)
+elif testcase == "modify_bag should return false if it can't modify the bag":
+    item = "Shortsword"
+    count = -100
+    bag = "Equipment"
+    expected_modified = False
+    expected_message = f"Couldn't update {char_name}'s bag {bag} with {count}x {item} because the new count would be {count}."
+
+    modified, message = bags.modify_bag(item, count, bag)
+
+    expect(message).to.be(expected_message)
+    expect(modified).to.be(expected_modified)
+elif testcase == "modify_bag should default to Equipment if bag not given":
+    item = "Shortsword"
+    count = 1
+    bag = None
+    expected_modified = True
+    expected_message = f"{item} added to {char_name}'s bag Equipment."
+
+    modified, message = bags.modify_bag(item, count, bag)
+
+    expect(message).to.be(expected_message)
+    expect(modified).to.be(expected_modified)
+elif testcase == "modify_bag should default to 1 if count not given":
+    item = "Shortsword"
+    count = None
+    bag = "Equipment"
+    expected_modified = True
+    expected_message = f"{item} added to {char_name}'s bag {bag}."
+
+    modified, message = bags.modify_bag(item, count, bag)
+
+    expect(message).to.be(expected_message)
+    expect(modified).to.be(expected_modified)
+elif testcase == "modify_bag should add and remove items":
+    item = "Shortsword"
+    count_a = 1
+    count_b = 9
+    count_c = -1
+    count_d = -9
+    bag = "Equipment"
+    expected_modified_a = True
+    expected_message_a = f"{item} added to {char_name}'s bag {bag}."
+    expected_modified_b = True
+    expected_message_b = f"{count_b}x {item} added to {char_name}'s bag {bag}."
+    expected_modified_c = True
+    expected_message_c = f"{item} removed from {char_name}'s bag {bag}."
+    expected_modified_d = True
+    expected_message_d = f"{abs(count_d)}x {item} removed from {char_name}'s bag {bag}."
+
+    modified_a, message_a = bags.modify_bag(item, count_a, bag)
+    modified_b, message_b = bags.modify_bag(item, count_b, bag)
+    modified_c, message_c = bags.modify_bag(item, count_c, bag)
+    modified_d, message_d = bags.modify_bag(item, count_d, bag)
+
+    expect(message_a).to.be(expected_message_a)
+    expect(modified_a).to.be(expected_modified_a)
+    expect(message_b).to.be(expected_message_b)
+    expect(modified_b).to.be(expected_modified_b)
+    expect(message_c).to.be(expected_message_c)
+    expect(modified_c).to.be(expected_modified_c)
+    expect(message_d).to.be(expected_message_d)
+    expect(modified_d).to.be(expected_modified_d)
+</drac2>

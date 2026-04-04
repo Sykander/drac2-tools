@@ -101,17 +101,15 @@ def get_default_ability_for_attack_type(attack_type: string):
 
     return None
 
-def join_advantage(advantage_a, advantage_b):
-    if advantage_a == None and advantage_b == None:
+def join_advantage(*advs):
+    if True in advs and False in advs:
         return None
-    elif advantage_a == None:
-        return advantage_b
-    elif advantage_b == None:
-        return advantage_a
-    elif advantage_a != advantage_b:
-        return None
+    elif True in advs:
+        return True
+    elif False in advs:
+        return False
     else:
-        return advantage_a
+        return None
 
 def get_d20(adv: bool | None = None, eadv: bool = False, mi: int | None = None, ma: int | None = None, ro: list[int] = [] ):
     if adv == None:
@@ -146,212 +144,6 @@ def join_roll_strings(roll_strings: list[str]):
         result_str += roll_str
 
     return result_str
-
-# Get a roll string for a character using a specific skill
-# character
-# skill_name - the skill to roll for
-# ability_name - the ability to use for the skill roll or None for default
-# bonus - any bonuses to add to the roll
-# adv - true for advantage, false for disadvantage, none for flat
-# returns a single roll string
-def get_skill_check(
-    character,
-    skill_name: str,
-    ability_name: str | None = None,
-    bonuses: list[str] | None = None,
-    adv: bool | None = None
-):
-    if bonuses == None:
-        bonuses = []
-
-    if (character == None):
-        based20 = get_d20(adv)
-        return join_roll_strings([based20] + bonuses)
-
-    skill = None
-    for (b_name, b_skill) in character.skills:
-        if skill_name == b_name:
-            skill = b_skill
-
-    if (skill == None):
-        err(f"Didn't find skill for {skill_name}!")
-
-    has_reliable_talent = character_has_reliable_talent(character)
-    has_halfling_luck = character_has_halfing_luck(character)
-    has_indomitable_might = character_has_indomitable_might(character)
-    using_strength = ability_name == "strength" or ability_name == None and get_default_ability_for_skill(skill_name) == "strength"
-
-    mod_override = 0
-    if ability_name != None:
-        ability_mod = character.stats.get_mod(ability_name)
-        if (ability_mod == None):
-            err(f"Didn't find ability mod for {ability_name}!")
-
-        ability_to_replace = get_default_ability_for_skill(skill_name)
-        if ability_to_replace == None:
-            ability_to_replace_mod = 0
-        else:
-            ability_to_replace_mod = character.stats.get_mod(ability_to_replace)
-
-        mod_override = ability_mod - ability_to_replace_mod
-
-    base_adv = join_advantage(adv, skill.adv)
-    base_mod = skill.value + mod_override
-
-    based20 = get_d20(
-        adv = base_adv,
-        mi = 10 if has_reliable_talent else None,
-        ro = [1] if has_halfling_luck else []
-    )
-
-    base_roll = join_roll_strings([based20, base_mod] + bonuses)
-    if using_strength and has_indomitable_might:
-        return f'({base_roll}, {character.stats.get_mod("strength")})kh1'
-
-    return base_roll
-
-# Get a roll string for a character using a specific save
-# character
-# save_name - the save to roll for
-# ability_name - the ability to use for the save roll or None for default
-# bonus - any bonuses to add to the roll
-# adv - true for advantage, false for disadvantage, none for flat
-# returns a single roll string
-def get_saving_throw(
-    character,
-    save_name: str,
-    ability_name: str | None = None,
-    bonuses: list[str] | None = None,
-    adv: bool | None = None
-):
-    if bonuses == None:
-        bonuses = []
-
-    if (character == None):
-        based20 = get_d20(adv)
-        return join_roll_strings([based20] + bonuses)
-
-    if (save_name not in save_abilities.keys()):
-        err(f"Didn't find save for {save_name}!")
-
-    save = character.saves.get(save_name)
-
-    has_halfling_luck = character_has_halfing_luck(character)
-
-    mod_override = None
-    if ability_name != None:
-        ability_mod = character.stats.get_mod(ability_name)
-        if (ability_mod == None):
-            err(f"Didn't find ability mod for {ability_name}!")
-
-        ability_to_replace = get_default_ability_for_save(skill_name)
-
-        if ability_to_replace == None:
-            ability_to_replace_mod = 0
-        else:
-            ability_to_replace_mod = character.stats.get_mod(ability_to_replace)
-
-        mod_override = save.value + ability_mod - ability_to_replace_mod
-
-    base_adv = join_advantage(adv, save.adv)
-    base_mod = skill.value + mod_override
-
-    based20 = get_d20(
-        adv = base_adv,
-        ro = [1] if has_halfling_luck else []
-    )
-
-    return join_roll_strings([based20, base_mod] + bonuses)
-
-def get_attack_roll(
-    character,
-    attack_type: str,
-    ability_name: str | None = None,
-    bonuses: list[str] | None = None,
-    adv: bool | None = None,
-    eadv: bool = False
-):
-    if character == None:
-        based20 = get_d20(adv = adv, eadv = eadv)
-        return join_roll_strings([based20] + bonuses)
-
-    ability_name = ability_name if ability_name != None else get_default_ability_for_attack_type(attack_type)
-
-    if ability_name == None:
-        err(f'Unrecognised attack type {attack_type}')
-
-    ability_mod = character.stats.get_mod(ability_name)
-    prof_mod = character.stats.prof_bonus
-
-    if bonuses == None:
-        bonuses = []
-
-    based20 = get_d20(
-        adv = adv,
-        eadv = eadv
-    )
-    return join_roll_strings([based20] + [str(ability_mod + prof_mod)] + bonuses)
-
-def get_passive_roll(
-    character,
-    skill_name,
-    ability_name: str | None = None,
-    bonuses: list[str] | None = None,
-    adv: bool | None = None,
-):
-    if bonuses == None:
-        bonuses = []
-
-    if (character == None):
-        if adv == True:
-            bonuses.append("+5[advantage]")
-        elif adv == False:
-            bonuses.append("-5[disadvantage]")
-        return join_roll_strings(["10"] + bonuses)
-
-    skill = None
-    for (b_name, b_skill) in character.skills:
-        if skill_name == b_name:
-            skill = b_skill
-
-    if (skill == None):
-        err(f"Didn't find skill for {skill_name}!")
-
-    has_indomitable_might = character_has_indomitable_might(character)
-    using_strength = ability_name == "strength" or ability_name == None and get_default_ability_for_skill(skill_name) == "strength"
-
-    mod_override = 0
-    if ability_name != None:
-        ability_mod = character.stats.get_mod(ability_name)
-        if (ability_mod == None):
-            err(f"Didn't find ability mod for {ability_name}!")
-
-        ability_to_replace = get_default_ability_for_skill(skill_name)
-        if ability_to_replace == None:
-            ability_to_replace_mod = 0
-        else:
-            ability_to_replace_mod = character.stats.get_mod(ability_to_replace)
-
-        mod_override = skill.value + ability_mod - ability_to_replace_mod
-
-    base_adv = join_advantage(adv, skill.adv)
-
-    if base_adv == True:
-        bonuses.append("+5[advantage]")
-    elif base_adv == False:
-        bonuses.append("-5[disadvantage]")
-
-    has_observant = character_has_observant(character)
-    observant_perception_check = ability_name in [None, "wisdom"] and skill_name == "perception"
-    observant_investigation_check = ability_name in [None, "intelligence"] and skill_name == "investigation"
-    if has_observant and (observant_investigation_check or observant_perception_check):
-        bonuses.append("+5[Observant]")
-
-    based20 = f"10+{skill.value + mod_override}"
-    base_roll = join_roll_strings([based20] + bonuses)
-    if using_strength and has_indomitable_might:
-        return f'({base_roll}, {character.stats.get_mod("strength")})kh1'
-    return base_roll
 
 def get_damage_roll(
     damage_dice: str,
@@ -407,6 +199,41 @@ def get_ability_to_use_from_args(args):
 
     return None
 
+def get_mod_override(character, abiliy_a: str | None = None, ability_b: str | None = None):
+    if ability_a == ability_b or character == None:
+        return 0
+
+    ability_a_mod = character.stats.get_mod(ability_a) if ability_a != None else 0
+    ability_b_mod = character.stats.get_mod(ability_b) if ability_b != None else 0
+
+    if (ability_a_mod == None):
+        err(f"Didn't find ability mod for {ability_a}!")
+
+    if (ability_b_mod == None):
+        err(f"Didn't find ability mod for {ability_b}!")
+
+    return ability_b_mod - ability_a_mod
+
+def get_skill_for_character(character, skill_name):
+    if character == None:
+        return 0, None
+
+    skills = [b_skill for (b_name, b_skill) in character.skills if roll_name == b_name]
+    if len(skills) != 1:
+        err(f"Didn't find skill for {roll_name}!")
+
+    skill = skills[0]
+    return skill.value, skill.adv
+
+def get_save_for_character(character, save_name):
+    if character == None:
+        return 0, None
+
+    if (roll_name not in save_abilities.keys()):
+        err(f"Didn't find save for {roll_name}!")
+
+    save = character.saves.get(roll_name)
+    return save.value, save.adv
 # get_roll
 # Processes a roll
 #
@@ -430,8 +257,11 @@ def get_roll(
     adv: bool | None = None,
     bonuses: list[str] = []
 ) -> dict:
+    if roll_type not in ["roll", "check", "passive", "save", "attack"]:
+        err(f'Unknown roll roll_type {roll_type}')
+
     bonuses += args.get("b")
-    adv = join_advantage(adv, args.adv(boolwise = True))
+    argsadv = args.adv(boolwise = True)
     eadv = args.adv(eadv = True) == 2 # returns 2 for elven accuracy
 
     if args.last("guidance") and roll_type in ["check", "passive"]:
@@ -445,48 +275,93 @@ def get_roll(
 
     ability_name = ability_name if ability_name != None else get_ability_to_use_from_args(args)
 
+    has_reliable_talent = character_has_reliable_talent(character)
+    has_halfling_luck = character_has_halfing_luck(character)
+    has_indomitable_might = character_has_indomitable_might(character)
+
     if roll_type == "check":
-        roll_str = get_skill_check(
-            character = character,
-            skill_name = roll_name,
-            ability_name = ability_name,
-            bonuses = bonuses,
-            adv = adv
-        )
         readable_roll_name = get_readable_name_for_skill(roll_name, ability_name)
     elif roll_type == "passive":
-        roll_str = get_passive_roll(
-            character = character,
-            skill_name = roll_name,
-            ability_name = ability_name,
-            bonuses = bonuses,
-            adv = adv
-        )
         readable_roll_name = get_readable_name_for_skill(roll_name, ability_name, is_passive = True)
     elif roll_type == "save":
-        roll_str = get_saving_throw(
-            character = character,
-            save_name = roll_name,
-            ability_name = ability_name,
-            bonuses = bonuses,
-            adv = adv
-        )
         readable_roll_name = get_readable_name_for_save(roll_name, ability_name)
     elif roll_type == "attack":
-        roll_str = get_attack_roll(
-            character = character,
-            attack_type = roll_name,
-            ability_name = ability_name,
-            bonuses = bonuses,
-            adv = adv,
-            eadv = eadv
-        )
-        readable_roll_name = get_readable_name_for_attack(roll_name, ability_name)
+        readable_roll_name = get_default_ability_for_attack_type(roll_name, ability_name)
     elif roll_type == "roll":
-        roll_str = roll_name
         readable_roll_name = 'Roll'
-    else:
-        err(f'Unknown roll roll_type {roll_type}')
+
+    if roll_type == "roll":
+        roll_str = roll_name
+    elif roll_type == "check":
+        skill_value, skill_adv = get_skill_for_character(character, roll_name)
+
+        using_strength = ability_name == "strength" or ability_name == None and get_default_ability_for_skill(roll_name) == "strength"
+        mod_override = get_mod_override(character, get_default_ability_for_save(roll_name), ability_name)
+
+        base_adv = join_advantage(adv, argsadv, skill_adv)
+        base_mod = skill_value + mod_override
+
+        based20 = get_d20(
+            adv = base_adv,
+            mi = 10 if has_reliable_talent else None,
+            ro = [1] if has_halfling_luck else []
+        )
+
+        roll_str = join_roll_strings([based20, base_mod] + bonuses)
+        if using_strength and has_indomitable_might:
+            roll_str = f'({roll_str}, {character.stats.get_mod("strength")})kh1'
+    elif roll_type == "passive":
+        skill_value, skill_adv = get_skill_for_character(character, roll_name)
+
+        using_strength = ability_name == "strength" or ability_name == None and get_default_ability_for_skill(roll_name) == "strength"
+        mod_override = get_mod_override(character, get_default_ability_for_save(roll_name), ability_name)
+
+        base_adv = join_advantage(adv, argsadv, skill_adv)
+        base_mod = skill_value + mod_override
+
+        has_observant = character_has_observant(character)
+        observant_perception_check = ability_name in [None, "wisdom"] and roll_name == "perception"
+        observant_investigation_check = ability_name in [None, "intelligence"] and roll_name == "investigation"
+        should_add_observant_bonus = has_observant and (observant_investigation_check or observant_perception_check)
+
+        flat_bonuses = (["+5[advantage]"] if adv else ["-5[disadvantage]"] if not adv else []) + (["+5[observant]"] if should_add_observant_bonus else [])
+        based20 = "10"
+        roll_str = join_roll_strings([based20, base_mod] + flat_bonuses + bonuses)
+        if using_strength and has_indomitable_might:
+            roll_str = f'({roll_str}, {character.stats.get_mod("strength")})kh1'
+    elif roll_type == "save":
+        save_value, save_adv = get_save_for_character(character, roll_name)
+        has_halfling_luck = character_has_halfing_luck(character)
+        mod_override = get_mod_override(character, get_default_ability_for_save(roll_name), ability_name)
+
+        base_adv = join_advantage(adv, argsadv, save_adv)
+        base_mod = save_value + mod_override
+
+        based20 = get_d20(
+            adv = base_adv,
+            ro = [1] if has_halfling_luck else []
+        )
+
+        roll_str = join_roll_strings([based20, base_mod] + bonuses)
+    elif roll_type == "attack":
+        ability_name = ability_name if ability_name != None else get_default_ability_for_attack_type(attack_type)
+
+        if attack_type not in attack_type_abilities.keys():
+            err(f'Unrecognised attack type {attack_type}')
+
+        if character == None:
+            ability_mod = 0
+            prof_mod = 0
+        else:
+            ability_mod = character.stats.get_mod(ability_name)
+            prof_mod = character.stats.prof_bonus
+
+        based20 = get_d20(
+            adv = adv,
+            eadv = eadv,
+            ro = [1] if has_halfling_luck else []
+        )
+        roll_str = join_roll_strings([based20] + [str(ability_mod + prof_mod)] + bonuses)
 
     roll_result = vroll(roll_str)
 

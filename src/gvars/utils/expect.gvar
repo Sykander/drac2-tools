@@ -1,0 +1,36 @@
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    dicts = env.gvars.dicts
+)
+
+def to_equal(arg, val, message: str | None = None):
+    if arg != val:
+        err(f"Expected {dump_json(arg)} to equal {dump_json(val)}" if message == None else message)
+
+    return expect(arg)
+
+def to_have_property(arg, key: str, val: any | None = None, message: str | None = None):
+    if not dicts.is_dict(arg):
+        err(f"Expected {arg} to be a dict" if message == None else message)
+    
+    if key not in arg:
+        err(f"Expected {arg} to have property {key}" if message == None else message)
+
+    arg_val = arg.get(key, None)
+
+    if val != None and arg_val != val:
+        err(f"Expected {arg} to have property {val} instead got {arg_val}" if message != None else message)
+    
+    return expect(arg_val)
+
+def expect(arg):
+    this_context = {
+        "to_be": lambda val, message = None: to_equal(arg, val, message),
+        "be": lambda val, message = None: to_equal(arg, val, message),
+        "have": lambda key, val = None, message = None: to_have_property(arg, key, val, message),
+        "to_have": lambda key, val = None, message = None: to_have_property(arg, key, val, message),
+    }
+
+    this_context["to"] = this_context
+
+    return this_context

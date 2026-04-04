@@ -29,6 +29,11 @@
       "id": "ef9ccbb2-5aed-4231-a5d2-773d6a3039d9"
     },
     {
+      "name": "expect",
+      "file": "src/gvars/utils/expect.gvar",
+      "id": "27035eb1-fcf5-4d9d-907f-ea0ab2ba0df4"
+    },
+    {
       "name": "lists",
       "file": "src/gvars/utils/lists.gvar",
       "id": "be56beeb-512b-4cc3-93e3-e3b9a8d2b70c"
