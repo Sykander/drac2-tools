@@ -154,6 +154,8 @@ def join_roll_strings(roll_strings: list[str]):
         if roll_str in [None, ""]:
             continue
 
+        roll_str = str(roll_str)
+
         if result_str != "" and not roll_str.startswith("+") and not roll_str.startswith("-"):
             result_str += "+"
 
