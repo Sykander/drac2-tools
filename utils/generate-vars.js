@@ -22,7 +22,7 @@ const varDict = gvars.reduce((acc, { file, id }) => {
   return acc;
 }, {});
 
-const newVarFileContents = JSON.stringify({ gvars: varDict });
+const newVarFileContents = JSON.stringify({ gvars: varDict }, null, 4);
 writeFileSync(varFile, newVarFileContents);
 
 console.log(`${environmentToUpdate} var file updated.`);
