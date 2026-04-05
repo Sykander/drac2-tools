@@ -1,0 +1,29 @@
+!strings -testcase "strings gvar loads"
+---
+---
+name: strings gvar loads
+
+!strings -testcase "get_readable_list should format empty, single, and multiple items"
+---
+---
+name: get_readable_list should format empty, single, and multiple items
+
+!strings -testcase "get_ordinal_index should return correct ordinals"
+---
+---
+name: get_ordinal_index should return correct ordinals
+
+!strings -testcase "is_str should distinguish strings from non-strings"
+---
+---
+name: is_str should distinguish strings from non-strings
+
+!strings -testcase "replace should replace first occurrence only"
+---
+---
+name: replace should replace first occurrence only
+
+!strings -testcase "replace_all should replace every occurrence"
+---
+---
+name: replace_all should replace every occurrence

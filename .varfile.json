@@ -22,22 +22,22 @@
       "filePath": "src/gvars/utils/lists/lists.gvar"
     },
     "e9e46b1d-71bd-4698-a029-cc4a1d79b418": {
-      "filePath": "src/gvars/utils/notes.gvar"
+      "filePath": "src/gvars/utils/notes/notes.gvar"
     },
     "fb177e86-5afb-4baa-91e2-1971381e3b06": {
-      "filePath": "src/gvars/utils/random.gvar"
+      "filePath": "src/gvars/utils/random/random.gvar"
     },
     "d66b2b2f-8df0-4e00-bc0f-9c69b23bc31a": {
-      "filePath": "src/gvars/utils/rolls.gvar"
+      "filePath": "src/gvars/utils/rolls/rolls.gvar"
     },
     "4cdbf636-b32b-426a-b13b-734787d876c0": {
-      "filePath": "src/gvars/utils/strings.gvar"
+      "filePath": "src/gvars/utils/strings/strings.gvar"
     },
     "3418ccc8-0bd8-49e0-ba91-f6a60a807b36": {
-      "filePath": "src/gvars/utils/time.gvar"
+      "filePath": "src/gvars/utils/time/time.gvar"
     },
     "b519d69b-7fa5-45e8-92c9-79244ff89dc1": {
-      "filePath": "src/gvars/utils/tools.gvar"
+      "filePath": "src/gvars/utils/tools/tools.gvar"
     }
   }
 }

@@ -1,0 +1,79 @@
+!notes -testcase "notes gvar loads"
+---
+---
+name: notes gvar loads
+
+!notes -testcase "get_notebooks_dict returns empty dict after clearing map"
+---
+---
+name: get_notebooks_dict returns empty dict after clearing map
+
+!notes -testcase "get_notebooks_dict returns stored notebook id map"
+---
+---
+name: get_notebooks_dict returns stored notebook id map
+
+!notes -testcase "set_notebooks_dict replaces entire map without merging"
+---
+---
+name: set_notebooks_dict replaces entire map without merging
+
+!notes -testcase "get_notebook_id returns note_ prefixed id when notebook is unmapped"
+---
+---
+name: get_notebook_id returns note_ prefixed id when notebook is unmapped
+
+!notes -testcase "get_notebook_id returns mapped id when notebook is registered"
+---
+---
+name: get_notebook_id returns mapped id when notebook is registered
+
+!notes -testcase "set_notebook_id stores notebook to id mapping"
+---
+---
+name: set_notebook_id stores notebook to id mapping
+
+!notes -testcase "get_notebook returns empty list when content cvar is unset"
+---
+---
+name: get_notebook returns empty list when content cvar is unset
+
+!notes -testcase "set_notebook persists contents and get_notebook reads them back"
+---
+---
+name: set_notebook persists contents and get_notebook reads them back
+
+!notes -testcase "create_notebook registers id and sets empty contents by default"
+---
+---
+name: create_notebook registers id and sets empty contents by default
+
+!notes -testcase "create_notebook writes initial contents"
+---
+---
+name: create_notebook writes initial contents
+
+!notes -testcase "push appends a note and returns the full notebook"
+---
+---
+name: push appends a note and returns the full notebook
+
+!notes -testcase "push preserves order across multiple calls"
+---
+---
+name: push preserves order across multiple calls
+
+!notes -testcase "get_notebook_id for empty notebook name uses note_ prefix"
+---
+---
+name: get_notebook_id for empty notebook name uses note_ prefix
+
+!notes -testcase "push appends empty string note"
+---
+---
+name: push appends empty string note
+
+!notes -testcase "set_notebook overwrites previous contents"
+---
+---
+name: set_notebook overwrites previous contents

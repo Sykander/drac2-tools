@@ -1,0 +1,174 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    notes = env.gvars.notes,
+    expect = env.gvars.expect,
+)
+
+expect = expect.expect
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+ch = character()
+
+if testcase == "notes gvar loads":
+    expected_cname = "notes"
+
+    actual_cname = notes.cname
+
+    expect(actual_cname).to.be(expected_cname)
+elif testcase == "get_notebooks_dict returns empty dict after clearing map":
+    expected = {}
+
+    notes.set_notebooks_dict({}, ch)
+    d = notes.get_notebooks_dict(ch)
+
+    expect(d).to.be(expected)
+elif testcase == "get_notebooks_dict returns stored notebook id map":
+    initial_map = {"journal": "note_custom_journal"}
+
+    notes.set_notebooks_dict(initial_map, ch)
+    d = notes.get_notebooks_dict(ch)
+
+    expect(d).to.have.property("journal", "note_custom_journal")
+elif testcase == "set_notebooks_dict replaces entire map without merging":
+    first_map = {"first": "note_first"}
+    second_map = {"second": "note_second"}
+    expected = {"second": "note_second"}
+
+    notes.set_notebooks_dict(first_map, ch)
+    notes.set_notebooks_dict(second_map, ch)
+    d = notes.get_notebooks_dict(ch)
+
+    expect(d).to.be(expected)
+elif testcase == "get_notebook_id returns note_ prefixed id when notebook is unmapped":
+    notebook_name = "journal"
+    expected_id = "note_journal"
+
+    notes.set_notebooks_dict({}, ch)
+    result = notes.get_notebook_id(notebook_name, ch)
+
+    expect(result).to.be(expected_id)
+elif testcase == "get_notebook_id returns mapped id when notebook is registered":
+    initial_map = {"journal": "my_stable_id"}
+    expected_id = "my_stable_id"
+
+    notes.set_notebooks_dict(initial_map, ch)
+    result = notes.get_notebook_id("journal", ch)
+
+    expect(result).to.be(expected_id)
+elif testcase == "set_notebook_id stores notebook to id mapping":
+    ledger_name = "ledger"
+    ledger_id = "cvar_ledger_99"
+
+    notes.set_notebooks_dict({}, ch)
+
+    notes.set_notebook_id(ledger_name, ledger_id, ch)
+
+    id_result = notes.get_notebook_id(ledger_name, ch)
+    m = notes.get_notebooks_dict(ch)
+
+    expect(id_result).to.be(ledger_id)
+    expect(m).to.have.property(ledger_name, ledger_id)
+elif testcase == "get_notebook returns empty list when content cvar is unset":
+    notebook_name = "unmapped_notebook_xyz"
+    expected_contents = []
+
+    notes.set_notebooks_dict({}, ch)
+    contents = notes.get_notebook(notebook_name, ch)
+
+    expect(contents).to.be(expected_contents)
+elif testcase == "set_notebook persists contents and get_notebook reads them back":
+    nb = "persist_nb"
+    written = ["alpha", "beta"]
+    expected_contents = written
+
+    notes.set_notebooks_dict({}, ch)
+
+    notes.set_notebook(nb, written, ch)
+
+    contents = notes.get_notebook(nb, ch)
+
+    expect(contents).to.be(expected_contents)
+elif testcase == "create_notebook registers id and sets empty contents by default":
+    nb = "create_empty_nb"
+    expected_id = "note_" + nb
+    expected_contents = []
+
+    notes.set_notebooks_dict({}, ch)
+
+    notes.create_notebook(nb, [], ch)
+
+    id_result = notes.get_notebook_id(nb, ch)
+    contents = notes.get_notebook(nb, ch)
+
+    expect(id_result).to.be(expected_id)
+    expect(contents).to.be(expected_contents)
+elif testcase == "create_notebook writes initial contents":
+    nb = "create_filled_nb"
+    seed = ["seed"]
+    expected_contents = seed
+
+    notes.set_notebooks_dict({}, ch)
+
+    notes.create_notebook(nb, seed, ch)
+
+    contents = notes.get_notebook(nb, ch)
+
+    expect(contents).to.be(expected_contents)
+elif testcase == "push appends a note and returns the full notebook":
+    nb = "push_one_nb"
+    note_text = "hello"
+    expected = [note_text]
+
+    notes.set_notebooks_dict({}, ch)
+
+    out = notes.push(nb, note_text, ch)
+
+    notebook = notes.get_notebook(nb, ch)
+
+    expect(out).to.be(expected)
+    expect(notebook).to.be(expected)
+elif testcase == "push preserves order across multiple calls":
+    nb = "push_order_nb"
+    expected = ["first", "second", "third"]
+
+    notes.set_notebooks_dict({}, ch)
+    notes.push(nb, "first", ch)
+    notes.push(nb, "second", ch)
+    notes.push(nb, "third", ch)
+    contents = notes.get_notebook(nb, ch)
+
+    expect(contents).to.be(expected)
+elif testcase == "get_notebook_id for empty notebook name uses note_ prefix":
+    expected_id = "note_"
+
+    notes.set_notebooks_dict({}, ch)
+    result = notes.get_notebook_id("", ch)
+
+    expect(result).to.be(expected_id)
+elif testcase == "push appends empty string note":
+    nb = "push_empty_str_nb"
+    expected = ["", "after"]
+
+    notes.set_notebooks_dict({}, ch)
+
+    notes.push(nb, "", ch)
+    notes.push(nb, "after", ch)
+
+    contents = notes.get_notebook(nb, ch)
+
+    expect(contents).to.be(expected)
+elif testcase == "set_notebook overwrites previous contents":
+    nb = "overwrite_nb"
+    expected_after = ["new"]
+
+    notes.set_notebooks_dict({}, ch)
+    notes.set_notebook(nb, ["old"], ch)
+
+    notes.set_notebook(nb, ["new"], ch)
+    contents = notes.get_notebook(nb, ch)
+
+    expect(contents).to.be(expected_after)
+</drac2>

@@ -1,0 +1,19 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    tools = env.gvars.tools,
+    expect = env.gvars.expect,
+)
+
+expect = expect.expect
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "tools gvar loads":
+    expected_prof_code = "pTools"
+
+    actual_code = tools.tool_prof_code
+
+    expect(actual_code).to.be(expected_prof_code)
+</drac2>

@@ -1,0 +1,9 @@
+!time -testcase "time gvar loads"
+---
+---
+name: time gvar loads
+
+!time -testcase "get_time should break down a timestamp into components"
+---
+---
+name: get_time should break down a timestamp into components

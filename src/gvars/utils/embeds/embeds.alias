@@ -64,7 +64,7 @@ elif testcase == "get_field Should give a properly formatted field":
     field = embeds.get_field(field_header, field_desc, field_inline)
 
     expect(field).to.be(expected_field)
-elif testcase == "format_to_length should cut the given string to the required length":
+elif testcase == "format_to_length should give a string less than the given length":
     lots_of_text = "1234567890123456789012345678901234567890"
     length = 20
     expected_text = lots_of_text[0:17] + "..."

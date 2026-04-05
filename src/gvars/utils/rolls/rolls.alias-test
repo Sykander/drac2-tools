@@ -1,0 +1,24 @@
+!rolls -testcase "rolls gvar loads"
+---
+---
+name: rolls gvar loads
+
+!rolls -testcase "join_roll_strings should join roll fragments with plus when needed"
+---
+---
+name: join_roll_strings should join roll fragments with plus when needed
+
+!rolls -testcase "join_roll_strings should return empty string for empty input"
+---
+---
+name: join_roll_strings should return empty string for empty input
+
+!rolls -testcase "get_readable_name_for_skill should format default ability skill checks"
+---
+---
+name: get_readable_name_for_skill should format default ability skill checks
+
+!rolls -testcase "get_default_ability_for_skill should map skills to abilities"
+---
+---
+name: get_default_ability_for_skill should map skills to abilities

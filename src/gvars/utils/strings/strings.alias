@@ -1,0 +1,82 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    strings = env.gvars.strings,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "strings gvar loads":
+    sample = "x"
+
+    result = strings.is_str(sample)
+
+    expect(result).to.be(True)
+elif testcase == "get_readable_list should format empty, single, and multiple items":
+    empty_in = []
+    single_in = ["a"]
+    pair_in = ["a", "b"]
+    triple_in = ["a", "b", "c"]
+    expected_empty = ""
+    expected_single = "a"
+    expected_pair = "a and b"
+    expected_triple = "a, b and c"
+
+    out_empty = strings.get_readable_list(empty_in)
+    out_single = strings.get_readable_list(single_in)
+    out_pair = strings.get_readable_list(pair_in)
+    out_triple = strings.get_readable_list(triple_in)
+
+    expect(out_empty).to.be(expected_empty)
+    expect(out_single).to.be(expected_single)
+    expect(out_pair).to.be(expected_pair)
+    expect(out_triple).to.be(expected_triple)
+elif testcase == "get_ordinal_index should return correct ordinals":
+    n1 = 1
+    n2 = 2
+    n3 = 3
+    n11 = 11
+    n21 = 21
+
+    r1 = strings.get_ordinal_index(n1)
+    r2 = strings.get_ordinal_index(n2)
+    r3 = strings.get_ordinal_index(n3)
+    r11 = strings.get_ordinal_index(n11)
+    r21 = strings.get_ordinal_index(n21)
+
+    expect(r1).to.be("1st")
+    expect(r2).to.be("2nd")
+    expect(r3).to.be("3rd")
+    expect(r11).to.be("11th")
+    expect(r21).to.be("21st")
+elif testcase == "is_str should distinguish strings from non-strings":
+
+    result_str = strings.is_str("hello")
+    result_int = strings.is_str(1)
+    result_list = strings.is_str([])
+
+    expect(result_str).to.be(True)
+    expect(result_int).to.be(False)
+    expect(result_list).to.be(False)
+elif testcase == "replace should replace first occurrence only":
+    given = "ab"
+    search = "a"
+    repl = "x"
+    expected = "xb"
+
+    result = strings.replace(given, search, repl)
+
+    expect(result).to.be(expected)
+elif testcase == "replace_all should replace every occurrence":
+    given = "aba"
+    search = "a"
+    repl = "x"
+    expected = "xbx"
+
+    result = strings.replace_all(given, search, repl)
+
+    expect(result).to.be(expected)
+</drac2>

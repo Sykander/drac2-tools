@@ -1,0 +1,14 @@
+!random -testcase "random gvar loads"
+---
+---
+name: random gvar loads
+
+!random -testcase "get_random_integer should return start when start equals stop"
+---
+---
+name: get_random_integer should return start when start equals stop
+
+!random -testcase "get_random_integer should be deterministic with explicit seed"
+---
+---
+name: get_random_integer should be deterministic with explicit seed

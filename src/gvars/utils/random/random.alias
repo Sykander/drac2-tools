@@ -1,0 +1,35 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    random = env.gvars.random,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "random gvar loads":
+    expected_current_key = "current"
+
+    actual_current_key = random.SEED_CURRENT
+
+    expect(actual_current_key).to.be(expected_current_key)
+elif testcase == "get_random_integer should return start when start equals stop":
+    start = 7
+    stop = 7
+    expected = 7
+
+    result = random.get_random_integer(start, stop)
+
+    expect(result).to.be(expected)
+elif testcase == "get_random_integer should be deterministic with explicit seed":
+    seed = 424242
+    start = 1
+    stop = 100
+
+    a = random.get_random_integer(start, stop, seed=seed)
+    b = random.get_random_integer(start, stop, seed=seed)
+
+    expect(a).to.be(b)
+</drac2>

@@ -20,7 +20,7 @@ def get_notebook_id(notebook, char = char):
 
 def set_notebook_id(notebook, notebook_id, char = char):
     notebooks = get_notebooks_dict(char)
-    notebooks[name] = notebook_id
+    notebooks[notebook] = notebook_id
     set_notebooks_dict(notebooks, char)
 
 def get_notebook(notebook, char = char):

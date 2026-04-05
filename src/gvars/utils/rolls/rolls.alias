@@ -1,0 +1,54 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    rolls = env.gvars.rolls,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "rolls gvar loads":
+    fragments = ["1d20"]
+
+    joined = rolls.join_roll_strings(fragments)
+
+    expect(joined).to.be("1d20")
+elif testcase == "join_roll_strings should join roll fragments with plus when needed":
+    parts_a = ["1d6", "+2"]
+    parts_b = ["1d20", "3"]
+    expected_a = "1d6+2"
+    expected_b = "1d20+3"
+
+    result_a = rolls.join_roll_strings(parts_a)
+    result_b = rolls.join_roll_strings(parts_b)
+
+    expect(result_a).to.be(expected_a)
+    expect(result_b).to.be(expected_b)
+elif testcase == "join_roll_strings should return empty string for empty input":
+    parts = []
+    expected = ""
+
+    result = rolls.join_roll_strings(parts)
+
+    expect(result).to.be(expected)
+elif testcase == "get_readable_name_for_skill should format default ability skill checks":
+    skill = "athletics"
+    expected = "Athletics Check"
+
+    result = rolls.get_readable_name_for_skill(skill)
+
+    expect(result).to.be(expected)
+elif testcase == "get_default_ability_for_skill should map skills to abilities":
+    skill_mapped = "athletics"
+    skill_unknown = "unknown_skill"
+    expected_mapped = "strength"
+    expected_unknown = None
+
+    result_mapped = rolls.get_default_ability_for_skill(skill_mapped)
+    result_unknown = rolls.get_default_ability_for_skill(skill_unknown)
+
+    expect(result_mapped).to.be(expected_mapped)
+    expect(result_unknown).to.be(expected_unknown)
+</drac2>

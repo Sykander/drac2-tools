@@ -40,32 +40,32 @@
     },
     {
       "name": "notes",
-      "file": "src/gvars/utils/notes.gvar",
+      "file": "src/gvars/utils/notes/notes.gvar",
       "id": "e9e46b1d-71bd-4698-a029-cc4a1d79b418"
     },
     {
       "name": "random",
-      "file": "src/gvars/utils/random.gvar",
+      "file": "src/gvars/utils/random/random.gvar",
       "id": "fb177e86-5afb-4baa-91e2-1971381e3b06"
     },
     {
       "name": "rolls",
-      "file": "src/gvars/utils/rolls.gvar",
+      "file": "src/gvars/utils/rolls/rolls.gvar",
       "id": "d66b2b2f-8df0-4e00-bc0f-9c69b23bc31a"
     },
     {
       "name": "strings",
-      "file": "src/gvars/utils/strings.gvar",
+      "file": "src/gvars/utils/strings/strings.gvar",
       "id": "4cdbf636-b32b-426a-b13b-734787d876c0"
     },
     {
       "name": "time",
-      "file": "src/gvars/utils/time.gvar",
+      "file": "src/gvars/utils/time/time.gvar",
       "id": "3418ccc8-0bd8-49e0-ba91-f6a60a807b36"
     },
     {
       "name": "tools",
-      "file": "src/gvars/utils/tools.gvar",
+      "file": "src/gvars/utils/tools/tools.gvar",
       "id": "b519d69b-7fa5-45e8-92c9-79244ff89dc1"
     }
   ]

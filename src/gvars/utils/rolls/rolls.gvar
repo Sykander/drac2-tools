@@ -113,13 +113,15 @@ def join_advantage(*advs):
 
 def get_d20(adv: bool | None = None, eadv: bool = False, mi: int | None = None, ma: int | None = None, ro: list[int] = [] ):
     if adv == None:
-        based20 "1d20"
+        based20 = "1d20"
     elif adv == True and eadv == True:
-        based20 "3d20kh1"
+        based20 = "3d20kh1"
     elif adv == True:
-        based20 "2d20kh1"
+        based20 = "2d20kh1"
     elif adv == False:
-        based20 "2d20kl1"
+        based20 = "2d20kl1"
+    else:
+        based20 = "1d20"
 
     mi_text = "" if mi == None else f"mi{mi}"
     ma_text = "" if ma == None else f"mi{ma}"

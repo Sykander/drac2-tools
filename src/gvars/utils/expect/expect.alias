@@ -25,15 +25,20 @@ def expect_to_not_raise_exception(func):
         return True
 
 if testcase == "expect.eq should throw an error if the values aren't equal":
+
+
     expect_to_raise_exception(lambda _ = None: expect("a").eq("b"))
     expect_to_not_raise_exception(lambda _ = None: expect("a").eq("a"))
 elif testcase == "expect.len should throw an error if the lengths aren't equal":
+
+
     expect_to_raise_exception(lambda _ = None: expect("a").len(2))
     expect_to_not_raise_exception(lambda _ = None: expect("a").len(1))
     expect_to_raise_exception(lambda _ = None: expect(["a"]).len(2))
     expect_to_not_raise_exception(lambda _ = None: expect(["a"]).len(1))
 elif testcase == "expect.property should throw an error if the property doesn't match":
     obj = { "a": True }
+
 
     expect_to_raise_exception(lambda _ = None: expect("a").property("a"))
     expect_to_raise_exception(lambda _ = None: expect({}).property("a"))
@@ -42,6 +47,7 @@ elif testcase == "expect.property should throw an error if the property doesn't 
 elif testcase == "expect.raise_exception should throw an error if the func doesn't throw an error":
     throws_err = lambda _ = None: err("throw")
     no_op = lambda _ = None: None
+
 
     expect_to_raise_exception(lambda _ = None: expect(no_op).raise_exception())
     expect_to_raise_exception(lambda _ = None: expect(no_op).raise_exception(AssertionError))
@@ -52,8 +58,9 @@ elif testcase == "expect.raise_exception should throw an error if the func doesn
 elif testcase == "expect.to.have.property should route to the property assertion":
     obj = { "a": True }
     assertion_a = lambda _ = None: expect(obj).to.have.property("a") 
-    assertion_b = lambda _ = None: expect(obj).to.have_property("a") 
+    assertion_b = lambda _ = None: expect(obj).to.have.property("a") 
     assertion_c = lambda _ = None: expect(obj).to_have_property("a") 
+
 
     expect_to_not_raise_exception(assertion_a)
     expect_to_not_raise_exception(assertion_b)
@@ -61,9 +68,10 @@ elif testcase == "expect.to.have.property should route to the property assertion
 elif testcase == "expect should map to the correction assertions":
     obj = { "a": True, "b": [0, 1], "c": { "d": "e" } }
     assertion_a = lambda _ = None: expect(obj).to.have.property("a") 
-    assertion_b = lambda _ = None: expect(obj).to.have_property("a").and_to.have.property("b")
+    assertion_b = lambda _ = None: expect(obj).to.have.property("a").and_to.have.property("b")
     assertion_c = lambda _ = None: expect(obj).to_have_property("b").which.has.length(2) 
     assertion_d = lambda _ = None: expect(obj).to.have.property("c").which.has.property("d").which.equals("e") 
+
 
     expect_to_not_raise_exception(assertion_a)
     expect_to_not_raise_exception(assertion_b)
