@@ -5,8 +5,9 @@ using(
 
 # Embed
 # A general purpose embed handler for creating embeds
-# 
+#
 # For a one off embed use `get_embed` but if you have multiple embed exit points use `configure_get_embed` instead
+
 
 def format_to_length(content: str, length: int) -> str:
     if len(content) < length:
@@ -14,8 +15,10 @@ def format_to_length(content: str, length: int) -> str:
 
     return f'{content[0:length - 3]}...'
 
+
 def get_field(title, text = "", inline = False):
     return f"{title}|{text}{'|inline' if inline else ''}"
+
 
 # get_embed
 # check `!help embed -here`
@@ -51,6 +54,7 @@ def get_embed(
         args.append(["-t", str(timeout)])
 
     return commands.get_command(actions, args)
+
 
 def configure_get_embed(
     desc: str | None = None,

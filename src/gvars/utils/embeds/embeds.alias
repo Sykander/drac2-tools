@@ -73,4 +73,32 @@ elif testcase == "format_to_length should give a string less than the given leng
 
     expect(cut_text).to.be(expected_text)
     expect(cut_text).to.have.length(length)
+elif testcase == "format_to_length should return content unchanged when shorter than limit":
+    short = "hello"
+    limit = 20
+
+    result = embeds.format_to_length(short, limit)
+
+    expect(result).to.be(short)
+elif testcase == "get_field should omit inline suffix when inline is false":
+    title = "T"
+    text = "Body"
+
+    field = embeds.get_field(title, text, False)
+
+    expect(field).to.be("T|Body")
+elif testcase == "get_field should use empty text by default":
+    title = "OnlyTitle"
+
+    field = embeds.get_field(title)
+
+    expect(field).to.be("OnlyTitle|")
+elif testcase == "get_embed should include field flags when fields are provided":
+    title = "T"
+    desc = "Just a description"
+    fields = ["A|B"]
+
+    embed_command = embeds.get_embed(title = title, desc = desc, fields = fields)
+
+    expect(embed_command).to.have_element("A|B")
 </drac2>

@@ -31,4 +31,13 @@ if testcase == "is_dict should give a bool whether the item is a dict or not":
     expect(result_c).to.be(expected_c)
     expect(result_d).to.be(expected_d)
     expect(result_e).to.be(expected_e)
+elif testcase == "is_dict should return true for non empty dict and false for tuple":
+    non_empty = {"a": 1}
+    tup = (1, 2)
+
+    is_dict_nonempty = dicts.is_dict(non_empty)
+    is_dict_tuple = dicts.is_dict(tup)
+
+    expect(is_dict_nonempty).to.be(True)
+    expect(is_dict_tuple).to.be(False)
 </drac2>

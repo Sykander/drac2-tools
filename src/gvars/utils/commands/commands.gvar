@@ -4,6 +4,7 @@
 
 MULTILINE_BASE = "multiline "
 
+
 # get_multiline
 #
 # commands - a list of commands for the multiline
@@ -11,6 +12,7 @@ MULTILINE_BASE = "multiline "
 # returns a multiline command string
 def get_multiline(commands: list[str]) -> str:
     return MULTILINE_BASE + ctx.prefix + ("\n" + ctx.prefix).join(commands)
+
 
 # get_quotes
 # encodes a given value with quotes for commands
@@ -32,8 +34,9 @@ def get_quotes(value: str) -> str:
 
     return f"《{value}》"
 
+
 # get_command
-# 
+#
 # actions - list of actions for the command eg. ["init", "attack", "longsword"]
 # args - OPTIONAL a dict of the args on the command eg. { "-t": "GO1" }
 #

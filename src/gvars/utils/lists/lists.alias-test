@@ -3,7 +3,97 @@
 ---
 name: to_dict should convert the given list of objects into a dictionary
 
+!lists -testcase "to_dict should return empty dict for empty list"
+---
+---
+name: to_dict should return empty dict for empty list
+
+!lists -testcase "to_dict should err when an item lacks the key"
+---
+---
+name: to_dict should err when an item lacks the key
+
+!lists -testcase "to_dict should keep the last item when duplicate keys appear"
+---
+---
+name: to_dict should keep the last item when duplicate keys appear
+
+!lists -testcase "get_random_from_list should return empty list when count is zero"
+---
+---
+name: get_random_from_list should return empty list when count is zero
+
+!lists -testcase "get_random_from_list should default count to one"
+---
+---
+name: get_random_from_list should default count to one
+
+!lists -testcase "get_random_from_list should return distinct items of requested length"
+---
+---
+name: get_random_from_list should return distinct items of requested length
+
+!lists -testcase "get_random_from_list should return a permutation when count equals list length"
+---
+---
+name: get_random_from_list should return a permutation when count equals list length
+
+!lists -testcase "get_random_from_list should err when count exceeds list length"
+---
+---
+name: get_random_from_list should err when count exceeds list length
+
+!lists -testcase "get_random_from_list should err when count is negative"
+---
+---
+name: get_random_from_list should err when count is negative
+
+!lists -testcase "get_random_from_list should err when list is empty and count is positive"
+---
+---
+name: get_random_from_list should err when list is empty and count is positive
+
 !lists -testcase "is_list should give True if its a list and False otherwise"
 ---
 ---
 name: is_list should give True if its a list and False otherwise
+
+!lists -testcase "search_list should prefer exact matches over substring matches"
+---
+---
+name: search_list should prefer exact matches over substring matches
+
+!lists -testcase "search_list should find case insensitive substring matches"
+---
+---
+name: search_list should find case insensitive substring matches
+
+!lists -testcase "search_list should return empty list when nothing matches"
+---
+---
+name: search_list should return empty list when nothing matches
+
+!lists -testcase "search_list should return empty list for empty items"
+---
+---
+name: search_list should return empty list for empty items
+
+!lists -testcase "search_list_by_key should prefer exact matches on the key"
+---
+---
+name: search_list_by_key should prefer exact matches on the key
+
+!lists -testcase "search_list_by_key should find case insensitive substring on key values"
+---
+---
+name: search_list_by_key should find case insensitive substring on key values
+
+!lists -testcase "search_list_by_key should return empty list when nothing matches"
+---
+---
+name: search_list_by_key should return empty list when nothing matches
+
+!lists -testcase "search_list_by_key should err when an item lacks the key"
+---
+---
+name: search_list_by_key should err when an item lacks the key

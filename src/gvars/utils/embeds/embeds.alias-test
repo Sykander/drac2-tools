@@ -27,3 +27,23 @@ name: get_field Should give a properly formatted field
 ---
 ---
 name: format_to_length should give a string less than the given length
+
+!embeds -testcase "format_to_length should return content unchanged when shorter than limit"
+---
+---
+name: format_to_length should return content unchanged when shorter than limit
+
+!embeds -testcase "get_field should omit inline suffix when inline is false"
+---
+---
+name: get_field should omit inline suffix when inline is false
+
+!embeds -testcase "get_field should use empty text by default"
+---
+---
+name: get_field should use empty text by default
+
+!embeds -testcase "get_embed should include field flags when fields are provided"
+---
+---
+name: get_embed should include field flags when fields are provided

@@ -57,9 +57,9 @@ elif testcase == "expect.raise_exception should throw an error if the func doesn
     expect_to_not_raise_exception(lambda _ = None: expect(throws_err).raise_exception())
 elif testcase == "expect.to.have.property should route to the property assertion":
     obj = { "a": True }
-    assertion_a = lambda _ = None: expect(obj).to.have.property("a") 
-    assertion_b = lambda _ = None: expect(obj).to.have.property("a") 
-    assertion_c = lambda _ = None: expect(obj).to_have_property("a") 
+    assertion_a = lambda _ = None: expect(obj).to.have.property("a")
+    assertion_b = lambda _ = None: expect(obj).to.have.property("a")
+    assertion_c = lambda _ = None: expect(obj).to_have_property("a")
 
 
     expect_to_not_raise_exception(assertion_a)
@@ -67,14 +67,29 @@ elif testcase == "expect.to.have.property should route to the property assertion
     expect_to_not_raise_exception(assertion_c)
 elif testcase == "expect should map to the correction assertions":
     obj = { "a": True, "b": [0, 1], "c": { "d": "e" } }
-    assertion_a = lambda _ = None: expect(obj).to.have.property("a") 
+    assertion_a = lambda _ = None: expect(obj).to.have.property("a")
     assertion_b = lambda _ = None: expect(obj).to.have.property("a").and_to.have.property("b")
-    assertion_c = lambda _ = None: expect(obj).to_have_property("b").which.has.length(2) 
-    assertion_d = lambda _ = None: expect(obj).to.have.property("c").which.has.property("d").which.equals("e") 
+    assertion_c = lambda _ = None: expect(obj).to_have_property("b").which.has.length(2)
+    assertion_d = lambda _ = None: expect(obj).to.have.property("c").which.has.property("d").which.equals("e")
 
 
     expect_to_not_raise_exception(assertion_a)
     expect_to_not_raise_exception(assertion_b)
     expect_to_not_raise_exception(assertion_c)
     expect_to_not_raise_exception(assertion_d)
+elif testcase == "expect.is_in should pass when value is in container":
+    container = ["a", "b", "c"]
+    needle = "b"
+
+    expect(needle).to.is_in(container)
+elif testcase == "expect.have_element should pass when collection contains value":
+    haystack = [1, 2, 3]
+    needle = 2
+
+    expect(haystack).to.have_element(needle)
+elif testcase == "expect.is_in should err when value is not in container":
+    container = ["x"]
+    needle = "y"
+
+    expect_to_raise_exception(lambda _ = None: expect(needle).to.is_in(container))
 </drac2>

@@ -2,3 +2,8 @@
 ---
 ---
 name: is_dict should give a bool whether the item is a dict or not
+
+!dicts -testcase "is_dict should return true for non empty dict and false for tuple"
+---
+---
+name: is_dict should return true for non empty dict and false for tuple

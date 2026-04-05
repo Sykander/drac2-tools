@@ -12,3 +12,13 @@ name: get_random_integer should return start when start equals stop
 ---
 ---
 name: get_random_integer should be deterministic with explicit seed
+
+!random -testcase "xorShift should be deterministic for the same seed"
+---
+---
+name: xorShift should be deterministic for the same seed
+
+!random -testcase "get_random_integer should swap reversed bounds when using explicit seed"
+---
+---
+name: get_random_integer should swap reversed bounds when using explicit seed

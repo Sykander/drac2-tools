@@ -22,3 +22,18 @@ name: modify_bag should default to 1 if count not given
 ---
 ---
 name: modify_bag should add and remove items
+
+!bags -testcase "get_bag should return empty dict when bag name is not found"
+---
+---
+name: get_bag should return empty dict when bag name is not found
+
+!bags -testcase "set_bag should create a bag and get_bag should read it back"
+---
+---
+name: set_bag should create a bag and get_bag should read it back
+
+!bags -testcase "modify_bag should treat zero count as removal wording"
+---
+---
+name: modify_bag should treat zero count as removal wording

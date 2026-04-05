@@ -7,3 +7,13 @@ name: time gvar loads
 ---
 ---
 name: get_time should break down a timestamp into components
+
+!time -testcase "get_discord_timestamp should format relative and absolute markers"
+---
+---
+name: get_discord_timestamp should format relative and absolute markers
+
+!time -testcase "get_ts_from_combat should return non negative float"
+---
+---
+name: get_ts_from_combat should return non negative float

@@ -27,3 +27,23 @@ name: replace should replace first occurrence only
 ---
 ---
 name: replace_all should replace every occurrence
+
+!strings -testcase "get_readable_list should honor custom delimiters"
+---
+---
+name: get_readable_list should honor custom delimiters
+
+!strings -testcase "get_ordinal_index should handle 12th and 13th exceptions"
+---
+---
+name: get_ordinal_index should handle 12th and 13th exceptions
+
+!strings -testcase "replace should return original string when search is absent"
+---
+---
+name: replace should return original string when search is absent
+
+!strings -testcase "replace_all should return original when search never appears"
+---
+---
+name: replace_all should return original when search never appears

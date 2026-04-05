@@ -54,4 +54,28 @@ elif testcase == "get_multiline should give a multiline command string":
     command = commands.get_multiline(list_of_commands)
 
     expect(command).to.be(expected_command)
+elif testcase == "get_command should omit args when args is None":
+    actions = ["roll", "1d20"]
+
+    command = commands.get_command(actions, None)
+
+    expect(command).to.be("roll 1d20")
+elif testcase == "get_quotes should wrap values containing tab or newline":
+    tab_value = "a\tb"
+    newline_value = "a\nb"
+    expected_tab = '"a\tb"'
+    expected_newline = '"a\nb"'
+
+    quoted_tab = commands.get_quotes(tab_value)
+    quoted_newline = commands.get_quotes(newline_value)
+
+    expect(quoted_tab).to.be(expected_tab)
+    expect(quoted_newline).to.be(expected_newline)
+elif testcase == "get_multiline should handle an empty command list":
+    list_of_commands = []
+    expected_command = commands.MULTILINE_BASE + ctx.prefix
+
+    command = commands.get_multiline(list_of_commands)
+
+    expect(command).to.be(expected_command)
 </drac2>

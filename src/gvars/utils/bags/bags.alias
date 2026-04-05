@@ -86,4 +86,31 @@ elif testcase == "modify_bag should add and remove items":
     expect(modified_c).to.be(expected_modified_c)
     expect(message_d).to.be(expected_message_d)
     expect(modified_d).to.be(expected_modified_d)
+elif testcase == "get_bag should return empty dict when bag name is not found":
+    missing_name = "ZZZ_BagDoesNotExist123"
+
+    contents = bags.get_bag(missing_name)
+
+    expect(contents).to.be({})
+elif testcase == "set_bag should create a bag and get_bag should read it back":
+    bag_name = "QA_IsolatedBag"
+    payload = {"token": 42}
+
+    bags.set_bag(bag_name, payload)
+    read_back = bags.get_bag(bag_name)
+
+    expect(read_back).to.have.property("token", 42)
+elif testcase == "modify_bag should treat zero count as removal wording":
+    item = "Pebbles"
+    count = 0
+    bag = "QA_ZeroCountBag"
+    char_name_local = char_name
+
+    bags.set_bag(bag, {})
+    expected_message = f"0x {item} removed from {char_name_local}'s bag {bag}."
+
+    modified, message = bags.modify_bag(item, count, bag)
+
+    expect(modified).to.be(True)
+    expect(message).to.be(expected_message)
 </drac2>

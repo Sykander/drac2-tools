@@ -9,13 +9,15 @@ DAY = 24 * HOUR
 
 ROUND = 6 * SECOND
 
+
 def get_ts_from_combat():
     try:
         com_rounds = combat().round_num
     except:
         com_rounds = 0
-    
+
     return float(com_rounds * ROUND)
+
 
 def get_time(ts: float = time()) -> dict[str, int]:
     days = floor(ts / DAY)
@@ -30,6 +32,7 @@ def get_time(ts: float = time()) -> dict[str, int]:
         "seconds": seconds
     }
 
+
 def get_readable_time(ts: float = time()):
     time = get_time(ts)
     days_part = time.days + " days " if time.days != 0 else ""
@@ -42,6 +45,7 @@ def get_readable_time(ts: float = time()):
 
     return f"{days_part}{hours_part}{minutes_part}{seconds_part}".strip()
 
+
 def get_discord_timestamp(ts: float = time()):
-    ts = floor(ts) # md can't handle decimals
+    ts = floor(ts)  # md can't handle decimals
     return f"<t:{ts}><t:{ts}:R>"

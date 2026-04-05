@@ -32,4 +32,19 @@ elif testcase == "get_random_integer should be deterministic with explicit seed"
     b = random.get_random_integer(start, stop, seed=seed)
 
     expect(a).to.be(b)
+elif testcase == "xorShift should be deterministic for the same seed":
+    seed = 123456789
+    first = random.xorShift(seed)
+    second = random.xorShift(seed)
+
+    expect(first).to.be(second)
+elif testcase == "get_random_integer should swap reversed bounds when using explicit seed":
+    high = 5
+    low = 1
+    seed = 777777
+
+    a = random.get_random_integer(high, low, seed=seed)
+    b = random.get_random_integer(low, high, seed=seed)
+
+    expect(a).to.be(b)
 </drac2>

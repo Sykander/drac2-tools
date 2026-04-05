@@ -2,3 +2,33 @@
 ---
 ---
 name: tools gvar loads
+
+!tools -testcase "search_for_tool should find exact tool names"
+---
+---
+name: search_for_tool should find exact tool names
+
+!tools -testcase "search_for_tool should fuzzy match case insensitively"
+---
+---
+name: search_for_tool should fuzzy match case insensitively
+
+!tools -testcase "get_has_proficiency should be false for unknown tools"
+---
+---
+name: get_has_proficiency should be false for unknown tools
+
+!tools -testcase "get_has_proficiency should be false when cvars omit the tool"
+---
+---
+name: get_has_proficiency should be false when cvars omit the tool
+
+!tools -testcase "get_has_expertise should be false when cvars omit expertise"
+---
+---
+name: get_has_expertise should be false when cvars omit expertise
+
+!tools -testcase "tool_exp_code should match workshop cvar name"
+---
+---
+name: tool_exp_code should match workshop cvar name

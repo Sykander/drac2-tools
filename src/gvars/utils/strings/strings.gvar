@@ -1,6 +1,7 @@
 # Strings
 # A place to store reusable string functions
 
+
 def get_readable_list(items: list[str], delim: str = ", ", final_delim: str = " and ") -> str:
     items = list(items)
     if len(items) == 0:
@@ -11,6 +12,7 @@ def get_readable_list(items: list[str], delim: str = ", ", final_delim: str = " 
         items_str = final_delim.join([delim.join(items[:-1]), items[-1]])
 
     return items_str
+
 
 def get_ordinal_index(index: int) -> str:
     if index == 11:
@@ -35,9 +37,11 @@ def get_ordinal_index(index: int) -> str:
 
     return f"{index}th"
 
+
 def replace_all(given_string: str, search: str, replace: str) -> str:
     parts = given_string.split(search)
     return replace.join(parts)
+
 
 def replace(given_string: str, search: str, replace: str) -> str:
     if search not in given_string:
@@ -51,6 +55,7 @@ def replace(given_string: str, search: str, replace: str) -> str:
     return search.join(
         [replace.join(parts[0:1])] + parts[2:]
     )
+
 
 def is_str(maybe_str) -> bool:
     try:

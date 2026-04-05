@@ -19,26 +19,153 @@ if testcase == "to_dict should convert the given list of objects into a dictiona
 
     expect(result).to.have.property(first_item[key]).which.has.property("val", first_item.val).and_to.have.property(key, first_item[key])
     expect(result).to.have.property(second_item[key]).which.has.property("val", second_item.val).and_to.have.property(key, second_item[key])
-elif testcase == "get_random_from_list should get random entries from a list":
-    items = [0,1,2,3,4,5,6,7,8,9]
+elif testcase == "to_dict should return empty dict for empty list":
+    input = []
+    key = "id"
+    expected = {}
+
+    result = lists.to_dict(input, key)
+
+    expect(result).to.be(expected)
+elif testcase == "to_dict should err when an item lacks the key":
+    input = [{"id": "ok"}, {"no_id": True}]
+    key = "id"
+
+    expect(lambda _ = None: lists.to_dict(input, key)).to.raise_exception()
+elif testcase == "to_dict should keep the last item when duplicate keys appear":
+    first = {"id": "dup", "v": 1}
+    second = {"id": "dup", "v": 2}
+    input = [first, second]
+    key = "id"
+
+    result = lists.to_dict(input, key)
+
+    expect(result).to.have.property("dup").which.has.property("v", 2)
+elif testcase == "get_random_from_list should return empty list when count is zero":
+    items = [1, 2, 3]
+    count = 0
+    expected = []
+
+    result = lists.get_random_from_list(items, count)
+
+    expect(result).to.be(expected)
+elif testcase == "get_random_from_list should default count to one":
+    items = [10, 20, 30, 40]
+
+    result = lists.get_random_from_list(items)
+
+    expect(result).to.have.length(1)
+    expect(result[0]).to.is_in(items)
+elif testcase == "get_random_from_list should return distinct items of requested length":
+    items = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     count = 3
 
     result = lists.get_random_from_list(items, count)
 
     expect(result).to.have.length(count)
+elif testcase == "get_random_from_list should return a permutation when count equals list length":
+    items = ["a", "b", "c"]
+    count = 3
+
+    result = lists.get_random_from_list(items, count)
+
+    expect(result).to.have.length(count)
+    expect(result).to.have_element("a")
+    expect(result).to.have_element("b")
+    expect(result).to.have_element("c")
+elif testcase == "get_random_from_list should err when count exceeds list length":
+    items = [1, 2]
+    count = 5
+
+    expect(lambda _ = None: lists.get_random_from_list(items, count)).to.raise_exception()
+elif testcase == "get_random_from_list should err when count is negative":
+    items = [1, 2, 3]
+    count = -1
+
+    expect(lambda _ = None: lists.get_random_from_list(items, count)).to.raise_exception()
+elif testcase == "get_random_from_list should err when list is empty and count is positive":
+    items = []
+    count = 1
+
+    expect(lambda _ = None: lists.get_random_from_list(items, count)).to.raise_exception()
 elif testcase == "is_list should give True if its a list and False otherwise":
     input_a = "a"
     input_b = 1
     input_c = {}
     input_d = []
+    input_e = (1, 2)
 
     result_a = lists.is_list(input_a)
     result_b = lists.is_list(input_b)
     result_c = lists.is_list(input_c)
     result_d = lists.is_list(input_d)
+    result_e = lists.is_list(input_e)
 
     expect(result_a).to.be(False)
     expect(result_b).to.be(False)
     expect(result_c).to.be(False)
     expect(result_d).to.be(True)
+    expect(result_e).to.be(False)
+elif testcase == "search_list should prefer exact matches over substring matches":
+    items = ["apple", "pineapple"]
+    search = "apple"
+
+    result = lists.search_list(items, search)
+
+    expect(result).to.have.length(1)
+    expect(result[0]).to.be("apple")
+elif testcase == "search_list should find case insensitive substring matches":
+    items = ["FooBar", "baz"]
+    search = "foo"
+
+    result = lists.search_list(items, search)
+
+    expect(result).to.have.length(1)
+    expect(result[0]).to.be("FooBar")
+elif testcase == "search_list should return empty list when nothing matches":
+    items = ["a", "b", "c"]
+    search = "xyz"
+
+    result = lists.search_list(items, search)
+
+    expect(result).to.be([])
+elif testcase == "search_list should return empty list for empty items":
+    items = []
+    search = "anything"
+
+    result = lists.search_list(items, search)
+
+    expect(result).to.be([])
+elif testcase == "search_list_by_key should prefer exact matches on the key":
+    items = [{"name": "ring"}, {"name": "ring of fire"}]
+    key = "name"
+    search = "ring"
+
+    result = lists.search_list_by_key(items, key, search)
+
+    expect(result).to.have.length(1)
+    expect(result[0]).to.have.property("name", "ring")
+elif testcase == "search_list_by_key should find case insensitive substring on key values":
+    items = [{"code": "AbCd"}, {"code": "zz"}]
+    key = "code"
+    search = "bc"
+
+    result = lists.search_list_by_key(items, key, search)
+
+    expect(result).to.have.length(1)
+    expect(result[0]).to.have.property("code", "AbCd")
+elif testcase == "search_list_by_key should return empty list when nothing matches":
+    items = [{"k": "a"}, {"k": "b"}]
+    key = "k"
+    search = "nomatch"
+
+    result = lists.search_list_by_key(items, key, search)
+
+    expect(result).to.be([])
+elif testcase == "search_list_by_key should err when an item lacks the key":
+    items = [{"name": "hello"}, {"id": 1}]
+    key = "name"
+    search = "ello"
+
+    expect(lambda _ = None: lists.search_list_by_key(items, key, search)).to.raise_exception()
 </drac2>

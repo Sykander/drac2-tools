@@ -79,4 +79,35 @@ elif testcase == "replace_all should replace every occurrence":
     result = strings.replace_all(given, search, repl)
 
     expect(result).to.be(expected)
+elif testcase == "get_readable_list should honor custom delimiters":
+    items = ["x", "y", "z"]
+    delim = "; "
+    final_delim = " | "
+    expected = "x; y | z"
+
+    result = strings.get_readable_list(items, delim, final_delim)
+
+    expect(result).to.be(expected)
+elif testcase == "get_ordinal_index should handle 12th and 13th exceptions":
+    twelfth = strings.get_ordinal_index(12)
+    thirteenth = strings.get_ordinal_index(13)
+
+    expect(twelfth).to.be("12th")
+    expect(thirteenth).to.be("13th")
+elif testcase == "replace should return original string when search is absent":
+    given = "unchanged"
+    search = "z"
+    repl = "q"
+
+    result = strings.replace(given, search, repl)
+
+    expect(result).to.be(given)
+elif testcase == "replace_all should return original when search never appears":
+    given = "abc"
+    search = "z"
+    repl = "x"
+
+    result = strings.replace_all(given, search, repl)
+
+    expect(result).to.be(given)
 </drac2>

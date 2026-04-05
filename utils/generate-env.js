@@ -29,7 +29,8 @@ const envDict = gvars.reduce((acc, { id, name }) => {
 const newEnvFileContents = `ENVIRONMENT = "${environmentToUpdate}"
 VERSION = "${version}"
 
-gvars = ${JSON.stringify(envDict)}`;
+gvars = ${JSON.stringify(envDict, null, 4)}
+`;
 
 writeFileSync(envFile, newEnvFileContents);
 

@@ -51,4 +51,96 @@ elif testcase == "get_default_ability_for_skill should map skills to abilities":
 
     expect(result_mapped).to.be(expected_mapped)
     expect(result_unknown).to.be(expected_unknown)
+elif testcase == "join_roll_strings should skip None and empty fragments":
+    parts = ["1d6", None, "", "+2"]
+    expected = "1d6+2"
+
+    result = rolls.join_roll_strings(parts)
+
+    expect(result).to.be(expected)
+elif testcase == "get_damage_roll should join dice and bonuses":
+    dice = "2d6"
+    bonuses = ["+3", "1d4"]
+
+    damage_expr = rolls.get_damage_roll(dice, bonuses)
+
+    expect(damage_expr).to.be("2d6+3+1d4")
+elif testcase == "get_damage_roll should default bonuses to empty":
+    dice = "1d8"
+
+    damage_expr = rolls.get_damage_roll(dice, None)
+
+    expect(damage_expr).to.be("1d8")
+elif testcase == "join_advantage should return None when advantage and disadvantage mix":
+    result = rolls.join_advantage(True, False)
+
+    expect(result).to.be(None)
+elif testcase == "join_advantage should return True when any argument is True and none False":
+    result = rolls.join_advantage(None, True)
+
+    expect(result).to.be(True)
+elif testcase == "join_advantage should return False when only False is present among bools":
+    result = rolls.join_advantage(False, False)
+
+    expect(result).to.be(False)
+elif testcase == "join_advantage should return None when no adv flags are given":
+    result = rolls.join_advantage()
+
+    expect(result).to.be(None)
+elif testcase == "get_d20 should build plain d20 when adv is None":
+    result = rolls.get_d20(None)
+
+    expect(result).to.be("1d20")
+elif testcase == "get_d20 should build advantage and elven advantage strings":
+    adv_only = rolls.get_d20(True)
+    elven = rolls.get_d20(True, True)
+
+    expect(adv_only).to.be("2d20kh1")
+    expect(elven).to.be("3d20kh1")
+elif testcase == "get_readable_name_for_skill should expand sleight and animal handling":
+    sleight = rolls.get_readable_name_for_skill("sleightOfHand")
+    animal = rolls.get_readable_name_for_skill("animalHandling")
+
+    expect(sleight).to.be("Sleight of Hand Check")
+    expect(animal).to.be("Animal Handling Check")
+elif testcase == "get_readable_name_for_skill should name non default ability overrides":
+    result = rolls.get_readable_name_for_skill("athletics", "dexterity")
+
+    expect(result).to.be("Dexterity (Athletics) Check")
+elif testcase == "get_readable_name_for_save should format default and overridden abilities":
+    default_save = rolls.get_readable_name_for_save("strength")
+    overridden = rolls.get_readable_name_for_save("strength", "dexterity")
+
+    expect(default_save).to.be("Strength Saving Throw")
+    expect(overridden).to.be("Dexterity (Strength) Saving Throw")
+elif testcase == "get_readable_name_for_attack should format melee attacks":
+    default_melee = rolls.get_readable_name_for_attack("melee", "strength")
+    ranged_default = rolls.get_readable_name_for_attack("ranged", "dexterity")
+
+    expect(default_melee).to.be("Melee Attack")
+    expect(ranged_default).to.be("Ranged Attack")
+elif testcase == "get_default_ability_for_save should return None for death saves":
+    result = rolls.get_default_ability_for_save("death")
+
+    expect(result).to.be(None)
+elif testcase == "get_default_ability_for_attack_type should map melee and ranged":
+    melee_ability = rolls.get_default_ability_for_attack_type("melee")
+    ranged_ability = rolls.get_default_ability_for_attack_type("ranged")
+
+    expect(melee_ability).to.be("strength")
+    expect(ranged_ability).to.be("dexterity")
+elif testcase == "character helpers should return false when character is None":
+    luck = rolls.character_has_halfing_luck(None)
+    talent = rolls.character_has_reliable_talent(None)
+    observant = rolls.character_has_observant(None)
+    might = rolls.character_has_indomitable_might(None)
+
+    expect(luck).to.be(False)
+    expect(talent).to.be(False)
+    expect(observant).to.be(False)
+    expect(might).to.be(False)
+elif testcase == "get_mod_override should return zero when character is None":
+    result = rolls.get_mod_override(None, "strength", "dexterity")
+
+    expect(result).to.be(0)
 </drac2>

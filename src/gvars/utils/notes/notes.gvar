@@ -8,32 +8,40 @@ cname = "notes"
 
 char = character()
 
+
 def get_notebooks_dict(char = char):
     return load_json(char.get_cvar(cname, "{}"))
+
 
 def set_notebooks_dict(contents, char = char):
     char.set_cvar(cname, dump_json(contents))
 
+
 def get_notebook_id(notebook, char = char):
     notebooks = get_notebooks_dict(char)
     return notebooks.get(notebook, "note_" + notebook)
+
 
 def set_notebook_id(notebook, notebook_id, char = char):
     notebooks = get_notebooks_dict(char)
     notebooks[notebook] = notebook_id
     set_notebooks_dict(notebooks, char)
 
+
 def get_notebook(notebook, char = char):
     notebook_id = get_notebook_id(notebook, char)
     return load_json(char.get_cvar(notebook_id, "[]"))
+
 
 def set_notebook(notebook, contents, char = char):
     notebook_id = get_notebook_id(notebook, char)
     char.set_cvar(notebook_id, dump_json(contents))
 
+
 def create_notebook(notebook, contents = [], char = char):
     set_notebook_id(notebook, get_notebook_id(notebook, char), char)
     set_notebook(notebook, contents, char)
+
 
 # Push
 #

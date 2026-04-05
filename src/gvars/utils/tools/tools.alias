@@ -16,4 +16,39 @@ if testcase == "tools gvar loads":
     actual_code = tools.tool_prof_code
 
     expect(actual_code).to.be(expected_prof_code)
+elif testcase == "search_for_tool should find exact tool names":
+    query = "Smith's Tools"
+
+    matches = tools.search_for_tool(query)
+
+    expect(matches).to.have.length(1)
+    expect(matches).to.have_element(query)
+elif testcase == "search_for_tool should fuzzy match case insensitively":
+    query = "herbal"
+
+    matches = tools.search_for_tool(query)
+
+    expect(matches).to.have_element("Herbalism Kit")
+elif testcase == "get_has_proficiency should be false for unknown tools":
+    result = tools.get_has_proficiency("Not A Real Tool Name")
+
+    expect(result).to.be(False)
+elif testcase == "get_has_proficiency should be false when cvars omit the tool":
+    known = "Dice Set"
+
+    result = tools.get_has_proficiency(known)
+
+    expect(result).to.be(False)
+elif testcase == "get_has_expertise should be false when cvars omit expertise":
+    known = "Thieves' Tools"
+
+    result = tools.get_has_expertise(known)
+
+    expect(result).to.be(False)
+elif testcase == "tool_exp_code should match workshop cvar name":
+    expected = "eTools"
+
+    actual = tools.tool_exp_code
+
+    expect(actual).to.be(expected)
 </drac2>

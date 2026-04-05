@@ -24,4 +24,16 @@ elif testcase == "get_time should break down a timestamp into components":
     expect(t).to.have.property("hours", 1)
     expect(t).to.have.property("minutes", 1)
     expect(t).to.have.property("seconds", 1)
+elif testcase == "get_discord_timestamp should format relative and absolute markers":
+    ts = 1700000000
+    expected = "<t:1700000000><t:1700000000:R>"
+
+    out = timelib.get_discord_timestamp(ts)
+
+    expect(out).to.be(expected)
+elif testcase == "get_ts_from_combat should return non negative float":
+    ts = timelib.get_ts_from_combat()
+    is_non_negative = ts >= 0
+
+    expect(is_non_negative).to.be(True)
 </drac2>

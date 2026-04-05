@@ -22,3 +22,88 @@ name: get_readable_name_for_skill should format default ability skill checks
 ---
 ---
 name: get_default_ability_for_skill should map skills to abilities
+
+!rolls -testcase "join_roll_strings should skip None and empty fragments"
+---
+---
+name: join_roll_strings should skip None and empty fragments
+
+!rolls -testcase "get_damage_roll should join dice and bonuses"
+---
+---
+name: get_damage_roll should join dice and bonuses
+
+!rolls -testcase "get_damage_roll should default bonuses to empty"
+---
+---
+name: get_damage_roll should default bonuses to empty
+
+!rolls -testcase "join_advantage should return None when advantage and disadvantage mix"
+---
+---
+name: join_advantage should return None when advantage and disadvantage mix
+
+!rolls -testcase "join_advantage should return True when any argument is True and none False"
+---
+---
+name: join_advantage should return True when any argument is True and none False
+
+!rolls -testcase "join_advantage should return False when only False is present among bools"
+---
+---
+name: join_advantage should return False when only False is present among bools
+
+!rolls -testcase "join_advantage should return None when no adv flags are given"
+---
+---
+name: join_advantage should return None when no adv flags are given
+
+!rolls -testcase "get_d20 should build plain d20 when adv is None"
+---
+---
+name: get_d20 should build plain d20 when adv is None
+
+!rolls -testcase "get_d20 should build advantage and elven advantage strings"
+---
+---
+name: get_d20 should build advantage and elven advantage strings
+
+!rolls -testcase "get_readable_name_for_skill should expand sleight and animal handling"
+---
+---
+name: get_readable_name_for_skill should expand sleight and animal handling
+
+!rolls -testcase "get_readable_name_for_skill should name non default ability overrides"
+---
+---
+name: get_readable_name_for_skill should name non default ability overrides
+
+!rolls -testcase "get_readable_name_for_save should format default and overridden abilities"
+---
+---
+name: get_readable_name_for_save should format default and overridden abilities
+
+!rolls -testcase "get_readable_name_for_attack should format melee attacks"
+---
+---
+name: get_readable_name_for_attack should format melee attacks
+
+!rolls -testcase "get_default_ability_for_save should return None for death saves"
+---
+---
+name: get_default_ability_for_save should return None for death saves
+
+!rolls -testcase "get_default_ability_for_attack_type should map melee and ranged"
+---
+---
+name: get_default_ability_for_attack_type should map melee and ranged
+
+!rolls -testcase "character helpers should return false when character is None"
+---
+---
+name: character helpers should return false when character is None
+
+!rolls -testcase "get_mod_override should return zero when character is None"
+---
+---
+name: get_mod_override should return zero when character is None

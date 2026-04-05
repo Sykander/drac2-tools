@@ -1,3 +1,8 @@
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    lists = env.gvars.lists,
+)
+
 tool_prof_code = "pTools"
 tool_exp_code = "eTools"
 
@@ -56,8 +61,10 @@ tools_list = [
 
 char = character()
 
+
 def search_for_tool(toolname):
     return lists.search_list(tools_list, toolname)
+
 
 # Returns true if the character has expertise or proficiency in the given tool
 def get_has_proficiency(
@@ -67,10 +74,11 @@ def get_has_proficiency(
     if toolname not in tools_list:
         return False
 
-    tool_prof = ch.get_cvar(bags.tool_prof_code, "")
-    tool_exp = ch.get_cvar(bags.tool_exp_code, "")
+    tool_prof = char.get_cvar(tool_prof_code, "")
+    tool_exp = char.get_cvar(tool_exp_code, "")
 
     return toolname in tool_prof or toolname in tool_exp
+
 
 def get_has_expertise(
     toolname: str,
@@ -79,6 +87,6 @@ def get_has_expertise(
     if toolname not in tools_list:
         return False
 
-    tool_exp = ch.get_cvar(bags.tool_exp_code, "")
+    tool_exp = char.get_cvar(tool_exp_code, "")
 
     return toolname in tool_exp
