@@ -1,0 +1,4 @@
+!dicts -testcase "is_dict should give a bool whether the item is a dict or not"
+---
+---
+name: is_dict should give a bool whether the item is a dict or not

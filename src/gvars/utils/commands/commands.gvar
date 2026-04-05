@@ -19,7 +19,9 @@ def get_multiline(commands: list[str]) -> str:
 #
 # returns the value wrapped in quotes
 def get_quotes(value: str) -> str:
-    if " " not in value and "\t" not in value and "\n" not in value:
+    problem_chars = [" ", "'", '"', "\t", "\n"]
+    problems = [char for char in problem_chars if char in value]
+    if len(problems) == 0:
         return value
 
     if '"' not in value:
@@ -36,10 +38,10 @@ def get_quotes(value: str) -> str:
 # args - OPTIONAL a dict of the args on the command eg. { "-t": "GO1" }
 #
 # returns the command string
-def get_command(actions: list[str], args: dict | None = None) -> str:
+def get_command(actions: list[str], args: list[Tuple[str, str]] | None = None) -> str:
     command = " ".join([get_quotes(action) for action in actions])
 
     if args != None:
-        command += " " + " ".join([f"{key}{' ' + get_quotes(value) if value != True else ''}" for key, value in args.items()])
+        command += " " + " ".join([f"{arg[0]} {get_quotes(arg[1])}" for arg in args])
 
     return command

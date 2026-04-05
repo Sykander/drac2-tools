@@ -1,0 +1,9 @@
+!lists -testcase "to_dict should convert the given list of objects into a dictionary"
+---
+---
+name: to_dict should convert the given list of objects into a dictionary
+
+!lists -testcase "is_list should give True if its a list and False otherwise"
+---
+---
+name: is_list should give True if its a list and False otherwise

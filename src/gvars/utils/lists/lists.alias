@@ -1,0 +1,44 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    lists = env.gvars.lists,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "to_dict should convert the given list of objects into a dictionary":
+    first_item = {"id": "a", "val": "b"}
+    second_item = {"id": "c", "val": "d"}
+    input = [first_item, second_item]
+    key = "id"
+
+    result = lists.to_dict(input, key)
+
+    expect(result).to.have.property(first_item[key]).which.has.property("val", first_item.val).and_to.have.property(key, first_item[key])
+    expect(result).to.have.property(second_item[key]).which.has.property("val", second_item.val).and_to.have.property(key, second_item[key])
+elif testcase == "get_random_from_list should get random entries from a list":
+    items = [0,1,2,3,4,5,6,7,8,9]
+    count = 3
+
+    result = lists.get_random_from_list(items, count)
+
+    expect(result).to.have.length(count)
+elif testcase == "is_list should give True if its a list and False otherwise":
+    input_a = "a"
+    input_b = 1
+    input_c = {}
+    input_d = []
+
+    result_a = lists.is_list(input_a)
+    result_b = lists.is_list(input_b)
+    result_c = lists.is_list(input_c)
+    result_d = lists.is_list(input_d)
+
+    expect(result_a).to.be(False)
+    expect(result_b).to.be(False)
+    expect(result_c).to.be(False)
+    expect(result_d).to.be(True)
+</drac2>

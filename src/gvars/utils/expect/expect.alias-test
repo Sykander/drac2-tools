@@ -1,0 +1,29 @@
+!expect -testcase = "expect.eq should throw an error if the values aren't equal"
+---
+---
+name: expect.eq should throw an error if the values aren't equal
+
+!expect -testcase = "expect.len should throw an error if the lengths aren't equal"
+---
+---
+name: expect.len should throw an error if the lengths aren't equal
+
+!expect -testcase = "expect.property should throw an error if the property doesn't match"
+---
+---
+name: expect.property should throw an error if the property doesn't match
+
+!expect -testcase = "expect.raise should throw an error if the func doesn't throw an error"
+---
+---
+name: expect.raise should throw an error if the func doesn't throw an error
+
+!expect -testcase = "expect.to.have.property should route to the property assertion"
+---
+---
+name: expect.to.have.property should route to the property assertion
+
+!expect -testcase = "expect should map to the correction assertions"
+---
+---
+name: expect should map to the correction assertions

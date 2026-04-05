@@ -1,0 +1,19 @@
+!commands -testcase "get_command should give a command string"
+---
+---
+name: get_command should give a command string
+
+!commands -testcase "get_command should wrap args in appropriate quote marks"
+---
+---
+name: get_command should wrap args in appropriate quote marks
+
+!commands -testcase "get_quotes should wrap args in appropriate quote marks"
+---
+---
+name: get_quotes should wrap args in appropriate quote marks
+
+!commands -testcase "get_multiline should give a multiline command string"
+---
+---
+name: "get_multiline should give a multiline command string"

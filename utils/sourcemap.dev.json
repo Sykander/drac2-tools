@@ -10,32 +10,32 @@
     },
     {
       "name": "bags",
-      "file": "src/gvars/utils/bags.gvar",
+      "file": "src/gvars/utils/bags/bags.gvar",
       "id": "77c61283-d505-471e-ac78-f50b6e17f143"
     },
     {
       "name": "commands",
-      "file": "src/gvars/utils/commands.gvar",
+      "file": "src/gvars/utils/commands/commands.gvar",
       "id": "33863fda-3e31-4676-8e52-582dde54bae0"
     },
     {
       "name": "dicts",
-      "file": "src/gvars/utils/dicts.gvar",
+      "file": "src/gvars/utils/dicts/dicts.gvar",
       "id": "945554b2-9526-4294-a5aa-3e732f863a07"
     },
     {
       "name": "embeds",
-      "file": "src/gvars/utils/embeds.gvar",
+      "file": "src/gvars/utils/embeds/embeds.gvar",
       "id": "25435017-7097-42f0-8fcc-a29c7e65311d"
     },
     {
       "name": "expect",
-      "file": "src/gvars/utils/expect.gvar",
+      "file": "src/gvars/utils/expect/expect.gvar",
       "id": "6c364b5c-83cc-40df-9b36-1f4437c42193"
     },
     {
       "name": "lists",
-      "file": "src/gvars/utils/lists.gvar",
+      "file": "src/gvars/utils/lists/lists.gvar",
       "id": "a2f94784-2002-40ed-b875-72de479efb1c"
     },
     {

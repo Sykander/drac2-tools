@@ -1,0 +1,57 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    commands = env.gvars.commands,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "get_command should give a command string":
+    actions = ["i", "a", "shortbow"]
+    args = [["-t", "GO1"], ["-d", "1d4"]]
+    expected_command = " ".join(actions) + " " + args[0][0] + " " + args[0][1] + " " + args[1][0] + " " + args[1][1]
+
+    command = commands.get_command(actions, args)
+
+    expect(command).to.be(expected_command)
+elif testcase == "get_command should wrap args in appropriate quote marks":
+    actions = ['i"', "a'", "shortbow 12"]
+    args = [["-t", "GO1"], ["-d", "1d4"]]
+    expected_command = """'i"' "a'" "shortbow 12" """ + args[0][0] + " " + args[0][1] + " " + args[1][0] + " " + args[1][1]
+
+    command = commands.get_command(actions, args)
+
+    expect(command).to.be(expected_command)
+elif testcase == "get_quotes should wrap args in appropriate quote marks":
+    arg_a = "no_quotes"
+    arg_b = "use quotes"
+    arg_c = 'use single quotes"'
+    arg_d = "use double quotes"
+    arg_e = "use special quotes'" + '"'
+    expected_a = arg_a
+    expected_b = f'"{arg_b}"'
+    expected_c = f"'{arg_c}'"
+    expected_d = f'"{arg_d}"'
+    expected_e = f'《{arg_e}》'
+
+    quoted_a = commands.get_quotes(arg_a)
+    quoted_b = commands.get_quotes(arg_b)
+    quoted_c = commands.get_quotes(arg_c)
+    quoted_d = commands.get_quotes(arg_d)
+    quoted_e = commands.get_quotes(arg_e)
+
+    expect(quoted_a).to.be(expected_a)
+    expect(quoted_b).to.be(expected_b)
+    expect(quoted_c).to.be(expected_c)
+    expect(quoted_d).to.be(expected_d)
+    expect(quoted_e).to.be(expected_e)
+elif testcase == "get_multiline should give a multiline command string":
+    list_of_commands = ["i a shortsword", "g hp +1"]
+    expected_command = "multiline !i a shortsword\n!g hp +1"
+
+    command = commands.get_multiline(list_of_commands)
+
+    expect(command).to.be(expected_command)
+</drac2>

@@ -1,13 +1,12 @@
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    commands = env.gvars.commands,
+)
+
 # Embed
 # A general purpose embed handler for creating embeds
 # 
 # For a one off embed use `get_embed` but if you have multiple embed exit points use `configure_get_embed` instead
-
-# Use these special quote marks to wrap the final content - so that " and ' don't break strings
-EMBED_LEFT_QUOTE="《"
-EMBED_RIGHT_QUOTE="》"
-
-EMBED_BASE = 'embed '
 
 def format_to_length(content: str, length: int) -> str:
     if len(content) < length:
@@ -30,30 +29,28 @@ def get_embed(
     color: str | None = None,
     timeout: int | None = None
 ) -> str:
-    embed = EMBED_BASE
-    embed += f" -title {EMBED_LEFT_QUOTE}{title}{EMBED_RIGHT_QUOTE}"
-    embed += f" -desc {EMBED_LEFT_QUOTE}{format_to_length(desc, 4020)}{EMBED_RIGHT_QUOTE}"
-
-    fields_strings = " ".join([f'-f {EMBED_LEFT_QUOTE}{format_to_length(field, 1020)}{EMBED_RIGHT_QUOTE}' for field in fields])
-    if fields_strings != "":
-        embed += " " + fields_strings
+    actions = ["embed"]
+    args = [
+        ["-title", title],
+        ["-desc", format_to_length(desc, 4020) if desc != None else desc],
+    ] + [["-f", format_to_length(field, 1020)] for field in fields]
 
     if footer != None:
-        embed += f" -footer {EMBED_LEFT_QUOTE}{footer}{EMBED_RIGHT_QUOTE}"
+        args.append(["-footer", footer])
 
     if image != None:
-        embed += f" -image {image}"
+        args.append(["-image", image])
 
     if thumb != None:
-        embed += f" -thumb {thumb}"
+        args.append(["-thumb", thumb])
 
     if color != None:
-        embed += f" -color {color}"
+        args.append(["-color", color])
 
     if timeout != None:
-        embed += f" -t {timeout}"
+        args.append(["-t", str(timeout)])
 
-    return embed
+    return commands.get_command(actions, args)
 
 def configure_get_embed(
     desc: str | None = None,

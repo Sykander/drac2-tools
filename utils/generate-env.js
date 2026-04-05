@@ -3,7 +3,8 @@
  * and quickly converts them all into a dictionary for use in the
  * `env` gvar
  */
-const { readFileSync, writeFileSync } = require('fs');
+const { writeFileSync } = require('fs');
+const { version } = require("../package.json")
 const prodSourceMap = require('./sourcemap.prod.json');
 const devSourceMap = require('./sourcemap.dev.json');
 
@@ -25,7 +26,8 @@ const envDict = gvars.reduce((acc, { id, name }) => {
   return acc;
 }, {});
 
-const newEnvFileContents = `ENV = "${environmentToUpdate}"
+const newEnvFileContents = `ENVIRONMENT = "${environmentToUpdate}"
+VERSION = "${version}"
 
 gvars = ${JSON.stringify(envDict)}`;
 

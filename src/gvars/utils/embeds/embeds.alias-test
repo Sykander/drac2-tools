@@ -1,0 +1,29 @@
+!embeds -testcase "get_embed should give an embed command string"
+---
+---
+name: get_embed should give an embed command string
+
+!embeds -testcase "get_embed should accept all valid embed args"
+---
+---
+name: get_embed should accept all valid embed args
+
+!embeds -testcase "configure_get_embed should used configured values as default"
+---
+---
+name: configure_get_embed should used configured values as default
+
+!embeds -testcase "configure_get_embed should accept all valid embed args"
+---
+---
+name: configure_get_embed should accept all valid embed args
+
+!embeds -testcase "get_field Should give a properly formatted field"
+---
+---
+name: get_field Should give a properly formatted field
+
+!embeds -testcase "format_to_length should give a string less than the given length"
+---
+---
+name: format_to_length should give a string less than the given length

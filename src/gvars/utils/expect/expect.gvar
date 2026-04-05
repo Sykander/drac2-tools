@@ -1,0 +1,126 @@
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    dicts = env.gvars.dicts,
+)
+
+def to_equal(arg, val, message: str | None = None):
+    if arg != val:
+        err(f"Expected {dump_json(arg)} to equal {dump_json(val)}" if message == None else message)
+
+    return expect(arg)
+
+def to_have_property(arg, key: str, val: any | None = None, message: str | None = None):
+    if not dicts.is_dict(arg):
+        err(f"Expected {arg} to be a dict" if message == None else message)
+    
+    if key not in arg:
+        err(f"Expected {arg} to have property {key}" if message == None else message)
+
+    arg_val = arg.get(key, None)
+
+    if val != None and arg_val != val:
+        err(f"Expected {arg} to have property {val} instead got {arg_val}" if message != None else message)
+    
+    return expect(arg_val, and_context = expect(arg))
+
+def to_have_length(arg, val: int | None = None, message: str | None = None):
+    try:
+        actual_length = len(arg)
+        if val != None and val != actual_length:
+            err(f"Expected {arg} to have length {val}, instead it has length {actual_length}" if message == None else message)
+
+        return expect(actual_length, and_context = expect(arg))
+    except:
+        err(f"Expected {arg} to be enumerable" if message == None else message)
+
+def to_raise_exception(arg, val: Exception | None = None, message: str | None = None):
+    if val == None:
+        try:
+            arg()
+        except:
+            return expect(arg)
+        else:
+            err(f"Expected {arg} to raise an exception, none raised" if message == None else message)
+    else:
+        try:
+            arg()
+        except val:
+            return expect(arg)
+        except:
+            err(f"Expected {arg} to raise a {val} exception, but a different type was thrown" if message == None else message)
+        else:
+            err(f"Expected {arg} to raise an exception, none raised" if message == None else message)
+
+def is_included_in(arg, val: any, message: str | None = None):
+    is_included = False
+    try:
+        is_included = arg  in val
+    except:
+        err(f"Expected {val} to work under the in keyword" if message == None else message)
+
+    if not is_included:
+        err(f"Expected {arg} to be included in {val}" if message == None else message)
+
+    return expect(arg)
+
+def has_element(arg, val: any, message: str | None = None):
+    is_included = False
+    try:
+        is_included = val in arg
+    except:
+        err(f"Expected {arg} to work under the in keyword" if message == None else message)
+
+    if not is_included:
+        err(f"Expected {val} to be included in {arg}" if message == None else message)
+
+    return expect(val)
+
+def has_index(arg, index: int, val: any = None, message: str | None = None):
+    try:
+        length = len(arg)
+    except:
+        err(f"Expected {arg} to have a length" if message == None else message)
+
+    if length - 1 <= index:
+        err(f"Expected {arg} to have index {index}" if message == None else message)
+
+    if val != None and arg[index] != val:
+        err(f"Expected {arg} to equal {val}" if message == None else message)
+    
+    return expect(arg[index])
+
+def expect(arg, and_context = None):
+    this_context = {
+        "be": lambda val, message = None: to_equal(arg, val, message),
+        "to_be": lambda val, message = None: to_equal(arg, val, message),
+        "eq": lambda val, message = None: to_equal(arg, val, message),
+        "equal": lambda val, message = None: to_equal(arg, val, message),
+        "equals": lambda val, message = None: to_equal(arg, val, message),
+        "to_equal": lambda val, message = None: to_equal(arg, val, message),
+        "property": lambda key, val = None, message = None: to_have_property(arg, key, val, message),
+        "have_property": lambda key, val = None, message = None: to_have_property(arg, key, val, message),
+        "to_have_property": lambda key, val = None, message = None: to_have_property(arg, key, val, message),
+        "len": lambda val = None, message = None: to_have_length(arg, val, message),
+        "have_len": lambda val = None, message = None: to_have_length(arg, val, message),
+        "to_have_len": lambda val = None, message = None: to_have_length(arg, val, message),
+        "length": lambda val = None, message = None: to_have_length(arg, val, message),
+        "have_length": lambda val = None, message = None: to_have_length(arg, val, message),
+        "to_have_length": lambda val = None, message = None: to_have_length(arg, val, message),
+        "raise_exception": lambda val = None, message = None: to_raise_exception(arg, val, message),
+        "to_raise_exception": lambda val = None, message = None: to_raise_exception(arg, val, message),
+        "is_in": lambda val, message = None: is_included_in(arg, val, message),
+        "element": lambda val, message = None: has_element(arg, val, message),
+        "have_element": lambda val, message = None: has_element(arg, val, message),
+        "to_have_element": lambda val, message = None: has_element(arg, val, message),
+        "index": lambda index, val = None, message = None: has_index(arg, index, val, message),
+        "have_index": lambda index, val = None, message = None: has_index(arg, index, val, message),
+        "to_have_index": lambda index, val = None, message = None: has_index(arg, index, val, message),
+    }
+
+    this_context["to"] = this_context
+    this_context["and_to"] = this_context if and_context == None else and_context 
+    this_context["have"] = this_context
+    this_context["which"] = this_context
+    this_context["has"] = this_context
+
+    return this_context

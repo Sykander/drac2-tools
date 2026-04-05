@@ -1,0 +1,76 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    embeds = env.gvars.embeds,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "get_embed should give an embed command string":
+    title = "Hello World!"
+    desc = "A really cool message!"
+    expected_command = f'embed -title "{title}" -desc "{desc}"'
+
+    embed_command = embeds.get_embed(title = title, desc = desc)
+
+    expect(embed_command).to.be(expected_command)
+elif testcase == "get_embed should accept all valid embed args":
+    title = "Hello World!"
+    desc = "A really cool message!"
+    fields = ["Field1", "Field2"]
+    footer = "cool footer"
+    image = "test"
+    thumb = "test"
+    color = "test"
+    timeout = 60
+    expected_command = f'embed -title "{title}" -desc "{desc}" -f {fields[0]} -f {fields[1]} -footer "{footer}" -image {image} -thumb {thumb} -color {color} -t {timeout}'
+
+    embed_command = embeds.get_embed(title = title, desc = desc, fields = fields, footer = footer, image = image, thumb = thumb, color = color, timeout = timeout)
+
+    expect(embed_command).to.be(expected_command)
+elif testcase == "configure_get_embed should used configured values as default":
+    title = "Hello World!"
+    desc = "A really cool message!"
+    footer = "footer message"
+    expected_command = f'embed -title "{title}" -desc "{desc}" -footer "{footer}"'
+
+    get_embed = embeds.configure_get_embed(title = title, desc = desc)
+    embed_command = get_embed(footer = footer)
+
+    expect(embed_command).to.be(expected_command)
+elif testcase == "configure_get_embed should accept all valid embed args":
+    title = "Hello World!"
+    desc = "A really cool message!"
+    fields = ["Field1", "Field2"]
+    footer = "cool footer"
+    image = "test"
+    thumb = "test"
+    color = "test"
+    timeout = 60
+    expected_command = f'embed -title "{title}" -desc "{desc}" -f {fields[0]} -f {fields[1]} -footer "{footer}" -image {image} -thumb {thumb} -color {color} -t {timeout}'
+
+    get_embed = embeds.configure_get_embed(title = title, desc = desc, fields = fields, footer = footer, image = image, thumb = thumb, color = color, timeout = timeout)
+    embed_command = get_embed()
+
+    expect(embed_command).to.be(expected_command)
+elif testcase == "get_field Should give a properly formatted field":
+    field_header = "Header"
+    field_desc = "Desc  test"
+    field_inline = True
+    expected_field = f"{field_header}|{field_desc}|inline"
+
+    field = embeds.get_field(field_header, field_desc, field_inline)
+
+    expect(field).to.be(expected_field)
+elif testcase == "format_to_length should cut the given string to the required length":
+    lots_of_text = "1234567890123456789012345678901234567890"
+    length = 20
+    expected_text = lots_of_text[0:17] + "..."
+
+    cut_text = embeds.format_to_length(lots_of_text, length)
+
+    expect(cut_text).to.be(expected_text)
+    expect(cut_text).to.have.length(length)
+</drac2>
