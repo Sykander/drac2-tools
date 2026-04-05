@@ -130,7 +130,7 @@ elif testcase == "get_default_ability_for_attack_type should map melee and range
     expect(melee_ability).to.be("strength")
     expect(ranged_ability).to.be("dexterity")
 elif testcase == "character helpers should return false when character is None":
-    luck = rolls.character_has_halfing_luck(None)
+    luck = rolls.character_has_halfling_luck(None)
     talent = rolls.character_has_reliable_talent(None)
     observant = rolls.character_has_observant(None)
     might = rolls.character_has_indomitable_might(None)

@@ -22,10 +22,10 @@ Returns `content` unchanged if shorter than `length`; otherwise truncates and ap
 
 Returns a field string for `get_embed`: `title|text`, or `title|text|inline` when `inline` is true.
 
-### `get_embed(desc: str | None = None, title: str | None = None, fields: list[str] = [], footer: str | None = None, image: str | None = None, thumb: str | None = None, color: str | None = None, timeout: int | None = None) -> str`
+### `get_embed(desc: str | None = None, title: str | None = None, fields: list[str] | None = None, footer: str | None = None, image: str | None = None, thumb: str | None = None, color: str | None = None, timeout: int | None = None) -> str`
 
 Builds the embed command. Arguments that are `None` are omitted. Description and each field are passed through `format_to_length` (description max 4020, fields max 1020).
 
-### `configure_get_embed(desc: str | None = None, title: str | None = None, fields: list[str] = [], footer: str | None = None, image: str | None = None, thumb: str | None = None, color: str | None = None, timeout: int | None = None)`
+### `configure_get_embed(desc: str | None = None, title: str | None = None, fields: list[str] | None = None, footer: str | None = None, image: str | None = None, thumb: str | None = None, color: str | None = None, timeout: int | None = None)`
 
 Returns a callable with the same keyword parameters as `get_embed`, using the captured values as defaults. Invoking it runs `get_embed` with any overrides you pass.

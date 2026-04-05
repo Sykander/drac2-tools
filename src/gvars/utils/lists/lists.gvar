@@ -28,13 +28,13 @@ def get_random_from_list(items: list, count = 1) -> list:
     if count > len(items):
         err(f"Can't get {count} items from a list of length {len(items)}")
 
-    indexes = []
+    seen = set()
     results = []
 
-    while len(indexes) < count:
+    while len(seen) < count:
         index = random.get_random_integer(0, len(items) - 1)
-        if index not in indexes:
-            indexes.append(index)
+        if index not in seen:
+            seen.add(index)
             results.append(items[index])
 
     return results

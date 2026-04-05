@@ -18,6 +18,9 @@ bags_cache = {}
 def get_bags(char = None) -> list[Tuple[str, dict]]:
     char = char if char != None else default_char
 
+    if char == None:
+        err("No character available for bag operations.")
+
     if not bags_cache.get(char.name, False):
         bags_cache[char.name] = load_json(char.get_cvar(bags_code)) if char.get_cvar(bags_code) else []
 
@@ -26,17 +29,21 @@ def get_bags(char = None) -> list[Tuple[str, dict]]:
 
 def set_bags(bags: list[Tuple[str, dict]], char = None) -> None:
     char = char if char != None else default_char
+
+    if char == None:
+        err("No character available for bag operations.")
+
     bags_cache[char.name] = bags
     char.set_cvar(bags_code, dump_json(bags))
 
 
 def get_bag(bag_name: str, char = None) -> dict:
     bags = get_bags(char)
-    matches = [bag for bag in bags if bag[0] == bag_name]
-    if len(matches) == 0:
-        return {}
-    else:
-        return matches[0][1]
+    for bag in bags:
+        if bag[0] == bag_name:
+            return bag[1]
+
+    return {}
 
 
 def set_bag(bag_name: str, bag_contents: dict, char = None) -> None:
@@ -73,6 +80,9 @@ def modify_bag(
     count = count if count != None else 1
     bag = bag if bag != None else "Equipment"
     char = char if char != None else default_char
+
+    if char == None:
+        err("No character available for bag operations.")
 
     bag_contents = get_bag(bag, char)
     current_count = bag_contents.get(item, 0)

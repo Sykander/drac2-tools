@@ -192,6 +192,6 @@ if (!gvarsMatch) {
   process.exit(1);
 }
 
-console.log('✅ SNIPPETS CHECK PASSED');
+console.log('✅ GVARS CHECK PASSED');
 
 console.log('✅ Development and Production sourcemaps match');

@@ -32,6 +32,6 @@ VERSION = "${version}"
 gvars = ${JSON.stringify(envDict, null, 4)}
 `;
 
-writeFileSync(envFile, newEnvFileContents);
+writeFileSync(envFile, `${newEnvFileContents.trimEnd()}\n`);
 
 console.log(`${environmentToUpdate} env file updated.`);

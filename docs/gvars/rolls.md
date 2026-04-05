@@ -14,9 +14,9 @@ using(rolls = "b6fe8f32-72ee-4179-a5b2-6fe79c77f372")
 
 ## Public API
 
-### `get_roll(character, roll_name: str, args: ParsedArguments, roll_type: str, ability_name: str | None = None, dc: int | None = None, adv: bool | None = None, bonuses: list[str] = []) -> dict`
+### `get_roll(character, roll_name: str, args: ParsedArguments, roll_type: str, ability_name: str | None = None, dc: int | None = None, adv: bool | None = None, bonuses: list[str] | None = None) -> dict`
 
-Main entry point. `roll_type` is one of `"roll"`, `"check"`, `"passive"`, `"save"`, `"attack"`. `roll_name` is a skill or save key, `"melee"` / `"ranged"` for attacks, or the raw dice string when `roll_type == "roll"`. `args` is parsed alias arguments (advantage flags, `-b`, `-guidance`, `-bless`, `-resistance`, ability overrides, etc.).
+Main entry point. `roll_type` is one of `"roll"`, `"check"`, `"passive"`, `"save"`, `"attack"`. `roll_name` is a skill or save key, `"melee"` / `"ranged"` for attacks, or the raw dice string when `roll_type == "roll"`. `args` is parsed alias arguments (advantage flags, `-b`, `-guidance`, `-bless`, `-resistance`, ability overrides, etc.). `bonuses` is copied when provided so callers’ lists are not mutated.
 
 Returns a dict with `roll`, `total`, `full`, `name`, `roll_string`, `dc`, `passed`, `crit`, and `crit_fail` (see `rolls.gvar`).
 
@@ -28,7 +28,7 @@ Joins roll fragments, inserting `+` between terms when needed; skips `None` and 
 
 Joins `damage_dice` with optional bonus strings.
 
-### `get_d20(adv: bool | None = None, eadv: bool = False, mi: int | None = None, ma: int | None = None, ro: list[int] = []) -> str`
+### `get_d20(adv: bool | None = None, eadv: bool = False, mi: int | None = None, ma: int | None = None, ro: list[int] | None = None) -> str`
 
 Builds the d20 portion (plain, advantage, disadvantage, elven accuracy, optional min/max and reroll snippets).
 
@@ -60,7 +60,7 @@ Default ability for a save key, or `None`.
 
 Default ability for `"melee"` or `"ranged"`, or `None`.
 
-### `character_has_halfing_luck(character) -> bool`
+### `character_has_halfling_luck(character) -> bool`
 
 ### `character_has_reliable_talent(character) -> bool`
 
