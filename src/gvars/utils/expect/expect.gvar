@@ -88,7 +88,7 @@ def has_index(arg, index: int, val: any = None, message: str | None = None):
     except:
         err(f"Expected {arg} to have a length" if message == None else message)
 
-    if length - 1 <= index:
+    if index < 0 or index >= length:
         err(f"Expected {arg} to have index {index}" if message == None else message)
 
     if val != None and arg[index] != val:

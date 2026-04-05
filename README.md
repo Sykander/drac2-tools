@@ -20,3 +20,5 @@ The following libraries are available freely for other developers to use in thei
 * Random
 * Rolls
 * Time
+### Docs
+You can read about each library in depth in the [docs](docs/README.md) section.

@@ -2,6 +2,8 @@
 # A reusable library for interacting with bags
 # https://avrae.io/dashboard/workshop/6296b723c964982e890e5315
 
+# Use get_bag, set_bag and modify_bag to interact with bags
+
 bags_code = "bags"
 
 try:
@@ -13,7 +15,7 @@ except:
 bags_cache = {}
 
 
-def get_bags(char = None):
+def get_bags(char = None) -> list[Tuple[str, dict]]:
     char = char if char != None else default_char
 
     if not bags_cache.get(char.name, False):
@@ -22,7 +24,7 @@ def get_bags(char = None):
     return bags_cache[char.name]
 
 
-def set_bags(bags: list[Tuple[str, dict]], char = None):
+def set_bags(bags: list[Tuple[str, dict]], char = None) -> None:
     char = char if char != None else default_char
     bags_cache[char.name] = bags
     char.set_cvar(bags_code, dump_json(bags))
@@ -37,7 +39,7 @@ def get_bag(bag_name: str, char = None) -> dict:
         return matches[0][1]
 
 
-def set_bag(bag_name: str, bag_contents: dict, char = None):
+def set_bag(bag_name: str, bag_contents: dict, char = None) -> None:
     bags = get_bags(char)
     bag_index = None
     for index, bag in enumerate(bags):
