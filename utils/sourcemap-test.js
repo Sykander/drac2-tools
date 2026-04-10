@@ -4,19 +4,111 @@ const devSourceMap = require('./sourcemap.dev.json');
 console.log(
   '❓ Checking Production Sourcemap includes everything from Development Sourcemap',
 );
-console.log('❓ ALIASES CHECK');
-
-const { aliases, snippets, gvars } = {
+const { aliases, snippets, gvars, workshop } = {
   aliases: [],
   snippets: [],
   gvars: [],
+  workshop: {},
   ...devSourceMap,
 };
 const {
   aliases: prodAliases,
   snippets: prodSnippets,
   gvars: prodGvars,
-} = { aliases: [], snippets: [], gvars: [], ...prodSourceMap };
+  workshop: prodWorkshop,
+} = { aliases: [], snippets: [], gvars: [], workshop: {}, ...prodSourceMap };
+
+console.log('❓ WORKSHOP CHECK');
+const { environment, id } = workshop
+const { environment: prodEnvironment, id: prodId } = prodWorkshop
+
+const idIsValid = (typeof id === "string" && id.length === 24) || id === undefined
+const prodIdIsValid = (typeof prodId === "string" && prodId.length === 24) || prodId === undefined
+
+const environmentIsValid = (typeof environment === "string" && environment.length === 36) || environment === undefined
+const prodEnvironmentIsValid = (typeof prodEnvironment === "string" && prodEnvironment.length === 36) || prodEnvironment === undefined
+
+const idsMatch = id === prodId && id !== undefined
+const environmentsMatch = environment === prodEnvironment && environment !== undefined
+
+const missingProdEnvironment = prodEnvironment === undefined && environment !== undefined
+const missingDevEnvironment = prodEnvironment !== undefined && environment === undefined
+const missingProdId = prodId === undefined && id !== undefined
+const missingDevId = prodId !== undefined && id === undefined
+
+const missingProdEnvironmentGvar = prodEnvironment !== undefined && !prodGvars.some(({ name, id: tid }) => name === "env" && tid === prodEnvironment)
+const missingDevEnvironmentGvar = environment !== undefined && !gvars.some(({ name, id: tid }) => name === "env" && tid === environment)
+
+const passedWorkshopCheck = idIsValid
+  && prodIdIsValid
+  && environmentIsValid
+  && prodEnvironmentIsValid
+  && !idsMatch
+  && !environmentsMatch
+  && !missingProdEnvironment
+  && !missingDevEnvironment
+  && !missingProdId
+  && !missingDevId
+  && !missingProdEnvironmentGvar
+  && !missingDevEnvironmentGvar
+
+if (!passedWorkshopCheck) {
+  if (!idIsValid) {
+    console.log('❌ Development workshop.id is invalid');
+  }
+  
+  if (!prodIdIsValid) {
+    console.log('❌ Production workshop.id is invalid');
+  }
+  
+  if (!environmentIsValid) {
+    console.log('❌ Development workshop.environment is invalid');
+  }
+  
+  if (!prodEnvironmentIsValid) {
+    console.log('❌ Production workshop.environment is invalid');
+  }
+
+  if (idsMatch) {
+      console.log('❌ Production and Development have the same workshop.id');
+  }
+
+  if (environmentsMatch) {
+      console.log('❌ Production and Development have the same workshop.environment');
+  }
+
+  if (missingProdEnvironment) {
+      console.log('❌ Production is missing workshop.environment');
+  }
+
+  if (missingDevEnvironment) {
+      console.log('❌ Development is missing workshop.environment');
+  }
+
+  if (missingProdId) {
+      console.log('❌ Production is missing workshop.id');
+  }
+
+  if (missingDevId) {
+      console.log('❌ Development is missing workshop.id');
+  }
+
+  if (missingProdEnvironmentGvar) {
+      console.log('❌ Production has workshop.environment but does not define a gvar in workshop.gvars for env with matching environment id');
+  }
+
+  if (missingDevEnvironmentGvar) {
+      console.log('❌ Development has workshop.environment but does not define a gvar in workshop.gvars for env with matching environment id');
+  }
+
+  console.log('❌ WORKSHOP CHECK FAILED');
+  process.exit(1);
+}
+
+console.log('✅ WORKSHOP CHECK PASSED');
+
+console.log('❓ ALIASES CHECK');
+
 
 const compareSubAliases = (devSubAliases, prodSubAliases) =>
   devSubAliases.every((devSubAlias) => {
