@@ -36,12 +36,16 @@ def get_embed(
         fields = []
 
     actions = ["embed"]
-    args = [
-        ["-title", title],
-        ["-desc", format_to_length(desc, 4020) if desc != None else desc],
-    ] + [["-f", format_to_length(field, 1020)] for field in fields]
+    args = []
+    if title != None:
+        args.append(["-title", title])
 
-    if footer != None:
+    if desc != None and len(desc) > 0:
+        args.append(["-desc", format_to_length(desc, 4020)])
+
+    args = args + [["-f", format_to_length(field, 1020)] for field in fields]
+
+    if footer != None and len(footer) > 0:
         args.append(["-footer", footer])
 
     if image != None:
