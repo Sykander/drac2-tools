@@ -270,7 +270,7 @@ def get_save_for_character(character, save_name):
 # Processes a roll
 #
 # character - the character to use
-# roll_name - the name of the check or save, or the type of the attack, or if just a flat roll then the roll string itself
+# roll_name - the name of the check or save, or the type of the attack, or if just a flat roll then the roll string itself (flat rolls accept non-strings; they are coerced with str())
 # args - the ParsedArguments to use for the roll
 # roll_type - either 'check' for Skill Checks and Ability Checks; 'save' for Saving Throws; 'attack' for attack rolls;  or 'roll' for rolls
 # ability_name - OPTIONAL None - string for the ability to use if overriding
@@ -283,7 +283,7 @@ def get_save_for_character(character, save_name):
 
 def get_roll(
     character,
-    roll_name: str,
+    roll_name,
     args: ParsedArguments,
     roll_type: str, # check, save, attack, roll
     ability_name: str | None = None, # Ability to use for roll
@@ -330,6 +330,9 @@ def get_roll(
         readable_roll_name = get_readable_name_for_attack(roll_name, ability_name)
     elif roll_type == "roll":
         readable_roll_name = 'Roll'
+
+    if roll_type == "roll":
+        roll_name = str(roll_name)
 
     if roll_type == "roll":
         roll_str = roll_name

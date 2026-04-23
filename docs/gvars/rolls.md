@@ -14,9 +14,9 @@ using(rolls = "b6fe8f32-72ee-4179-a5b2-6fe79c77f372")
 
 ## Public API
 
-### `get_roll(character, roll_name: str, args: ParsedArguments, roll_type: str, ability_name: str | None = None, dc: int | None = None, adv: bool | None = None, bonuses: list[str] | None = None) -> dict`
+### `get_roll(character, roll_name, args: ParsedArguments, roll_type: str, ability_name: str | None = None, dc: int | None = None, adv: bool | None = None, bonuses: list[str] | None = None) -> dict`
 
-Main entry point. `roll_type` is one of `"roll"`, `"check"`, `"passive"`, `"save"`, `"attack"`. `roll_name` is a skill or save key, `"melee"` / `"ranged"` for attacks, or the raw dice string when `roll_type == "roll"`. `args` is parsed alias arguments (advantage flags, `-b`, `-guidance`, `-bless`, `-resistance`, ability overrides, etc.). `bonuses` is copied when provided so callers’ lists are not mutated.
+Main entry point. `roll_type` is one of `"roll"`, `"check"`, `"passive"`, `"save"`, `"attack"`. For `"check"`, `"passive"`, `"save"`, and `"attack"`, `roll_name` is the usual string key (skill name, save name, or `"melee"` / `"ranged"` for attacks). When `roll_type == "roll"`, `roll_name` is the dice expression passed to `vroll`; it is normalized with `str()` first, so you can pass a string or another value (such as a number) that stringifies to valid dice syntax. `args` is parsed alias arguments (advantage flags, `-b`, `-guidance`, `-bless`, `-resistance`, ability overrides, etc.). `bonuses` is copied when provided so callers’ lists are not mutated.
 
 Returns a dict with `roll`, `total`, `full`, `name`, `roll_string`, `dc`, `passed`, `crit`, and `crit_fail` (see `rolls.gvar`).
 

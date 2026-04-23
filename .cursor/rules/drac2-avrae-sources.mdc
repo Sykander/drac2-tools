@@ -1,0 +1,54 @@
+---
+description: Drac2/Avrae conventions for .gvar, .alias, .snippet, and .alias-test files
+globs:
+  - "**/*.gvar"
+  - "**/*.alias"
+  - "**/*.alias-test"
+  - "**/*.snippet"
+  - docs/**/*.md
+alwaysApply: false
+---
+
+# Drac2 / Avrae — file roles
+
+## Extensions
+
+- **`.gvar`** — Workshop/global library: `def` helpers, maps, constants. Imported via `using` / env; not a `!command` entrypoint.
+- **`.snippet`** — Snippet-sized Drac2 Avrae ships separately from aliases; same language, different deployment (sourcemaps / publish config). Follow repo patterns when snippets exist.
+- **`.alias`** — `!command` Drac2 (`<drac2>` …), `argparse(&ARGS&)`, etc. See **two roles** below.
+
+## `.alias-test` files
+
+- **Not deployed** — They are inputs for **`avrae-ls --run-tests`** only (see `.github/workflows/test.yaml`, `DEVELOPMENT.md`).
+- **Shape** — Repeated blocks: `!pairedalias -testcase "unique case title"`, often with `---` separators; the string is the testcase id `avrae-ls` passes through.
+- **Contract** — A `.alias-test` must pair with a sibling **`.alias`** whose code does `testcase = args.last("testcase", None)` (or equivalent) and **`elif testcase == "exact same title":`** branches. Titles must match **exactly** between the two files.
+
+## Test-harness `.alias` vs workshop / production `.alias`
+
+| | **Test harness** | **Workshop / real alias** |
+|--|--|--|
+| **Signals** | Same basename **`.alias-test`** next to it (e.g. `lists.alias` + `lists.alias-test`) | No `.alias-test`; appears in publish/sourcemap / workshop layout as a live command |
+| **Purpose** | Drive **`expect`** assertions against a `.gvar` (or thin integration); heavy `elif testcase == …` trees are normal | Player-facing behavior; keep focused on real args; avoid testcase-only branches unless you intentionally ship one file for both |
+
+When you edit an **`.alias`**, decide which role it plays before copying structure from another file: testcase dispatch + test assertions belong on **harness** aliases; production aliases should stay lean and not depend on `-testcase` unless that is deliberate.
+
+## Drac2 style (match existing code)
+
+- **`None`**, not `null`. **`err(...)`** for intentional hard failures.
+- **Types** — Mirror the surrounding file (hints vs untyped).
+- **Naming** — `snake_case`; Avrae string keys (`"melee"`, `"sleightOfHand"`, …) stay consistent with domain maps.
+- **`== None` / `!= None`** — Match the dominant style in the file you are editing.
+- **Comments** — Short headers / non-obvious rationale only.
+
+## Testing (when a `.alias-test` exists)
+
+- Use **`env.gvars.expect`** and **`expect(...).to.have.property`**, **`.to.be`**, **`.raise_exception`** via lambdas, consistent with `expect.alias-test`.
+- Prefer deterministic rolls (**`1d1`**, seeded random helpers) when totals must be stable.
+
+## Docs
+
+- Keep **markdown under `docs/`** consistent with the Drac2 artifacts it describes (API, parameters, return shapes, deployment notes). Today most module pages live under **`docs/gvars/`**; if you add **`docs/`** pages for aliases, snippets, or workshops, treat them the same way when related code changes.
+
+## Deeper Avrae / Drac2
+
+Use the **Drac2 Coder** agent or primary Avrae references for engine or workshop edge cases instead of guessing.

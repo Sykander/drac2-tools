@@ -107,3 +107,13 @@ name: character helpers should return false when character is None
 ---
 ---
 name: get_mod_override should return zero when character is None
+
+!rolls -testcase "get_roll should stringify flat roll_name for vroll"
+---
+---
+name: get_roll should stringify flat roll_name for vroll
+
+!rolls -testcase "get_roll should coerce numeric flat roll_name to string for vroll"
+---
+---
+name: get_roll should coerce numeric flat roll_name to string for vroll

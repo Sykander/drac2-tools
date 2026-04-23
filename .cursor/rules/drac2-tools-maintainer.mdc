@@ -1,0 +1,14 @@
+---
+description: Keep docs and tests in sync when changing drac2-tools behavior
+alwaysApply: true
+---
+
+# drac2-tools maintenance
+
+When you change **behavior or public API** (not typo-only or formatting):
+
+1. **Documentation** — Update any **markdown under `docs/`** that documents the changed surface (signatures, parameters, return shapes, edge cases, workshop or deploy notes). If you add a new public surface, add or extend the right doc path and link it from **`docs/README.md`** when appropriate (not only under `docs/gvars/`).
+2. **Tests** — For each `src/gvars/utils/<name>/` util, keep the trio aligned: `<name>.gvar` (logic), `<name>.alias` (testcase branches + `expect` assertions), `<name>.alias-test` (one `!name -testcase "..."` block per case). Add or adjust cases when behavior changes.
+3. **Verify** — After gvar or alias test edits, run `avrae-ls --run-tests src` from the repo root (requires `avrae-ls` on PATH).
+
+Do not leave “docs later” as a follow-up unless the user explicitly asks to split work.
