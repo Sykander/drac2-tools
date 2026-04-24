@@ -6,39 +6,69 @@
 
 cname = "notes"
 
-char = character()
+
+def _active_character():
+    try:
+        return character()
+    except:
+        return None
 
 
-def get_notebooks_dict(char = char):
+def _resolve_optional_character(char = None):
+    return char if char != None else _active_character()
+
+
+def _require_character(char = None, context: str = "this operation"):
+    c = _resolve_optional_character(char)
+    if c == None:
+        err(f"No character available for {context}.")
+    return c
+
+
+def get_notebooks_dict(char = None):
+    char = _require_character(char, "notes")
+
     return load_json(char.get_cvar(cname, "{}"))
 
 
-def set_notebooks_dict(contents, char = char):
+def set_notebooks_dict(contents, char = None):
+    char = _require_character(char, "notes")
+
     char.set_cvar(cname, dump_json(contents))
 
 
-def get_notebook_id(notebook, char = char):
+def get_notebook_id(notebook, char = None):
+    char = _require_character(char, "notes")
+
     notebooks = get_notebooks_dict(char)
     return notebooks.get(notebook, "note_" + notebook)
 
 
-def set_notebook_id(notebook, notebook_id, char = char):
+def set_notebook_id(notebook, notebook_id, char = None):
+    char = _require_character(char, "notes")
+
     notebooks = get_notebooks_dict(char)
     notebooks[notebook] = notebook_id
     set_notebooks_dict(notebooks, char)
 
 
-def get_notebook(notebook, char = char):
+def get_notebook(notebook, char = None):
+    char = _require_character(char, "notes")
+
     notebook_id = get_notebook_id(notebook, char)
     return load_json(char.get_cvar(notebook_id, "[]"))
 
 
-def set_notebook(notebook, contents, char = char):
+def set_notebook(notebook, contents, char = None):
+    char = _require_character(char, "notes")
+
     notebook_id = get_notebook_id(notebook, char)
     char.set_cvar(notebook_id, dump_json(contents))
 
 
-def create_notebook(notebook, contents = [], char = char):
+def create_notebook(notebook, contents = [], char = None):
+    char = _require_character(char, "notes")
+
     set_notebook_id(notebook, get_notebook_id(notebook, char), char)
     set_notebook(notebook, contents, char)
 
@@ -47,10 +77,12 @@ def create_notebook(notebook, contents = [], char = char):
 #
 # notebook - the name of the notebook
 # note - the note to push
-# char - OPTIONAL use a character other than default
+# char - OPTIONAL explicit character; defaults to active character()
 #
 # returns the updated notebook
-def push(notebook: str, note: str, char = char) -> list[str]:
+def push(notebook: str, note: str, char = None) -> list[str]:
+    char = _require_character(char, "notes")
+
     contents = get_notebook(notebook, char)
     contents.append(note)
     create_notebook(notebook, contents, char)

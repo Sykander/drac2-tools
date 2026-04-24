@@ -18,6 +18,8 @@ using(rolls = "b6fe8f32-72ee-4179-a5b2-6fe79c77f372")
 
 Main entry point. `roll_type` is one of `"roll"`, `"check"`, `"passive"`, `"save"`, `"attack"`. For `"check"`, `"passive"`, `"save"`, and `"attack"`, `roll_name` is the usual string key (skill name, save name, or `"melee"` / `"ranged"` for attacks). When `roll_type == "roll"`, `roll_name` is the dice expression passed to `vroll`; it is normalized with `str()` first, so you can pass a string or another value (such as a number) that stringifies to valid dice syntax. `args` is parsed alias arguments (advantage flags, `-b`, `-guidance`, `-bless`, `-resistance`, ability overrides, etc.). `bonuses` is copied when provided so callers’ lists are not mutated.
 
+Pass **`None`** for `character` to use the **active** Avrae sheet when one exists (`resolve_character`). For `"check"`, `"passive"`, `"save"`, and `"attack"`, a sheet is **required** after resolution—if there is no active character and no explicit override, `get_roll` errors. For `"roll"`, a missing sheet is still allowed for the roll string itself; when `character` is `None` and there is no active character, race/feat helpers behave as if there were no sheet.
+
 Returns a dict with `roll`, `total`, `full`, `name`, `roll_string`, `dc`, `passed`, `crit`, and `crit_fail` (see `rolls.gvar`).
 
 ### `join_roll_strings(roll_strings: list[str]) -> str`

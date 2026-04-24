@@ -1,5 +1,5 @@
 ---
-description: Keep docs and tests in sync when changing drac2-tools behavior
+description: Docs, tests, workshop UUIDs, sourcemaps, and generated env/var files
 alwaysApply: true
 ---
 
@@ -10,5 +10,32 @@ When you change **behavior or public API** (not typo-only or formatting):
 1. **Documentation** — Update any **markdown under `docs/`** that documents the changed surface (signatures, parameters, return shapes, edge cases, workshop or deploy notes). If you add a new public surface, add or extend the right doc path and link it from **`docs/README.md`** when appropriate (not only under `docs/gvars/`).
 2. **Tests** — For each `src/gvars/utils/<name>/` util, keep the trio aligned: `<name>.gvar` (logic), `<name>.alias` (testcase branches + `expect` assertions), `<name>.alias-test` (one `!name -testcase "..."` block per case). Add or adjust cases when behavior changes.
 3. **Verify** — After gvar or alias test edits, run `avrae-ls --run-tests src` from the repo root (requires `avrae-ls` on PATH).
+
+## Sourcemaps vs generated files (single source of truth)
+
+**Hand-edit:** `utils/sourcemap.dev.json`, `utils/sourcemap.prod.json`, gvar sources under **`src/gvars/utils/**`** (and their `.alias` / `.alias-test`), `unused_gvars.md`, tests, docs, `Makefile`, `package.json`, and the generator scripts under **`utils/*.js`** (`generate-env.js`, `generate-vars.js`, `sourcemap-test.js`, `deploy.js`, etc.).
+
+**Do not hand-edit (regenerate instead):** `src/gvars/env.dev.gvar`, `src/gvars/env.prod.gvar`, and **`.varfile.json`** — they are outputs of the table below.
+
+**Generated — do not edit directly.** These are overwritten by Node scripts that read the sourcemaps (and `package.json` where noted):
+
+| Output | Generator | Typical command |
+|--------|-----------|-------------------|
+| `src/gvars/env.dev.gvar`, `src/gvars/env.prod.gvar` | `utils/generate-env.js` | `npm run generate-env` |
+| `.varfile.json` | `utils/generate-vars.js` | `npm run generate-vars` |
+
+After you change **which gvars exist or their ids/paths** in the sourcemaps, **regenerate** env (and dev var file) instead of patching `env.*.gvar` or `.varfile.json` by hand:
+
+- **`make rebuild`** — runs **`make rebuild_dev`** (`ENVIRONMENT=Development npm run generate-env`, then `npm run generate-vars`) and **`make rebuild_prod`** (`ENVIRONMENT=Production npm run generate-env` only). See the **`Makefile`** for the exact recipe.
+- **`ENVIRONMENT`** — optional for scripts: set to **`Development`** or **`Production`** so `generate-env.js` / `generate-vars.js` / `deploy.js` pick the matching sourcemap (see each script; `generate-env` defaults to Development when unset).
+
+Also run **`npm run test-sourcemaps`** after sourcemap edits. **`npm run deploy`** (`utils/deploy.js`) consumes the sourcemap for publish-avrae; same **`ENVIRONMENT`** idea applies.
+
+## Workshop gvar UUIDs (`unused_gvars.md`)
+
+**Never invent UUIDs.** Each workshop gvar slot has a real id; reusing or guessing an id can **overwrite** the wrong gvar in Avrae.
+
+- When you **add** a gvar, edit **`utils/sourcemap.dev.json`** and **`utils/sourcemap.prod.json`** (name, `file`, `id`). Take the **`id`** from the **top** line of **`unused_gvars.md`**, then **delete** that line. Regenerate env/var files with **`make rebuild`** / **`npm run generate-env`** / **`npm run generate-vars`** — do **not** paste ids into **`env.*.gvar`** manually.
+- When you **remove** a gvar from the sourcemaps, **append** its UUID as a new line at the **bottom** of **`unused_gvars.md`**.
 
 Do not leave “docs later” as a follow-up unless the user explicitly asks to split work.

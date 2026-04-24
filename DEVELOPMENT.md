@@ -19,6 +19,8 @@ We use [publish-avrae](https://www.npmjs.com/package/publish-avrae) to automatic
 ### Sourcemaps
 Publish-avrae relies on using sourcemaps which configures which files to deploy to which aliases, gvars and snippets in which workshops. We use these sourcemaps as a source of truth for other files, and so whenever you update a sourcemap you should also run `make rebuild`.
 
+**Generated files:** `make rebuild` runs `npm run generate-env` (writes `src/gvars/env.dev.gvar` / `env.prod.gvar` from the maps and `package.json` version) and, for dev, `npm run generate-vars` (writes `.varfile.json`). Do not hand-edit those outputs—change the sourcemaps and re-run the Makefile targets. Optional `ENVIRONMENT=Development` or `ENVIRONMENT=Production` is read by the generate scripts (see `utils/generate-env.js`). Cursor rules in `.cursor/rules/drac2-tools-maintainer.mdc` spell this out for agents.
+
 Development Environment Sourcemap `utils/sourcemap.dev.json`
 Production Environment Sourcemap `utils/sourcemap.prod.json`
 ### Triggering a deployment
