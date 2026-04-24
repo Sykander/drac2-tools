@@ -1,0 +1,97 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    regex = env.gvars.regex,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "regex gvar loads":
+    p = regex.compile_program("a")
+
+    expect(p).to.have.length(1)
+elif testcase == "full_match should accept digit class":
+    p = regex.compile_program("\\d")
+
+    expect(regex.full_match(p, "7")).to.be(True)
+    expect(regex.full_match(p, "x")).to.be(False)
+elif testcase == "full_match should handle optional quantifier":
+    p = regex.compile_program("a?")
+
+    expect(regex.full_match(p, "")).to.be(True)
+    expect(regex.full_match(p, "a")).to.be(True)
+    expect(regex.full_match(p, "aa")).to.be(False)
+elif testcase == "full_match should handle star quantifier":
+    p = regex.compile_program("a*")
+
+    expect(regex.full_match(p, "")).to.be(True)
+    expect(regex.full_match(p, "aaa")).to.be(True)
+elif testcase == "full_match should handle plus quantifier":
+    p = regex.compile_program("a+")
+
+    expect(regex.full_match(p, "a")).to.be(True)
+    expect(regex.full_match(p, "aaa")).to.be(True)
+    expect(regex.full_match(p, "")).to.be(False)
+elif testcase == "full_match should handle exact brace count":
+    p = regex.compile_program("a{2}")
+
+    expect(regex.full_match(p, "aa")).to.be(True)
+    expect(regex.full_match(p, "a")).to.be(False)
+elif testcase == "full_match should handle brace min max":
+    p = regex.compile_program("a{1,2}")
+
+    expect(regex.full_match(p, "a")).to.be(True)
+    expect(regex.full_match(p, "aa")).to.be(True)
+    expect(regex.full_match(p, "aaa")).to.be(False)
+elif testcase == "full_match should handle grouped repeat":
+    p = regex.compile_program("(ab){2}")
+
+    expect(regex.full_match(p, "abab")).to.be(True)
+    expect(regex.full_match(p, "ab")).to.be(False)
+elif testcase == "search_from should find substring":
+    p = regex.compile_program("hello")
+    hit = regex.search_from(p, "xhelloy")
+
+    expect(hit).to.have.property("start", 1)
+    expect(hit).to.have.property("end", 6)
+elif testcase == "match_from should return end index":
+    p = regex.compile_program("bc")
+    end = regex.match_from(p, "abcd", 1)
+
+    expect(end).to.be(3)
+elif testcase == "full_match should accept positive character class":
+    p = regex.compile_program("[abc]")
+
+    expect(regex.full_match(p, "b")).to.be(True)
+    expect(regex.full_match(p, "x")).to.be(False)
+elif testcase == "full_match should accept negated character class":
+    p = regex.compile_program("[^xyz]")
+
+    expect(regex.full_match(p, "a")).to.be(True)
+    expect(regex.full_match(p, "x")).to.be(False)
+elif testcase == "full_match should accept range inside class":
+    p = regex.compile_program("[a-c]")
+
+    expect(regex.full_match(p, "b")).to.be(True)
+    expect(regex.full_match(p, "d")).to.be(False)
+elif testcase == "full_match should combine class escape and quantifier":
+    p = regex.compile_program("[\\d]{2}")
+
+    expect(regex.full_match(p, "37")).to.be(True)
+    expect(regex.full_match(p, "3")).to.be(False)
+elif testcase == "full_match should accept negated range":
+    p = regex.compile_program("[^0-2]")
+
+    expect(regex.full_match(p, "5")).to.be(True)
+    expect(regex.full_match(p, "1")).to.be(False)
+elif testcase == "full_match should accept mixed literals escapes and optional":
+    p = regex.compile_program("Hello World!?\\d\\d\\s")
+
+    expect(regex.full_match(p, "Hello World!37 ")).to.be(True)
+    expect(regex.full_match(p, "Hello World08\t")).to.be(True)
+    expect(regex.full_match(p, "Hello World!9 ")).to.be(False)
+    expect(regex.full_match(p, "Hello World!37")).to.be(False)
+</drac2>

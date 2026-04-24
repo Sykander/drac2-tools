@@ -14,6 +14,7 @@ Drac2 global-variable helpers live under `src/gvars/utils/`. Production workshop
 | lists | List → dict by key, random picks without replacement, list type check, search helpers. | [gvars/lists.md](gvars/lists.md) |
 | notes | Named per-character notebooks in cvars; append lines or replace whole notebooks. | [gvars/notes.md](gvars/notes.md) |
 | random | Seeded or one-shot random integers for reproducible or isolated rolls. | [gvars/random.md](gvars/random.md) |
+| regex | Small regexp subset: compile once, match with low statement overhead (no `re` in Drac2). | [gvars/regex.md](gvars/regex.md) |
 | rolls | Skill/save/attack/passive dice strings, `vroll` via `get_roll`, and roll-formatting helpers. | [gvars/rolls.md](gvars/rolls.md) |
 | strings | Readable lists, ordinals, replace helpers, and string type checks. | [gvars/strings.md](gvars/strings.md) |
 | time | Durations from combat rounds, human-readable time, Discord timestamp snippets. | [gvars/time.md](gvars/time.md) |

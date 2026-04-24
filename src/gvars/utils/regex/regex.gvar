@@ -1,0 +1,363 @@
+# regex
+# Minimal regexp engine for Drac2 (Avrae has no `re` module). Intended to stay under
+# Avrae statement limits: compile a pattern once to an opcode list, then match with
+# short loops — avoid re-parsing the pattern per character.
+#
+# Supported: literals; `.`; `\d \D \w \W \s \S` and `\\ ...` escapes; `? * +`;
+# `{n}`, `{n,}`, `{n,m}`; `(...)` groups; `[...]` character classes and `[^...]` negated.
+# Inside `[ ]` only: literals, `-` ranges over a-z / A-Z / 0-9, and `\d \w \s` (expanded
+# to finite sets). Not supported: `|`, `^` / `$` anchors, backreferences, `\D \W \S`
+# inside brackets (use `[^0-9]` etc. instead).
+
+def _rx_err(msg: str):
+    err(f"regex: {msg}")
+
+
+def _digit_val(ch: str) -> int:
+    digits = "0123456789"
+    k = 0
+    while k < 10:
+        if ch == digits[k]:
+            return k
+        k = k + 1
+    return 0
+
+
+def _parse_int(pat: str, i: int):
+    if i >= len(pat) or pat[i] < "0" or pat[i] > "9":
+        return None, i
+    n = 0
+    while i < len(pat) and pat[i] >= "0" and pat[i] <= "9":
+        n = n * 10 + _digit_val(pat[i])
+        i = i + 1
+    return n, i
+
+
+def _parse_brace(pat: str, i: int):
+    # i points at '{'
+    j = i + 1
+    if j >= len(pat):
+        _rx_err("unclosed {")
+    min_n, j = _parse_int(pat, j)
+    if min_n == None:
+        _rx_err("{ needs a number")
+    if j < len(pat) and pat[j] == "}":
+        return min_n, min_n, j + 1
+    if j >= len(pat) or pat[j] != ",":
+        _rx_err("{ expected , or }")
+    j = j + 1
+    max_n = None
+    if j < len(pat) and pat[j] == "}":
+        max_n = None
+        j = j + 1
+    else:
+        max_n, j = _parse_int(pat, j)
+        if max_n == None:
+            _rx_err("{ expected number after ,")
+        if j >= len(pat) or pat[j] != "}":
+            _rx_err("unclosed {")
+        j = j + 1
+    return min_n, max_n, j
+
+
+def _parse_escape(pat: str, i: int):
+    # i points at backslash
+    if i + 1 >= len(pat):
+        _rx_err("dangling \\")
+    n = pat[i + 1]
+    if n == "d":
+        return {"k": "cls", "c": "d"}, i + 2
+    if n == "D":
+        return {"k": "cls", "c": "D"}, i + 2
+    if n == "w":
+        return {"k": "cls", "c": "w"}, i + 2
+    if n == "W":
+        return {"k": "cls", "c": "W"}, i + 2
+    if n == "s":
+        return {"k": "cls", "c": "s"}, i + 2
+    if n == "S":
+        return {"k": "cls", "c": "S"}, i + 2
+    return {"k": "lit", "v": n}, i + 2
+
+
+def _is_digit(ch: str) -> bool:
+    return ch >= "0" and ch <= "9"
+
+
+def _is_space(ch: str) -> bool:
+    return ch == " " or ch == "\t" or ch == "\n" or ch == "\r"
+
+
+def _is_word(ch: str) -> bool:
+    return _is_digit(ch) or (ch >= "a" and ch <= "z") or (ch >= "A" and ch <= "Z") or ch == "_"
+
+
+def _cls_ok(c: str, kind: str) -> bool:
+    if kind == "d":
+        return _is_digit(c)
+    if kind == "D":
+        return not _is_digit(c)
+    if kind == "w":
+        return _is_word(c)
+    if kind == "W":
+        return not _is_word(c)
+    if kind == "s":
+        return _is_space(c)
+    if kind == "S":
+        return not _is_space(c)
+    return False
+
+
+def _expand_set_escape(e):
+    if e["k"] == "lit":
+        return e["v"]
+    if e["k"] != "cls":
+        _rx_err("bad escape in class")
+    c = e["c"]
+    if c == "d":
+        return "0123456789"
+    if c == "w":
+        return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+    if c == "s":
+        return " \t\n\r"
+    _rx_err("only \\d \\w \\s allowed inside []")
+
+
+def _range_expand(lo: str, hi: str) -> str:
+    if len(lo) != 1 or len(hi) != 1:
+        _rx_err("range endpoints must be single chars")
+    lows = "abcdefghijklmnopqrstuvwxyz"
+    ups = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    digs = "0123456789"
+
+    def _span(pool: str, a: str, b: str) -> str:
+        si = None
+        ei = None
+        k = 0
+        while k < len(pool):
+            if pool[k] == a:
+                si = k
+            if pool[k] == b:
+                ei = k
+            k = k + 1
+        if si == None or ei == None or si > ei:
+            _rx_err("bad range")
+        out = ""
+        while si <= ei:
+            out += pool[si]
+            si = si + 1
+        return out
+
+    if lo >= "a" and hi <= "z" and lo <= hi:
+        return _span(lows, lo, hi)
+    if lo >= "A" and hi <= "Z" and lo <= hi:
+        return _span(ups, lo, hi)
+    if lo >= "0" and hi <= "9" and lo <= hi:
+        return _span(digs, lo, hi)
+    _rx_err("range must stay in a-z, A-Z, or 0-9")
+
+
+def _parse_class(pat: str, i: int):
+    # i points at '['
+    j = i + 1
+    if j >= len(pat):
+        _rx_err("unclosed [")
+    neg = False
+    if pat[j] == "^":
+        neg = True
+        j = j + 1
+    acc = ""
+    pending = None
+    while j < len(pat) and pat[j] != "]":
+        c = pat[j]
+        if c == "\\":
+            e, j2 = _parse_escape(pat, j)
+            ex = _expand_set_escape(e)
+            if pending != None:
+                acc += pending
+                pending = None
+            acc += ex
+            j = j2
+            continue
+        if c == "-" and pending != None and j + 1 < len(pat) and pat[j + 1] != "]":
+            hi = pat[j + 1]
+            if hi == "\\":
+                _rx_err("range end must be literal")
+            acc += _range_expand(pending, hi)
+            pending = None
+            j = j + 2
+            continue
+        if c == "-":
+            if pending != None:
+                acc += pending
+                pending = None
+            pending = "-"
+            j = j + 1
+            continue
+        if pending != None:
+            acc += pending
+        pending = c
+        j = j + 1
+    if j >= len(pat):
+        _rx_err("unclosed [")
+    if pending != None:
+        acc += pending
+    if len(acc) == 0 and not neg:
+        _rx_err("empty []")
+    return {"k": "set", "n": neg, "s": acc}, j + 1
+
+
+def _char_in_set(ch: str, s: str) -> bool:
+    k = 0
+    while k < len(s):
+        if ch == s[k]:
+            return True
+        k = k + 1
+    return False
+
+
+def _wrap_rep(atom, lo: int, hi):
+    return {"k": "rep", "a": atom, "lo": lo, "hi": hi}
+
+
+def _parse_quant(pat: str, i: int, atom):
+    if i >= len(pat):
+        return atom, i
+    q = pat[i]
+    if q == "?":
+        return _wrap_rep(atom, 0, 1), i + 1
+    if q == "*":
+        return _wrap_rep(atom, 0, None), i + 1
+    if q == "+":
+        return _wrap_rep(atom, 1, None), i + 1
+    if q == "{":
+        lo, hi, j = _parse_brace(pat, i)
+        return _wrap_rep(atom, lo, hi), j
+    return atom, i
+
+
+def _parse_seq(pat: str, i: int, in_group: bool):
+    nodes = []
+    while i < len(pat):
+        if in_group and pat[i] == ")":
+            return nodes, i
+        if not in_group and pat[i] == ")":
+            _rx_err("unexpected )")
+        atom = None
+        c = pat[i]
+        if c == "(":
+            inner, j = _parse_seq(pat, i + 1, True)
+            if j >= len(pat) or pat[j] != ")":
+                _rx_err("unclosed (")
+            atom = {"k": "grp", "g": inner}
+            i = j + 1
+        elif c == "[":
+            atom, i = _parse_class(pat, i)
+        elif c == ".":
+            atom = {"k": "dot"}
+            i = i + 1
+        elif c == "\\":
+            atom, i = _parse_escape(pat, i)
+        elif c == "{" or c == "}" or c == "*" or c == "+" or c == "?" or c == "]":
+            _rx_err(f"unexpected {c}")
+        else:
+            atom = {"k": "lit", "v": c}
+            i = i + 1
+        atom, i = _parse_quant(pat, i, atom)
+        nodes.append(atom)
+    if in_group:
+        _rx_err("unclosed (")
+    return nodes, i
+
+
+def compile_program(pat: str) -> list:
+    nodes, i = _parse_seq(pat, 0, False)
+    if i != len(pat):
+        _rx_err("trailing junk")
+    return nodes
+
+
+def _match_node(node, text: str, pos: int, lim: int):
+    k = node["k"]
+    if pos > lim:
+        return -1
+    if k == "lit":
+        if pos < len(text) and text[pos] == node["v"]:
+            return pos + 1
+        return -1
+    if k == "dot":
+        if pos < len(text):
+            return pos + 1
+        return -1
+    if k == "cls":
+        if pos < len(text) and _cls_ok(text[pos], node["c"]):
+            return pos + 1
+        return -1
+    if k == "set":
+        if pos >= len(text):
+            return -1
+        ch = text[pos]
+        ok = _char_in_set(ch, node["s"])
+        if node["n"]:
+            ok = not ok
+        if ok:
+            return pos + 1
+        return -1
+    if k == "grp":
+        return _match_all(node["g"], text, pos, lim)
+    if k == "rep":
+        return _match_rep(node, text, pos, lim)
+    return -1
+
+
+def _match_all(nodes: list, text: str, pos: int, lim: int):
+    p = pos
+    for node in nodes:
+        n = _match_node(node, text, p, lim)
+        if n < 0:
+            return -1
+        p = n
+    return p
+
+
+def _match_rep(node, text: str, pos: int, lim: int):
+    lo = node["lo"]
+    hi = node["hi"]
+    a = node["a"]
+    p = pos
+    cnt = 0
+    while True:
+        if hi != None and cnt >= hi:
+            break
+        n = _match_node(a, text, p, lim)
+        if n < 0:
+            break
+        p = n
+        cnt = cnt + 1
+    if cnt < lo:
+        return -1
+    return p
+
+
+def match_from(program: list, text: str, start: int = 0):
+    lim = len(text)
+    end = _match_all(program, text, start, lim)
+    if end < 0:
+        return None
+    return end
+
+
+def full_match(program: list, text: str) -> bool:
+    e = match_from(program, text, 0)
+    return e != None and e == len(text)
+
+
+def search_from(program: list, text: str):
+    lim = len(text)
+    s = 0
+    while s <= lim:
+        e = _match_all(program, text, s, lim)
+        if e >= 0:
+            return {"start": s, "end": e}
+        s = s + 1
+    return None
