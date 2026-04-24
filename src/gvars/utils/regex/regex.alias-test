@@ -1,0 +1,79 @@
+!regex -testcase "regex gvar loads"
+---
+---
+name: regex gvar loads
+
+!regex -testcase "full_match should accept digit class"
+---
+---
+name: full_match should accept digit class
+
+!regex -testcase "full_match should handle optional quantifier"
+---
+---
+name: full_match should handle optional quantifier
+
+!regex -testcase "full_match should handle star quantifier"
+---
+---
+name: full_match should handle star quantifier
+
+!regex -testcase "full_match should handle plus quantifier"
+---
+---
+name: full_match should handle plus quantifier
+
+!regex -testcase "full_match should handle exact brace count"
+---
+---
+name: full_match should handle exact brace count
+
+!regex -testcase "full_match should handle brace min max"
+---
+---
+name: full_match should handle brace min max
+
+!regex -testcase "full_match should handle grouped repeat"
+---
+---
+name: full_match should handle grouped repeat
+
+!regex -testcase "search_from should find substring"
+---
+---
+name: search_from should find substring
+
+!regex -testcase "match_from should return end index"
+---
+---
+name: match_from should return end index
+
+!regex -testcase "full_match should accept positive character class"
+---
+---
+name: full_match should accept positive character class
+
+!regex -testcase "full_match should accept negated character class"
+---
+---
+name: full_match should accept negated character class
+
+!regex -testcase "full_match should accept range inside class"
+---
+---
+name: full_match should accept range inside class
+
+!regex -testcase "full_match should combine class escape and quantifier"
+---
+---
+name: full_match should combine class escape and quantifier
+
+!regex -testcase "full_match should accept negated range"
+---
+---
+name: full_match should accept negated range
+
+!regex -testcase "full_match should accept mixed literals escapes and optional"
+---
+---
+name: full_match should accept mixed literals escapes and optional

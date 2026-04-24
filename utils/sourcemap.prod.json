@@ -49,6 +49,11 @@
       "id": "9ddcdac4-2fb8-4d3b-bc4c-1cde24936dc5"
     },
     {
+      "name": "regex",
+      "file": "src/gvars/utils/regex/regex.gvar",
+      "id": "1bfe2ba2-6d6e-468e-9555-0e6490ff8d4b"
+    },
+    {
       "name": "rolls",
       "file": "src/gvars/utils/rolls/rolls.gvar",
       "id": "b6fe8f32-72ee-4179-a5b2-6fe79c77f372"
