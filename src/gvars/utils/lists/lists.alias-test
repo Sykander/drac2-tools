@@ -68,6 +68,11 @@ name: search_list should prefer exact matches over substring matches
 ---
 name: search_list should find case insensitive substring matches
 
+!lists -testcase "search_list should prefer case insensitive full matches over substring matches"
+---
+---
+name: search_list should prefer case insensitive full matches over substring matches
+
 !lists -testcase "search_list should return empty list when nothing matches"
 ---
 ---
@@ -87,6 +92,11 @@ name: search_list_by_key should prefer exact matches on the key
 ---
 ---
 name: search_list_by_key should find case insensitive substring on key values
+
+!lists -testcase "search_list_by_key should prefer case insensitive full key matches over substring matches"
+---
+---
+name: search_list_by_key should prefer case insensitive full key matches over substring matches
 
 !lists -testcase "search_list_by_key should return empty list when nothing matches"
 ---

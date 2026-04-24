@@ -6,20 +6,31 @@
 
 bags_code = "bags"
 
-try:
-    default_char = character()
-except:
-    default_char = None
+
+def _active_character():
+    try:
+        return character()
+    except:
+        return None
+
+
+def _resolve_optional_character(char = None):
+    return char if char != None else _active_character()
+
+
+def _require_character(char = None, context: str = "this operation"):
+    c = _resolve_optional_character(char)
+    if c == None:
+        err(f"No character available for {context}.")
+    return c
+
 
 # So that we can do multiple updates on the bags
 bags_cache = {}
 
 
 def get_bags(char = None) -> list[Tuple[str, dict]]:
-    char = char if char != None else default_char
-
-    if char == None:
-        err("No character available for bag operations.")
+    char = _require_character(char, "bag operations")
 
     if not bags_cache.get(char.name, False):
         bags_cache[char.name] = load_json(char.get_cvar(bags_code)) if char.get_cvar(bags_code) else []
@@ -28,10 +39,7 @@ def get_bags(char = None) -> list[Tuple[str, dict]]:
 
 
 def set_bags(bags: list[Tuple[str, dict]], char = None) -> None:
-    char = char if char != None else default_char
-
-    if char == None:
-        err("No character available for bag operations.")
+    char = _require_character(char, "bag operations")
 
     bags_cache[char.name] = bags
     char.set_cvar(bags_code, dump_json(bags))
@@ -79,10 +87,7 @@ def modify_bag(
 ) -> Tuple[bool, str]:
     count = count if count != None else 1
     bag = bag if bag != None else "Equipment"
-    char = char if char != None else default_char
-
-    if char == None:
-        err("No character available for bag operations.")
+    char = _require_character(char, "bag operations")
 
     bag_contents = get_bag(bag, char)
     current_count = bag_contents.get(item, 0)

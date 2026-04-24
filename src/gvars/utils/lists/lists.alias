@@ -122,6 +122,14 @@ elif testcase == "search_list should find case insensitive substring matches":
 
     expect(result).to.have.length(1)
     expect(result[0]).to.be("FooBar")
+elif testcase == "search_list should prefer case insensitive full matches over substring matches":
+    items = ["Apple", "apple pie"]
+    search = "apple"
+
+    result = lists.search_list(items, search)
+
+    expect(result).to.have.length(1)
+    expect(result[0]).to.be("Apple")
 elif testcase == "search_list should return empty list when nothing matches":
     items = ["a", "b", "c"]
     search = "xyz"
@@ -154,6 +162,15 @@ elif testcase == "search_list_by_key should find case insensitive substring on k
 
     expect(result).to.have.length(1)
     expect(result[0]).to.have.property("code", "AbCd")
+elif testcase == "search_list_by_key should prefer case insensitive full key matches over substring matches":
+    items = [{"name": "Ring"}, {"name": "ring mail"}]
+    key = "name"
+    search = "ring"
+
+    result = lists.search_list_by_key(items, key, search)
+
+    expect(result).to.have.length(1)
+    expect(result[0]).to.have.property("name", "Ring")
 elif testcase == "search_list_by_key should return empty list when nothing matches":
     items = [{"k": "a"}, {"k": "b"}]
     key = "k"

@@ -143,4 +143,17 @@ elif testcase == "get_mod_override should return zero when character is None":
     result = rolls.get_mod_override(None, "strength", "dexterity")
 
     expect(result).to.be(0)
+elif testcase == "get_roll should stringify flat roll_name for vroll":
+    parsed = argparse("")
+    result = rolls.get_roll(None, "1d1", parsed, "roll")
+
+    expect(result).to.have.property("name", "Roll")
+    expect(result).to.have.property("roll_string", "1d1")
+    expect(result).to.have.property("total", 1)
+elif testcase == "get_roll should coerce numeric flat roll_name to string for vroll":
+    parsed = argparse("")
+    result = rolls.get_roll(None, 1, parsed, "roll")
+
+    expect(result).to.have.property("roll_string", "1")
+    expect(result).to.have.property("total", 1)
 </drac2>

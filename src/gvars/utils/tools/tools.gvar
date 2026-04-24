@@ -59,7 +59,23 @@ tools_list = [
     "Water Vehicles",
 ]
 
-char = character()
+
+def _active_character():
+    try:
+        return character()
+    except:
+        return None
+
+
+def _resolve_optional_character(char = None):
+    return char if char != None else _active_character()
+
+
+def _require_character(char = None, context: str = "this operation"):
+    c = _resolve_optional_character(char)
+    if c == None:
+        err(f"No character available for {context}.")
+    return c
 
 
 def search_for_tool(toolname):
@@ -69,8 +85,10 @@ def search_for_tool(toolname):
 # Returns true if the character has expertise or proficiency in the given tool
 def get_has_proficiency(
     toolname: str,
-    char = char
+    char = None,
 ) -> bool:
+    char = _require_character(char, "tools")
+
     if toolname not in tools_list:
         return False
 
@@ -82,8 +100,10 @@ def get_has_proficiency(
 
 def get_has_expertise(
     toolname: str,
-    char = char
+    char = None,
 ) -> bool:
+    char = _require_character(char, "tools")
+
     if toolname not in tools_list:
         return False
 

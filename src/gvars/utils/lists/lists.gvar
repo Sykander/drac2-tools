@@ -53,7 +53,13 @@ def search_list(items: list, search: str) -> list:
     if len(exact_matches) > 0:
         return exact_matches
 
-    return [item for item in items if search.lower() in str(item).lower()]
+    search_lower = search.lower()
+    lower_matches = [item for item in items if search_lower == str(item).lower()]
+
+    if len(lower_matches) > 0:
+        return lower_matches
+
+    return [item for item in items if search_lower in str(item).lower()]
 
 
 def search_list_by_key(items: list[dict], key: str, search: str) -> list[dict]:
@@ -62,4 +68,10 @@ def search_list_by_key(items: list[dict], key: str, search: str) -> list[dict]:
     if len(exact_matches) > 0:
         return exact_matches
 
-    return [item for item in items if search.lower() in str(item[key]).lower()]
+    search_lower = search.lower()
+    lower_matches = [item for item in items if search_lower == str(item[key]).lower()]
+
+    if len(lower_matches) > 0:
+        return lower_matches
+
+    return [item for item in items if search_lower in str(item[key]).lower()]

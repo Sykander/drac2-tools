@@ -1,0 +1,69 @@
+---
+description: Drac2/Avrae conventions for .gvar, .alias, .snippet, and .alias-test files
+globs:
+  - "**/*.gvar"
+  - "**/*.alias"
+  - "**/*.alias-test"
+  - "**/*.snippet"
+  - docs/**/*.md
+  - .cursor/avrae-reference/**
+alwaysApply: false
+---
+
+# Drac2 / Avrae — file roles
+
+## Extensions
+
+- **`.gvar`** — Entire file is **Drac2** (Draconic): a **Python subset** Avrae runs as workshop/global library code (`def`, maps, constants). Imported via `using` / env; not a `!command` entrypoint.
+- **`.alias` / `.snippet`** — May mix non-Drac2 alias/snippet text with logic blocks; **Drac2 only inside** `<drac2></drac2>` (or equivalent drac2 tags). Same language as gvars inside those blocks.
+- **`.alias`** roles — See **test harness vs production** below.
+
+## Drac2 language (Avrae)
+
+- Prefer **normal Python style** (readability, structure) **where Drac2 allows**; it is not full Python, so some patterns or stdlib pieces will not exist—verify against **cached upstream** (below), then live docs, then existing repo code—never assume full CPython behavior.
+- **Automations** (attacks, spells, effects) are usually **YAML or JSON** trees of automation nodes—separate artifact type from Drac2 files, but part of the same Avrae ecosystem when you touch them.
+
+### Cached Avrae documentation (Cursor-adjacent, not product docs)
+
+Official Read the Docs **RST sources** live next to Cursor rules under **`.cursor/avrae-reference/`** (not under `docs/`):
+
+- **Drac2 & aliasing:** `.cursor/avrae-reference/aliasing-api.rst.txt`
+- **Automation:** `.cursor/avrae-reference/automation-reference.rst.txt`
+- **Metadata, canonical HTML URLs, refresh steps:** `.cursor/avrae-reference/README.md`
+- **Refresh script:** `.cursor/avrae-reference/refresh-avrae-docs.sh`
+
+**When behavior surprises you:** (1) Search those `.rst.txt` files. (2) Open the **canonical HTML** URLs in `README.md`—if live text differs from the cache, run **`.cursor/avrae-reference/refresh-avrae-docs.sh`**, update the **Last RST fetch** line in **`.cursor/avrae-reference/README.md`**, and commit. (3) If the cache matches live docs but **`avrae-ls`** or local runs still disagree, treat it as a **tooling** issue; if the **Discord bot** disagrees with published docs, treat it as **Avrae** upstream—do not “fix” repo Drac2 to match a guess.
+
+**When URLs break** (404, moved `_sources/` paths): fix the URLs in **`refresh-avrae-docs.sh`** and in **`README.md`** in that folder, then refresh.
+
+## `.alias-test` files
+
+- **Not deployed** — Inputs for **`avrae-ls --run-tests`** only (see `.github/workflows/test.yaml`, `DEVELOPMENT.md`).
+- **Shape** — Blocks like `!pairedalias -testcase "unique case title"` (often separated by `---`); that string is the testcase id.
+- **Contract** — Paired **`.alias`** uses `testcase = args.last("testcase", None)` (or equivalent) and **`elif testcase == "exact same title":`** branches; titles must match **exactly**.
+
+## Test-harness `.alias` vs workshop / production `.alias`
+
+| | **Test harness** | **Workshop / real alias** |
+|--|--|--|
+| **Signals** | Same basename **`.alias-test`** (e.g. `lists.alias` + `lists.alias-test`) | No `.alias-test`; listed in publish/sourcemap / workshop as a live command |
+| **Purpose** | **`expect`** against a `.gvar` (or thin integration); long `elif testcase == …` chains are normal | Player-facing args; avoid testcase-only branches unless deliberately dual-purpose |
+
+When editing an **`.alias`**, decide which role it plays before copying structure from another file.
+
+## Conventions in this repo (Drac2 code)
+
+- **`None`**, not `null`. **`err(...)`** for intentional hard failures.
+- **Types** — Mirror the surrounding file (hints vs untyped).
+- **Naming** — `snake_case`; Avrae string keys (`"melee"`, `"sleightOfHand"`, …) stay consistent with domain maps.
+- **`== None` / `!= None`** — Match the dominant style in the file you are editing.
+- **Comments** — Short headers / non-obvious rationale only.
+
+## Testing (when a `.alias-test` exists)
+
+- Use **`env.gvars.expect`** and **`expect(...).to.have.property`**, **`.to.be`**, **`.raise_exception`** via lambdas, consistent with `expect.alias-test`.
+- Prefer deterministic rolls (**`1d1`**, seeded random helpers) when totals must be stable.
+
+## Docs
+
+- Keep **`docs/**/*.md`** consistent with the artifacts it describes (API, parameters, return shapes, deployment). Today most module pages are under **`docs/gvars/`**; add other paths under `docs/` when you document aliases, snippets, or workshops.
