@@ -78,15 +78,15 @@ name: full_match should accept negated range
 ---
 name: full_match should accept mixed literals escapes and optional
 
-!regex -testcase "compile should expose full_match search exec and program"
+!regex -testcase "compile wrapper should expose python style pattern api"
 ---
 ---
-name: compile should expose full_match search exec and program
+name: compile wrapper should expose python style pattern api
 
-!regex -testcase "pattern should behave like compile"
+!regex -testcase "compile should be deterministic for same pattern string"
 ---
 ---
-name: pattern should behave like compile
+name: compile should be deterministic for same pattern string
 
 !regex -testcase "compile should strip js style slash delimiters"
 ---
@@ -233,10 +233,40 @@ name: full_match should backtrack optional prefix for whole match
 ---
 name: full_match should backtrack star to satisfy suffix
 
-!regex -testcase "full_match should treat pipe as literal not alternation"
+!regex -testcase "full_match should treat pipe as alternation"
 ---
 ---
-name: full_match should treat pipe as literal not alternation
+name: full_match should treat pipe as alternation
+
+!regex -testcase "full_match should treat escaped pipe as literal"
+---
+---
+name: full_match should treat escaped pipe as literal
+
+!regex -testcase "full_match should alternate grouped branches"
+---
+---
+name: full_match should alternate grouped branches
+
+!regex -testcase "search_from should find first alternation branch"
+---
+---
+name: search_from should find first alternation branch
+
+!regex -testcase "full_match should alternate three arms"
+---
+---
+name: full_match should alternate three arms
+
+!regex -testcase "full_match should use first matching alternation arm"
+---
+---
+name: full_match should use first matching alternation arm
+
+!regex -testcase "full_match should combine alternation with suffix"
+---
+---
+name: full_match should combine alternation with suffix
 
 !regex -testcase "compile wrapper should reuse program for repeated checks"
 ---
@@ -252,3 +282,68 @@ name: full_match should handle complex email like token
 ---
 ---
 name: search should scan empty string for empty pattern
+
+!regex -testcase "stress search needle after four hundred char pad"
+---
+---
+name: stress search needle after four hundred char pad
+
+!regex -testcase "stress full_match digit brace two hundred"
+---
+---
+name: stress full_match digit brace two hundred
+
+!regex -testcase "stress nested groups depth twelve"
+---
+---
+name: stress nested groups depth twelve
+
+!regex -testcase "stress quantified pair eighty repeats"
+---
+---
+name: stress quantified pair eighty repeats
+
+!regex -testcase "stress dot star five hundred char string"
+---
+---
+name: stress dot star five hundred char string
+
+!regex -testcase "stress alternation forty eight fixed width arms"
+---
+---
+name: stress alternation forty eight fixed width arms
+
+!regex -testcase "stress word class brace two fifty"
+---
+---
+name: stress word class brace two fifty
+
+!regex -testcase "stress mixed alts quantifiers and classes"
+---
+---
+name: stress mixed alts quantifiers and classes
+
+!regex -testcase "match_from_captures should return two groups"
+---
+---
+name: match_from_captures should return two groups
+
+!regex -testcase "match_from_captures should leave optional group none"
+---
+---
+name: match_from_captures should leave optional group none
+
+!regex -testcase "search_captures should include groups in hit"
+---
+---
+name: search_captures should include groups in hit
+
+!regex -testcase "compiled dict groups key should skip noncapturing group"
+---
+---
+name: compiled dict groups key should skip noncapturing group
+
+!regex -testcase "compile_program should err on unsupported question paren"
+---
+---
+name: compile_program should err on unsupported question paren
