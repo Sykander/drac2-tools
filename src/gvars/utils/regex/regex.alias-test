@@ -77,3 +77,168 @@ name: full_match should accept negated range
 ---
 ---
 name: full_match should accept mixed literals escapes and optional
+
+!regex -testcase "compile should expose full_match search exec and program"
+---
+---
+name: compile should expose full_match search exec and program
+
+!regex -testcase "pattern should behave like compile"
+---
+---
+name: pattern should behave like compile
+
+!regex -testcase "compile should strip js style slash delimiters"
+---
+---
+name: compile should strip js style slash delimiters
+
+!regex -testcase "compile should strip re colon prefix"
+---
+---
+name: compile should strip re colon prefix
+
+!regex -testcase "compile should not strip single leading slash"
+---
+---
+name: compile should not strip single leading slash
+
+!regex -testcase "compile should match long haystack with search"
+---
+---
+name: compile should match long haystack with search
+
+!regex -testcase "compile should full_match long fixed pattern"
+---
+---
+name: compile should full_match long fixed pattern
+
+!regex -testcase "full_match should accept dot star across long string"
+---
+---
+name: full_match should accept dot star across long string
+
+!regex -testcase "full_match should accept negated empty class any char"
+---
+---
+name: full_match should accept negated empty class any char
+
+!regex -testcase "full_match should handle zero lower bound brace"
+---
+---
+name: full_match should handle zero lower bound brace
+
+!regex -testcase "full_match should handle brace unbounded max"
+---
+---
+name: full_match should handle brace unbounded max
+
+!regex -testcase "full_match should handle nested quantified group"
+---
+---
+name: full_match should handle nested quantified group
+
+!regex -testcase "full_match should handle class with literal dot"
+---
+---
+name: full_match should handle class with literal dot
+
+!regex -testcase "full_match should handle escaped metachar as literal"
+---
+---
+name: full_match should handle escaped metachar as literal
+
+!regex -testcase "search_from should return none when no match"
+---
+---
+name: search_from should return none when no match
+
+!regex -testcase "match_from should return none on failure"
+---
+---
+name: match_from should return none on failure
+
+!regex -testcase "compile_program should err on unclosed group"
+---
+---
+name: compile_program should err on unclosed group
+
+!regex -testcase "compile_program should err on leading quantifier"
+---
+---
+name: compile_program should err on leading quantifier
+
+!regex -testcase "compile_program should err on empty positive class"
+---
+---
+name: compile_program should err on empty positive class
+
+!regex -testcase "full_match should handle word class run"
+---
+---
+name: full_match should handle word class run
+
+!regex -testcase "full_match should handle non digit class"
+---
+---
+name: full_match should handle non digit class
+
+!regex -testcase "full_match should handle non space class"
+---
+---
+name: full_match should handle non space class
+
+!regex -testcase "full_match should handle non word class"
+---
+---
+name: full_match should handle non word class
+
+!regex -testcase "full_match should combine multiple groups and literals"
+---
+---
+name: full_match should combine multiple groups and literals
+
+!regex -testcase "search_from should find earliest double a"
+---
+---
+name: search_from should find earliest double a
+
+!regex -testcase "match_from should respect start offset at end"
+---
+---
+name: match_from should respect start offset at end
+
+!regex -testcase "full_match should handle digit range in class"
+---
+---
+name: full_match should handle digit range in class
+
+!regex -testcase "full_match should handle uppercase range in class"
+---
+---
+name: full_match should handle uppercase range in class
+
+!regex -testcase "full_match should handle optional group"
+---
+---
+name: full_match should handle optional group
+
+!regex -testcase "full_match should treat pipe as literal not alternation"
+---
+---
+name: full_match should treat pipe as literal not alternation
+
+!regex -testcase "compile wrapper should reuse program for repeated checks"
+---
+---
+name: compile wrapper should reuse program for repeated checks
+
+!regex -testcase "full_match should handle complex email like token"
+---
+---
+name: full_match should handle complex email like token
+
+!regex -testcase "search should scan empty string for empty pattern"
+---
+---
+name: search should scan empty string for empty pattern

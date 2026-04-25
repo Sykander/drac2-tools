@@ -4,7 +4,7 @@
 
 A **small regular-expression subset** for Drac2 where Python’s `re` module is unavailable. Patterns compile once to an internal **program** (opcode list); matching walks the text with tight loops so Avrae is less likely to hit **too many statements** than ad‑hoc character-by-character re-parsing of the pattern string.
 
-This is **not** a full PCRE engine. Unsupported features include `|`, `^` / `$` as dedicated anchors (use `search_from` to scan), backreferences, and flags.
+This is **not** a full PCRE engine. Unsupported features include `|` as **alternation** (a literal `|` still matches itself), `^` / `$` as **anchors** (a literal `$` is just a character), backreferences, and flags. Quantifiers are **greedy** without backtracking: optional groups take the match attempt the engine uses first, not every path.
 
 ## Supported syntax
 
@@ -22,6 +22,35 @@ using(regex = "<workshop-uuid-from-env>")
 ```
 
 ## Public API
+
+### `compile(pat: str) -> dict` and `pattern(pat: str) -> dict`
+
+Same function under two names (Python **`re.compile`** style). Normalizes the pattern string, then parses it:
+
+- Optional prefix **`re:`** (same convention as avrae-ls regex expectations) is stripped.
+- If the string **starts and ends with `/`**, those slashes are stripped so you can write **`/body/`** like a JavaScript regex literal (only the simple `.../.../` form; no `/foo/bar/` flags suffix).
+
+Returns a **dict** (treat it as an opaque pattern object) with:
+
+| Key | Type | Role |
+|-----|------|------|
+| **`full_match`** | `(text: str) -> bool` | Whole-string match (Python **`re.fullmatch`**). |
+| **`test`** | `(text: str) -> bool` | Same as **`full_match`**. |
+| **`search`** | `(text: str) -> dict \| None` | First match anywhere; `{"start", "end"}` or `None`. |
+| **`exec`** | `(text: str) -> dict \| None` | Same as **`search`** (name mirrors JS **`RegExp.prototype.exec`** for the first hit). |
+| **`match_from`** | `(text: str, start: int = 0) -> int \| None` | Match anchored at `start`; exclusive end index or `None`. |
+| **`program`** | `list` | Cached program for the low-level API below. |
+
+Example:
+
+```drac2
+rx = regex.compile("/\\d{3}-\\d{4}/")
+rx["full_match"]("555-1212")
+hit = rx["search"]("call 555-1212 today")
+# hit["start"], hit["end"]
+```
+
+Use **`compile_program`** when you build the pattern string yourself and want the raw **`list`** without going through the wrapper.
 
 ### `compile_program(pat: str) -> list`
 

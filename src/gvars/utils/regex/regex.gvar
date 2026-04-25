@@ -3,6 +3,10 @@
 # Avrae statement limits: compile a pattern once to an opcode list, then match with
 # short loops — avoid re-parsing the pattern per character.
 #
+# Ergonomic entry: **`compile`** / **`pattern`** return a dict with `full_match`, `search`,
+# `exec`, `match_from`, and `program` (same idea as Python `re.compile`). Low-level:
+# **`compile_program`**, **`match_from`**, **`full_match`**, **`search_from`**.
+#
 # Supported: literals; `.`; `\d \D \w \W \s \S` and `\\ ...` escapes; `? * +`;
 # `{n}`, `{n,}`, `{n,m}`; `(...)` groups; `[...]` character classes and `[^...]` negated.
 # Inside `[ ]` only: literals, `-` ranges over a-z / A-Z / 0-9, and `\d \w \s` (expanded
@@ -361,3 +365,47 @@ def search_from(program: list, text: str):
             return {"start": s, "end": e}
         s = s + 1
     return None
+
+
+def _normalize_pattern_string(pat: str) -> str:
+    """
+    Optional wrappers for readability (similar to JS /re/ literals and avrae-ls regex strings):
+    - Leading `re:` is stripped.
+    - If the whole string starts and ends with `/`, those slashes are stripped (body only).
+    """
+    if pat == None:
+        _rx_err("pattern is None")
+    pat = str(pat)
+    if pat.startswith("re:"):
+        pat = pat[3:]
+    if len(pat) >= 2 and pat[0] == "/" and pat[-1] == "/":
+        return pat[1:-1]
+    return pat
+
+
+def compile(pat: str):
+    """
+    Compile a pattern into a reusable object (dict) — same idea as Python's `re.compile`.
+
+    Returned mapping keys (all optional except `program`):
+    - **`full_match`**, **`test`** — `(text) -> bool` whole-string match.
+    - **`search`**, **`exec`** — `(text) -> {"start", "end"} | None` first match scanning left‑to‑right (`exec` mirrors JS naming).
+    - **`match_from`** — `(text, start=0) -> int | None` exclusive end index if the pattern matches from `start`, else `None`.
+    - **`program`** — low-level program for `match_from` / `full_match` / `search_from` with a pre-built list.
+
+    Use **`compile_program`** / **`match_from`** directly when you already have a program list.
+    """
+    prog = compile_program(_normalize_pattern_string(pat))
+    return {
+        "full_match": lambda t: full_match(prog, t),
+        "test": lambda t: full_match(prog, t),
+        "search": lambda t: search_from(prog, t),
+        "exec": lambda t: search_from(prog, t),
+        "match_from": lambda t, start = 0: match_from(prog, t, start),
+        "program": prog,
+    }
+
+
+def pattern(pat: str):
+    """Alias of **`compile`** (JavaScript / Python both use the word “pattern”)."""
+    return compile(pat)
