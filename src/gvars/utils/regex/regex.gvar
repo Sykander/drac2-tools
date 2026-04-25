@@ -12,6 +12,10 @@
 # Inside `[ ]` only: literals, `-` ranges over a-z / A-Z / 0-9, and `\d \w \s` (expanded
 # to finite sets). Not supported: `|`, `^` / `$` anchors, backreferences, `\D \W \S`
 # inside brackets (use `[^0-9]` etc. instead).
+#
+# Matching uses light backtracking on quantifiers: for each `rep` node the engine
+# takes a greedy maximum count, then tries fewer counts if the rest of the pattern
+# fails (still no `|` alternation).
 
 def _rx_err(msg: str):
     err(f"regex: {msg}")
@@ -281,7 +285,8 @@ def compile_program(pat: str) -> list:
     return nodes
 
 
-def _match_node(node, text: str, pos: int, lim: int):
+def _match_node_plain(node, text: str, pos: int, lim: int):
+    """Single code unit: literal, dot, class, or set (not `grp` / `rep`)."""
     k = node["k"]
     if pos > lim:
         return -1
@@ -307,40 +312,87 @@ def _match_node(node, text: str, pos: int, lim: int):
         if ok:
             return pos + 1
         return -1
-    if k == "grp":
-        return _match_all(node["g"], text, pos, lim)
-    if k == "rep":
-        return _match_rep(node, text, pos, lim)
-    return -1
+    _rx_err("internal: expected plain atom")
+
+
+def _match_one_unit(atom, text: str, pos: int, lim: int):
+    """One match of a repetition atom: plain token or whole parenthesized subprogram."""
+    if atom["k"] == "grp":
+        return _match_seq_bt(atom["g"], text, pos, lim, 0)
+    return _match_node_plain(atom, text, pos, lim)
+
+
+def _after_n_units(atom, text: str, pos: int, lim: int, n: int):
+    """Exclusive end after matching `atom` exactly `n` times in a row, or -1."""
+    p = pos
+    t = 0
+    while t < n:
+        nx = _match_one_unit(atom, text, p, lim)
+        if nx < 0:
+            return -1
+        p = nx
+        t = t + 1
+    return p
+
+
+def _greedy_max_take(atom, text: str, pos: int, lim: int, hi):
+    """
+    Greedy repetition count for `atom` starting at `pos`, capped by `hi` (None = unbounded).
+    Stops on first failed match. If a match consumes no input, accept at most one such step
+    then stop (avoids runaway on patterns like `(a?)*` on empty input).
+    """
+    p = pos
+    c = 0
+    guard = 0
+    max_guard = len(text) + len(text) + 128
+    while guard < max_guard:
+        guard = guard + 1
+        if hi != None and c >= hi:
+            break
+        nx = _match_one_unit(atom, text, p, lim)
+        if nx < 0:
+            break
+        if nx == p:
+            c = c + 1
+            p = nx
+            break
+        p = nx
+        c = c + 1
+    return c, p
+
+
+def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int):
+    """
+    Match `nodes[idx:]` from `pos`. Returns exclusive end index or -1.
+    `rep` nodes backtrack: try repetition counts from greedy max down to `lo`.
+    """
+    if idx >= len(nodes):
+        return pos
+    node = nodes[idx]
+    if node["k"] == "rep":
+        lo = node["lo"]
+        hi = node["hi"]
+        atom = node["a"]
+        max_c, _p_g = _greedy_max_take(atom, text, pos, lim, hi)
+        if max_c < lo:
+            return -1
+        k = max_c
+        while k >= lo:
+            p2 = _after_n_units(atom, text, pos, lim, k)
+            if p2 >= 0:
+                rest = _match_seq_bt(nodes, text, p2, lim, idx + 1)
+                if rest >= 0:
+                    return rest
+            k = k - 1
+        return -1
+    nx = _match_one_unit(node, text, pos, lim)
+    if nx < 0:
+        return -1
+    return _match_seq_bt(nodes, text, nx, lim, idx + 1)
 
 
 def _match_all(nodes: list, text: str, pos: int, lim: int):
-    p = pos
-    for node in nodes:
-        n = _match_node(node, text, p, lim)
-        if n < 0:
-            return -1
-        p = n
-    return p
-
-
-def _match_rep(node, text: str, pos: int, lim: int):
-    lo = node["lo"]
-    hi = node["hi"]
-    a = node["a"]
-    p = pos
-    cnt = 0
-    while True:
-        if hi != None and cnt >= hi:
-            break
-        n = _match_node(a, text, p, lim)
-        if n < 0:
-            break
-        p = n
-        cnt = cnt + 1
-    if cnt < lo:
-        return -1
-    return p
+    return _match_seq_bt(nodes, text, pos, lim, 0)
 
 
 def match_from(program: list, text: str, start: int = 0):

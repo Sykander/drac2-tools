@@ -4,7 +4,9 @@
 
 A **small regular-expression subset** for Drac2 where Python’s `re` module is unavailable. Patterns compile once to an internal **program** (opcode list); matching walks the text with tight loops so Avrae is less likely to hit **too many statements** than ad‑hoc character-by-character re-parsing of the pattern string.
 
-This is **not** a full PCRE engine. Unsupported features include `|` as **alternation** (a literal `|` still matches itself), `^` / `$` as **anchors** (a literal `$` is just a character), backreferences, and flags. Quantifiers are **greedy** without backtracking: optional groups take the match attempt the engine uses first, not every path.
+This is **not** a full PCRE engine. Unsupported features include `|` as **alternation** (a literal `|` still matches itself), `^` / `$` as **anchors** (a literal `$` is just a character), backreferences, and flags.
+
+**Quantifiers (minimal backtracking):** each `?`, `*`, `+`, and `{…}` repetition tries a **greedy** count first, then **reduces** the count if the rest of the pattern fails—enough for cases like `(ha)?ha` on **`ha`**. There is still **no** `|` branch backtracking; catastrophic slowdown on pathological patterns is possible (same as naive regex engines).
 
 ## Supported syntax
 

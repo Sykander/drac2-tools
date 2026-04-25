@@ -223,6 +223,16 @@ name: full_match should handle uppercase range in class
 ---
 name: full_match should handle optional group
 
+!regex -testcase "full_match should backtrack optional prefix for whole match"
+---
+---
+name: full_match should backtrack optional prefix for whole match
+
+!regex -testcase "full_match should backtrack star to satisfy suffix"
+---
+---
+name: full_match should backtrack star to satisfy suffix
+
 !regex -testcase "full_match should treat pipe as literal not alternation"
 ---
 ---
