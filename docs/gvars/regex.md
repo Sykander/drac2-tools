@@ -50,9 +50,9 @@ Example:
 
 ```drac2
 rx = regex.compile("/\\d{3}-\\d{4}/")
-rx["fullmatch"]("555-1212")
-hit = rx["search"]("call 555-1212 today")
-# hit["start"], hit["end"]
+rx.fullmatch("555-1212")
+hit = rx.search("call 555-1212 today")
+# hit.start, hit.end
 ```
 
 Use **`compile_program`** when you build the pattern string yourself and want the raw **`list`** without going through the wrapper.

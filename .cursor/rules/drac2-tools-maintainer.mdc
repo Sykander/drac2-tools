@@ -9,6 +9,8 @@ When you change **behavior or public API** (not typo-only or formatting):
 
 1. **Documentation** — Update any **markdown under `docs/`** that documents the changed surface (signatures, parameters, return shapes, edge cases, workshop or deploy notes). If you add a new public surface, add or extend the right doc path and link it from **`docs/README.md`** when appropriate (not only under `docs/gvars/`).
 
+   In Drac2 fenced code blocks under **`docs/`**, prefer attribute access (e.g. **`rx.fullmatch(...)`**, **`hit.start`**) over **`rx["fullmatch"]`** when the key is a valid identifier (see **`drac2-avrae-sources.mdc`** → Docs).
+
    **Audience — `docs/` is for people using the artifacts** (imports, public API, runtime behavior, deploy/workshop notes that affect consumers). **Do not** put maintainer-only material in `docs/`, especially under **`docs/gvars/`**: how to run tests, **`avrae-ls`** / **`.alias-test`** mechanics, CI, mock profiles, coverage, or “where tests live.” Keep that in **`AGENTS.md`**, **`DEVELOPMENT.md`**, workflow files, or next to the tests themselves.
 2. **Tests** — For each `src/gvars/utils/<name>/` util, keep the trio aligned: `<name>.gvar` (logic), `<name>.alias` (testcase branches + `expect` assertions), `<name>.alias-test` (one `!name -testcase "..."` block per case). Add or adjust cases when behavior changes.
 3. **Verify** — After gvar or alias test edits, run `avrae-ls --run-tests src` from the repo root (requires `avrae-ls` on PATH). For **avrae-ls** semantics (`.alias-test` metadata, `.avraels.json`, `varFiles`), read **`.cursor/avrae-ls-reference/`** (see **`drac2-avrae-sources.mdc`**) instead of inventing behavior.
