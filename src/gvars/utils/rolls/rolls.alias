@@ -156,4 +156,13 @@ elif testcase == "get_roll should coerce numeric flat roll_name to string for vr
 
     expect(result).to.have.property("roll_string", "1")
     expect(result).to.have.property("total", 1)
+elif testcase == "resolve_save_input should map partial save names":
+    expect(rolls.resolve_save_input("dex")).to.be("dexterity")
+    expect(rolls.resolve_save_input("STR")).to.be("strength")
+    expect(rolls.resolve_save_input("death")).to.be("death")
+elif testcase == "get_roll flat should expose naturalRoll when raw tree is simple":
+    parsed = argparse("")
+    result = rolls.get_roll(None, "1d1", parsed, "roll")
+
+    expect(result).to.have.property("naturalRoll", 1)
 </drac2>

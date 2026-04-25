@@ -14,13 +14,21 @@ using(rolls = "b6fe8f32-72ee-4179-a5b2-6fe79c77f372")
 
 ## Public API
 
-### `get_roll(character, roll_name, args: ParsedArguments, roll_type: str, ability_name: str | None = None, dc: int | None = None, adv: bool | None = None, bonuses: list[str] | None = None) -> dict`
+### `get_roll(character, roll_name, args: ParsedArguments, roll_type: str, ability_name: str | None = None, dc: int | None = None, adv: bool | None = None, bonuses: list[str] | None = None, arg_aliases: dict | None = None) -> dict`
 
-Main entry point. `roll_type` is one of `"roll"`, `"check"`, `"passive"`, `"save"`, `"attack"`. For `"check"`, `"passive"`, `"save"`, and `"attack"`, `roll_name` is the usual string key (skill name, save name, or `"melee"` / `"ranged"` for attacks). When `roll_type == "roll"`, `roll_name` is the dice expression passed to `vroll`; it is normalized with `str()` first, so you can pass a string or another value (such as a number) that stringifies to valid dice syntax. `args` is parsed alias arguments (advantage flags, `-b`, `-guidance`, `-bless`, `-resistance`, ability overrides, etc.). `bonuses` is copied when provided so callers’ lists are not mutated.
+Main entry point. `roll_type` is one of `"roll"`, `"check"`, `"passive"`, `"save"`, `"attack"`. For `"check"`, `"passive"`, `"save"`, and `"attack"`, `roll_name` is usually a skill or save key (or `"melee"` / `"ranged"` for attacks). When `roll_type == "roll"`, `roll_name` is the dice expression passed to `vroll`; it is normalized with `str()` first, so you can pass a string or another value (such as a number) that stringifies to valid dice syntax. `args` is parsed alias arguments (advantage flags, `-b`, `-guidance`, `-bless`, `-resistance`, ability overrides, etc.). `bonuses` is copied when provided so callers’ lists are not mutated.
+
+For **`"check"`** and **`"passive"`**, `roll_name` is normalized with **`resolve_skill_input`** (substring match on sheet skill keys, case-insensitive, spaces removed). For **`"save"`**, use **`resolve_save_input`** (e.g. `dex` → `dexterity`); ambiguous partial names error.
+
+Optional **`arg_aliases`** remaps argparse keys, e.g. `{"advantage": {"adv": "survAdv", "dis": "survDis"}, "b": "survBonus", "guidance": "survGuidance", "mc": "survMC"}`. Omitted entries keep defaults `adv`/`dis`, `b`, `guidance`, `mc`.
+
+**Minimum d20 on checks:** `-mc <n>` sets the d20 minimum. Otherwise minimum **10** applies only when the skill is **proficient** (`skill.prof >= 1`) and the character either has Reliable Talent by level (`character_has_reliable_talent`) or the sheet csetting **`talent`** is true.
+
+**Rerolls:** Halfling Lucky still uses `ro1` when applicable. If **`character.csettings["reroll"]`** is an integer, it is merged into the d20 reroll list (when `csettings` exists at runtime).
 
 Pass **`None`** for `character` to use the **active** Avrae sheet when one exists (`resolve_character`). For `"check"`, `"passive"`, `"save"`, and `"attack"`, a sheet is **required** after resolution—if there is no active character and no explicit override, `get_roll` errors. For `"roll"`, a missing sheet is still allowed for the roll string itself; when `character` is `None` and there is no active character, race/feat helpers behave as if there were no sheet.
 
-Returns a dict with `roll`, `total`, `full`, `name`, `roll_string`, `dc`, `passed`, `crit`, and `crit_fail` (see `rolls.gvar`).
+Returns a dict with `roll`, `total`, `full`, `name`, `roll_string`, `dc`, `passed`, `crit`, `crit_fail`, and **`naturalRoll`** (first leaf of `roll.raw` when it can be coerced to `int`, else `None`; omitted meaning is `None` for `"passive"`). See `rolls.gvar`.
 
 ### `join_roll_strings(roll_strings: list[str]) -> str`
 
@@ -63,6 +71,14 @@ Default ability for a save key, or `None`.
 Default ability for `"melee"` or `"ranged"`, or `None`.
 
 ### `character_has_halfling_luck(character) -> bool`
+
+### `resolve_skill_input(character, raw_name: str) -> str`
+
+Requires a character. Returns the internal skill key from the first sheet skill whose key contains `raw_name` (case-insensitive, spaces stripped). Errors if nothing matches.
+
+### `resolve_save_input(raw_name: str) -> str`
+
+Returns a `save_abilities` key from a full or partial ability or special save name (`death`, `honor`, `sanity` when present on the sheet map).
 
 ### `character_has_reliable_talent(character) -> bool`
 

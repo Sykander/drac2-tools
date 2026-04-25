@@ -117,3 +117,13 @@ name: get_roll should stringify flat roll_name for vroll
 ---
 ---
 name: get_roll should coerce numeric flat roll_name to string for vroll
+
+!rolls -testcase "resolve_save_input should map partial save names"
+---
+---
+name: resolve_save_input should map partial save names
+
+!rolls -testcase "get_roll flat should expose naturalRoll when raw tree is simple"
+---
+---
+name: get_roll flat should expose naturalRoll when raw tree is simple
