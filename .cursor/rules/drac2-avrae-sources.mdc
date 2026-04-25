@@ -82,3 +82,4 @@ When editing an **`.alias`**, decide which role it plays before copying structur
 ## Docs
 
 - Keep **`docs/**/*.md`** consistent with the artifacts it describes (API, parameters, return shapes, deployment). Today most module pages are under **`docs/gvars/`**; add other paths under `docs/` when you document aliases, snippets, or workshops. **`docs/gvars/`** pages are for **library consumers**—do not add test-runner, CI, or **`avrae-ls`** how-to there (see **`drac2-tools-maintainer.mdc`** and **`AGENTS.md`**).
+- **Drac2 snippets in markdown** — Prefer **attribute access** (`obj.field`, `obj.fullmatch(...)`) over **bracket dict keys** (`obj["field"]`) when the key is a valid identifier and the snippet is meant to run in Drac2 (Avrae allows attribute-style access on dicts). Keep brackets for list/tuple indexing, non-identifier keys, or when documenting literal JSON shapes.

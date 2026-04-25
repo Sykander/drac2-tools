@@ -26,7 +26,7 @@ Optional **`arg_aliases`** remaps argparse keys, e.g. `{"advantage": {"adv": "su
 
 **Minimum d20 on checks:** `-mc <n>` sets the d20 minimum. Otherwise minimum **10** applies only when the skill is **proficient** (`skill.prof >= 1`) and the character either has Reliable Talent by level (`character_has_reliable_talent`) or the sheet csetting **`talent`** is true.
 
-**Rerolls:** Halfling Lucky still uses `ro1` when applicable. If **`character.csettings["reroll"]`** is an integer, it is merged into the d20 reroll list (when `csettings` exists at runtime).
+**Rerolls:** Halfling Lucky still uses `ro1` when applicable. If **`character.csettings.reroll`** is an integer, it is merged into the d20 reroll list (when `csettings` exists at runtime).
 
 Pass **`None`** for `character` to use the **active** Avrae sheet when one exists (`resolve_character`). For `"check"`, `"passive"`, `"save"`, and `"attack"`, a sheet is **required** after resolution—if there is no active character and no explicit override, `get_roll` errors. For `"roll"`, a missing sheet is still allowed for the roll string itself; when `character` is `None` and there is no active character, race/feat helpers behave as if there were no sheet.
 

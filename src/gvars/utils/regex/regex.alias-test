@@ -77,3 +77,273 @@ name: full_match should accept negated range
 ---
 ---
 name: full_match should accept mixed literals escapes and optional
+
+!regex -testcase "compile wrapper should expose python style pattern api"
+---
+---
+name: compile wrapper should expose python style pattern api
+
+!regex -testcase "compile should be deterministic for same pattern string"
+---
+---
+name: compile should be deterministic for same pattern string
+
+!regex -testcase "compile should strip js style slash delimiters"
+---
+---
+name: compile should strip js style slash delimiters
+
+!regex -testcase "compile should strip re colon prefix"
+---
+---
+name: compile should strip re colon prefix
+
+!regex -testcase "compile should not strip single leading slash"
+---
+---
+name: compile should not strip single leading slash
+
+!regex -testcase "compile should match long haystack with search"
+---
+---
+name: compile should match long haystack with search
+
+!regex -testcase "compile should full_match long fixed pattern"
+---
+---
+name: compile should full_match long fixed pattern
+
+!regex -testcase "full_match should accept dot star across long string"
+---
+---
+name: full_match should accept dot star across long string
+
+!regex -testcase "full_match should accept negated empty class any char"
+---
+---
+name: full_match should accept negated empty class any char
+
+!regex -testcase "full_match should handle zero lower bound brace"
+---
+---
+name: full_match should handle zero lower bound brace
+
+!regex -testcase "full_match should handle brace unbounded max"
+---
+---
+name: full_match should handle brace unbounded max
+
+!regex -testcase "full_match should handle nested quantified group"
+---
+---
+name: full_match should handle nested quantified group
+
+!regex -testcase "full_match should handle class with literal dot"
+---
+---
+name: full_match should handle class with literal dot
+
+!regex -testcase "full_match should handle escaped metachar as literal"
+---
+---
+name: full_match should handle escaped metachar as literal
+
+!regex -testcase "search_from should return none when no match"
+---
+---
+name: search_from should return none when no match
+
+!regex -testcase "match_from should return none on failure"
+---
+---
+name: match_from should return none on failure
+
+!regex -testcase "compile_program should err on unclosed group"
+---
+---
+name: compile_program should err on unclosed group
+
+!regex -testcase "compile_program should err on leading quantifier"
+---
+---
+name: compile_program should err on leading quantifier
+
+!regex -testcase "compile_program should err on empty positive class"
+---
+---
+name: compile_program should err on empty positive class
+
+!regex -testcase "full_match should handle word class run"
+---
+---
+name: full_match should handle word class run
+
+!regex -testcase "full_match should handle non digit class"
+---
+---
+name: full_match should handle non digit class
+
+!regex -testcase "full_match should handle non space class"
+---
+---
+name: full_match should handle non space class
+
+!regex -testcase "full_match should handle non word class"
+---
+---
+name: full_match should handle non word class
+
+!regex -testcase "full_match should combine multiple groups and literals"
+---
+---
+name: full_match should combine multiple groups and literals
+
+!regex -testcase "search_from should find earliest double a"
+---
+---
+name: search_from should find earliest double a
+
+!regex -testcase "match_from should respect start offset at end"
+---
+---
+name: match_from should respect start offset at end
+
+!regex -testcase "full_match should handle digit range in class"
+---
+---
+name: full_match should handle digit range in class
+
+!regex -testcase "full_match should handle uppercase range in class"
+---
+---
+name: full_match should handle uppercase range in class
+
+!regex -testcase "full_match should handle optional group"
+---
+---
+name: full_match should handle optional group
+
+!regex -testcase "full_match should backtrack optional prefix for whole match"
+---
+---
+name: full_match should backtrack optional prefix for whole match
+
+!regex -testcase "full_match should backtrack star to satisfy suffix"
+---
+---
+name: full_match should backtrack star to satisfy suffix
+
+!regex -testcase "full_match should treat pipe as alternation"
+---
+---
+name: full_match should treat pipe as alternation
+
+!regex -testcase "full_match should treat escaped pipe as literal"
+---
+---
+name: full_match should treat escaped pipe as literal
+
+!regex -testcase "full_match should alternate grouped branches"
+---
+---
+name: full_match should alternate grouped branches
+
+!regex -testcase "search_from should find first alternation branch"
+---
+---
+name: search_from should find first alternation branch
+
+!regex -testcase "full_match should alternate three arms"
+---
+---
+name: full_match should alternate three arms
+
+!regex -testcase "full_match should use first matching alternation arm"
+---
+---
+name: full_match should use first matching alternation arm
+
+!regex -testcase "full_match should combine alternation with suffix"
+---
+---
+name: full_match should combine alternation with suffix
+
+!regex -testcase "compile wrapper should reuse program for repeated checks"
+---
+---
+name: compile wrapper should reuse program for repeated checks
+
+!regex -testcase "full_match should handle complex email like token"
+---
+---
+name: full_match should handle complex email like token
+
+!regex -testcase "search should scan empty string for empty pattern"
+---
+---
+name: search should scan empty string for empty pattern
+
+!regex -testcase "stress search needle after four hundred char pad"
+---
+---
+name: stress search needle after four hundred char pad
+
+!regex -testcase "stress full_match digit brace two hundred"
+---
+---
+name: stress full_match digit brace two hundred
+
+!regex -testcase "stress nested groups depth twelve"
+---
+---
+name: stress nested groups depth twelve
+
+!regex -testcase "stress quantified pair eighty repeats"
+---
+---
+name: stress quantified pair eighty repeats
+
+!regex -testcase "stress dot star five hundred char string"
+---
+---
+name: stress dot star five hundred char string
+
+!regex -testcase "stress alternation forty eight fixed width arms"
+---
+---
+name: stress alternation forty eight fixed width arms
+
+!regex -testcase "stress word class brace two fifty"
+---
+---
+name: stress word class brace two fifty
+
+!regex -testcase "stress mixed alts quantifiers and classes"
+---
+---
+name: stress mixed alts quantifiers and classes
+
+!regex -testcase "match_from_captures should return two groups"
+---
+---
+name: match_from_captures should return two groups
+
+!regex -testcase "match_from_captures should leave optional group none"
+---
+---
+name: match_from_captures should leave optional group none
+
+!regex -testcase "search_captures should include groups in hit"
+---
+---
+name: search_captures should include groups in hit
+
+!regex -testcase "compiled dict groups key should skip noncapturing group"
+---
+---
+name: compiled dict groups key should skip noncapturing group
+
+!regex -testcase "compile_program should err on unsupported question paren"
+---
+---
+name: compile_program should err on unsupported question paren
