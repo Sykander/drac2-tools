@@ -12,7 +12,9 @@ Smaller helpers compose expressions (advantage, damage, joining fragments) and f
 using(rolls = "b6fe8f32-72ee-4179-a5b2-6fe79c77f372")
 ```
 
-## Public API
+## Supported public API
+
+Only the functions in this section are considered a stable, supported surface for aliases and other gvars. Each one is covered by **`rolls.alias-test`** (with **`character`** / **`vars`** metadata where a mock sheet is required). Anything not listed here—including any **`_`**-prefixed name in `rolls.gvar`—is internal.
 
 ### `get_roll(character, roll_name, args: ParsedArguments, roll_type: str, ability_name: str | None = None, dc: int | None = None, adv: bool | None = None, bonuses: list[str] | None = None, arg_aliases: dict | None = None) -> dict`
 
@@ -28,7 +30,7 @@ Optional **`arg_aliases`** remaps argparse keys, e.g. `{"advantage": {"adv": "su
 
 Pass **`None`** for `character` to use the **active** Avrae sheet when one exists (`resolve_character`). For `"check"`, `"passive"`, `"save"`, and `"attack"`, a sheet is **required** after resolution—if there is no active character and no explicit override, `get_roll` errors. For `"roll"`, a missing sheet is still allowed for the roll string itself; when `character` is `None` and there is no active character, race/feat helpers behave as if there were no sheet.
 
-Returns a dict with `roll`, `total`, `full`, `name`, `roll_string`, `dc`, `passed`, `crit`, `crit_fail`, and **`naturalRoll`** (first leaf of `roll.raw` when it can be coerced to `int`, else `None`; omitted meaning is `None` for `"passive"`). See `rolls.gvar`.
+Returns a dict with `roll`, `total`, `full`, `name`, `roll_string`, `dc`, `passed`, `crit`, `crit_fail`, and **`natural_roll`** (first leaf of `roll.raw` when it can be coerced to `int`, else `None`; omitted meaning is `None` for `"passive"`). For **`"check"`**, **`"save"`**, **`"attack"`**, and **`"roll"`** expressions whose `roll_name` contains **`d20`**, **`crit`** / **`crit_fail`** follow **`natural_roll`**: `20` / `1` respectively; otherwise both are `False`. See `rolls.gvar`.
 
 ### `join_roll_strings(roll_strings: list[str]) -> str`
 
@@ -93,3 +95,19 @@ Return `False` when `character` is `None`; otherwise check race, class levels, f
 Returns the difference between the two ability modifiers when overriding which ability applies; `0` when abilities match or `character` is `None`.
 
 Module-level maps `skills_abilities`, `save_abilities`, and `attack_type_abilities` define default pairings used by the helpers above.
+
+## Internal helpers (unsupported)
+
+Names starting with **`_`** in `rolls.gvar` (for example `_get_skill_for_character`, `_natural_roll_from_result`, `_d20_reroll_list`) are implementation details; do not call them from other modules.
+
+## Alias tests (`avrae-ls`)
+
+Tests live in **`rolls.alias`** / **`rolls.alias-test`** and run with **`avrae-ls --run-tests`** (see **`AGENTS.md`**).
+
+After the second `---` in an `.alias-test` block, YAML metadata may include:
+
+- **`name`** — testcase id (must match `testcase` in the paired `.alias`).
+- **`character`** — shallow/deep merged onto the language server’s default mock character for that run (see **`avrae_ls` `ContextProfile.character`** / built-in defaults in the `avrae-ls` package’s `config.py`).
+- **`vars`** — merged into mock `cvars` / `uvars` / etc. for that run.
+
+**Note:** In **`avrae-ls` 0.8.x**, `avrae-ls --run-tests` uses the workspace **`defaultProfile`** from **`.avraels.json`** (or the built-in default when no profiles are defined). Per-testcase **`profile`** selection is not applied by the CLI test runner; use **`character`** / **`vars`** overrides for sheet-specific cases. Optional named **`profiles`** in **`.avraels.json`** are still useful for editor/LSP runs against a fixed sheet.

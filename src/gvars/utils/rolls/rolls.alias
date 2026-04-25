@@ -160,9 +160,153 @@ elif testcase == "resolve_save_input should map partial save names":
     expect(rolls.resolve_save_input("dex")).to.be("dexterity")
     expect(rolls.resolve_save_input("STR")).to.be("strength")
     expect(rolls.resolve_save_input("death")).to.be("death")
-elif testcase == "get_roll flat should expose naturalRoll when raw tree is simple":
+elif testcase == "get_roll flat should expose natural_roll when raw tree is simple":
     parsed = argparse("")
     result = rolls.get_roll(None, "1d1", parsed, "roll")
 
-    expect(result).to.have.property("naturalRoll", 1)
+    expect(result).to.have.property("natural_roll", 1)
+    expect(result).to.have.property("crit", False)
+    expect(result).to.have.property("crit_fail", False)
+elif testcase == "get_roll flat d20 should set crit flags from natural_roll":
+    parsed = argparse("")
+    r_hi = rolls.get_roll(None, "1d20mi20ma20", parsed, "roll")
+    r_lo = rolls.get_roll(None, "1d20mi1ma1", parsed, "roll")
+
+    expect(r_hi).to.have.property("natural_roll", 20)
+    expect(r_hi).to.have.property("crit", True)
+    expect(r_hi).to.have.property("crit_fail", False)
+    expect(r_lo).to.have.property("natural_roll", 1)
+    expect(r_lo).to.have.property("crit", False)
+    expect(r_lo).to.have.property("crit_fail", True)
+elif testcase == "get_d20 should build disadvantage and mi ma ro snippets":
+    dis = rolls.get_d20(False)
+    mi = rolls.get_d20(None, False, 5, None, None)
+    ma = rolls.get_d20(None, False, None, 2, None)
+    ro = rolls.get_d20(None, False, None, None, [1, 2])
+    combo = rolls.get_d20(True, False, 10, None, [1])
+
+    expect(dis).to.be("2d20kl1")
+    expect(mi).to.be("1d20mi5")
+    expect(ma).to.be("1d20ma2")
+    expect(ro).to.be("1d20ro1ro2")
+    expect(combo).to.be("2d20kh1mi10ro1")
+elif testcase == "get_default_ability_for_save should map ability saves":
+    expect(rolls.get_default_ability_for_save("intelligence")).to.be("intelligence")
+    expect(rolls.get_default_ability_for_save("wisdom")).to.be("wisdom")
+elif testcase == "get_default_ability_for_skill should map persuasion to charisma":
+    expect(rolls.get_default_ability_for_skill("persuasion")).to.be("charisma")
+elif testcase == "get_readable_name_for_attack should show ability when not default":
+    expect(rolls.get_readable_name_for_attack("melee", "dexterity")).to.be("Melee Attack (dexterity)")
+elif testcase == "resolve_skill_input should map substring to skill key":
+    expect(rolls.resolve_skill_input(character(), "letics")).to.be("athletics")
+    expect(rolls.resolve_skill_input(character(), "PERC")).to.be("perception")
+elif testcase == "resolve_skill_input should err on empty input":
+    expect(lambda: rolls.resolve_skill_input(character(), "   ")).to.raise_exception()
+elif testcase == "resolve_skill_input should err when no skill matches":
+    expect(lambda: rolls.resolve_skill_input(character(), "zzqqnomatchxx")).to.raise_exception()
+elif testcase == "resolve_save_input should err on ambiguous partial":
+    expect(lambda: rolls.resolve_save_input("st")).to.raise_exception()
+elif testcase == "resolve_save_input should err on empty input":
+    expect(lambda: rolls.resolve_save_input("")).to.raise_exception()
+elif testcase == "resolve_save_input should map honor shorthand":
+    expect(rolls.resolve_save_input("hon")).to.be("honor")
+elif testcase == "character_has_halfling_luck should be true for halfling race":
+    expect(rolls.character_has_halfling_luck(character())).to.be(True)
+elif testcase == "character_has_reliable_talent should be true at rogue 11":
+    expect(rolls.character_has_reliable_talent(character())).to.be(True)
+elif testcase == "character_has_observant should read feats cvar":
+    expect(rolls.character_has_observant(character())).to.be(True)
+elif testcase == "character_has_indomitable_might should be true at barbarian 18":
+    expect(rolls.character_has_indomitable_might(character())).to.be(True)
+elif testcase == "get_mod_override should return modifier delta for active character":
+    ch = character()
+    expect(rolls.get_mod_override(ch, "strength", "dexterity")).to.be(-1)
+    expect(rolls.get_mod_override(ch, "strength", "strength")).to.be(0)
+elif testcase == "get_roll passive should omit natural_roll and skip crit flags":
+    parsed = argparse("")
+    result = rolls.get_roll(None, "perception", parsed, "passive")
+
+    expect(result).to.have.property("name", "Passive Perception Check")
+    expect(result).to.have.property("natural_roll", None)
+    expect(result).to.have.property("crit", False)
+    expect(result).to.have.property("crit_fail", False)
+elif testcase == "get_roll check should resolve skill and build d20 string":
+    parsed = argparse("")
+    result = rolls.get_roll(None, "letics", parsed, "check")
+
+    expect(result).to.have.property("name", "Athletics Check")
+    expect("1d20" in result.roll_string).to.be(True)
+elif testcase == "get_roll save should resolve shorthand save name":
+    parsed = argparse("")
+    result = rolls.get_roll(None, "dex", parsed, "save")
+
+    expect(result).to.have.property("name", "Dexterity Saving Throw")
+    expect("1d20" in result.roll_string).to.be(True)
+elif testcase == "get_roll attack melee should label and include d20":
+    parsed = argparse("")
+    result = rolls.get_roll(None, "melee", parsed, "attack")
+
+    expect(result).to.have.property("name", "Melee Attack")
+    expect("1d20" in result.roll_string).to.be(True)
+elif testcase == "get_roll save death should default dc to ten":
+    parsed = argparse("")
+    result = rolls.get_roll(None, "death", parsed, "save")
+
+    expect(result).to.have.property("dc", 10)
+    expect(result).to.have.property("name", "Death Saving Throw")
+elif testcase == "get_roll check should honor explicit mc flag":
+    parsed = argparse("-mc 12")
+    result = rolls.get_roll(None, "acrobatics", parsed, "check")
+
+    expect("mi12" in result.roll_string).to.be(True)
+elif testcase == "get_roll check should add guidance bonus when flagged":
+    parsed = argparse("-guidance")
+    result = rolls.get_roll(None, "history", parsed, "check")
+
+    expect("1d4[Guidance]" in result.roll_string).to.be(True)
+elif testcase == "get_roll save should add resistance bonus when flagged":
+    parsed = argparse("-resistance")
+    result = rolls.get_roll(None, "wisdom", parsed, "save")
+
+    expect("1d4[Resistance]" in result.roll_string).to.be(True)
+elif testcase == "get_roll attack should add bless bonus when flagged":
+    parsed = argparse("-bless")
+    result = rolls.get_roll(None, "melee", parsed, "attack")
+
+    expect("1d4[Bless]" in result.roll_string).to.be(True)
+elif testcase == "get_roll should remap bonus argparse key via arg_aliases":
+    parsed = argparse("-xb 2")
+    aliases = {"b": "xb"}
+    result = rolls.get_roll(None, "religion", parsed, "check", arg_aliases=aliases)
+
+    expect("+2" in result.roll_string or "2" in result.roll_string).to.be(True)
+elif testcase == "get_roll should err on unknown roll_type":
+    parsed = argparse("")
+    expect(lambda: rolls.get_roll(None, "1d20", parsed, "invalid_type")).to.raise_exception()
+elif testcase == "get_roll check should include halfling lucky reroll":
+    parsed = argparse("")
+    result = rolls.get_roll(None, "nature", parsed, "check")
+
+    expect("ro1" in result.roll_string).to.be(True)
+elif testcase == "get_roll check should merge csettings reroll into d20":
+    parsed = argparse("")
+    result = rolls.get_roll(None, "arcana", parsed, "check")
+
+    expect("ro2" in result.roll_string).to.be(True)
+    expect("ro1" in result.roll_string).to.be(False)
+elif testcase == "get_roll check should apply reliable talent floor on proficient skill":
+    parsed = argparse("")
+    result = rolls.get_roll(None, "investigation", parsed, "check")
+
+    expect("mi10" in result.roll_string).to.be(True)
+elif testcase == "get_roll check should apply talent csetting floor when proficient":
+    parsed = argparse("")
+    result = rolls.get_roll(None, "insight", parsed, "check")
+
+    expect("mi10" in result.roll_string).to.be(True)
+elif testcase == "get_roll check should use dexterity override from args":
+    parsed = argparse("-dex")
+    result = rolls.get_roll(None, "athletics", parsed, "check")
+
+    expect(result).to.have.property("name", "Dexterity (Athletics) Check")
 </drac2>

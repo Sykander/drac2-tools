@@ -220,7 +220,7 @@ def character_has_indomitable_might(character):
     return (character.levels.get("Barbarian") or 0) >= 18
 
 
-def get_ability_to_use_from_args(args):
+def _get_ability_to_use_from_args(args):
     if args.last("str"):
         return "strength"
 
@@ -258,7 +258,7 @@ def get_mod_override(character, ability_a: str | None = None, ability_b: str | N
     return ability_b_mod - ability_a_mod
 
 
-def get_skill_for_character(character, skill_name):
+def _get_skill_for_character(character, skill_name):
     if character == None:
         return 0, None, 0
 
@@ -358,7 +358,7 @@ def _natural_roll_from_result(roll_result):
         return None
 
 
-def get_save_for_character(character, save_name):
+def _get_save_for_character(character, save_name):
     if character == None:
         return 0, None
 
@@ -441,7 +441,7 @@ def get_roll(
     if args.last("bless") and roll_type in ["attack", "save"]:
         bonuses.append("1d4[Bless]")
 
-    ability_name = ability_name if ability_name != None else get_ability_to_use_from_args(args)
+    ability_name = ability_name if ability_name != None else _get_ability_to_use_from_args(args)
 
     has_indomitable_might = character_has_indomitable_might(actor)
 
@@ -467,7 +467,7 @@ def get_roll(
     if roll_type == "roll":
         roll_str = roll_name
     elif roll_type == "check":
-        skill_value, skill_adv, skill_prof = get_skill_for_character(actor, roll_name)
+        skill_value, skill_adv, skill_prof = _get_skill_for_character(actor, roll_name)
 
         using_strength = ability_name == "strength" or ability_name == None and get_default_ability_for_skill(roll_name) == "strength"
         mod_override = get_mod_override(actor, get_default_ability_for_skill(roll_name), ability_name)
@@ -492,7 +492,7 @@ def get_roll(
         if using_strength and has_indomitable_might:
             roll_str = f'({roll_str}, {actor.stats.get_mod("strength")})kh1'
     elif roll_type == "passive":
-        skill_value, skill_adv, skill_prof = get_skill_for_character(actor, roll_name)
+        skill_value, skill_adv, skill_prof = _get_skill_for_character(actor, roll_name)
 
         using_strength = ability_name == "strength" or ability_name == None and get_default_ability_for_skill(roll_name) == "strength"
         mod_override = get_mod_override(actor, get_default_ability_for_skill(roll_name), ability_name)
@@ -518,7 +518,7 @@ def get_roll(
         if using_strength and has_indomitable_might:
             roll_str = f'({roll_str}, {actor.stats.get_mod("strength")})kh1'
     elif roll_type == "save":
-        save_value, save_adv = get_save_for_character(actor, roll_name)
+        save_value, save_adv = _get_save_for_character(actor, roll_name)
         mod_override = get_mod_override(actor, get_default_ability_for_save(roll_name), ability_name)
 
         base_adv = join_advantage(adv, argsadv, save_adv)
@@ -552,6 +552,8 @@ def get_roll(
 
     roll_result = vroll(roll_str)
 
+    natural_roll = None if roll_type == "passive" else _natural_roll_from_result(roll_result)
+
     if dc == None and roll_type == "save" and roll_name == "death":
         dc = 10
 
@@ -561,33 +563,19 @@ def get_roll(
 
     crit = False
     crit_fail = False
-    if roll_type in ["attack", "save", "check"] or (roll_type == "roll" and "d20" in roll_name):
-        dice_elements = roll_result.dice.split(" ")
-        if len(dice_elements) < 2:
-            pass
-        elif "d20" in dice_elements[0]:
-            first_result = dice_elements[1]
-            items_to_check = [first_result]
-            if "(" in first_result and ")" not in first_result:
-                for dice in dice_elements[2:]:
-                    items_to_check.append(dice)
-                    if ")" in dice:
-                        break
-            for item in items_to_check:
-                if item in ["(**1**,","**1**,", "(**1**)", "**1**)"]:
-                    crit_fail = True
-                    break
-                elif item in ["(**20**,", "**20**,", "(**20**)", "**20**)"]:
-                    crit = True
-                    break
+    if natural_roll != None:
+        applies_crit = roll_type in ["attack", "save", "check"] or (roll_type == "roll" and "d20" in roll_name)
+        if applies_crit:
+            if natural_roll == 1:
+                crit_fail = True
+            elif natural_roll == 20:
+                crit = True
 
     if roll_type == "attack" or (roll_type == "save" and roll_name == "death"):
         if crit:
             passed = True
         elif crit_fail:
             passed = False
-
-    natural_roll = _natural_roll_from_result(roll_result) if roll_type != "passive" else None
 
     return {
         "roll": roll_result,
@@ -599,5 +587,5 @@ def get_roll(
         "passed": passed,
         "crit": crit,
         "crit_fail": crit_fail,
-        "naturalRoll": natural_roll,
+        "natural_roll": natural_roll,
     }

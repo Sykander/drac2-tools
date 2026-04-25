@@ -123,7 +123,203 @@ name: get_roll should coerce numeric flat roll_name to string for vroll
 ---
 name: resolve_save_input should map partial save names
 
-!rolls -testcase "get_roll flat should expose naturalRoll when raw tree is simple"
+!rolls -testcase "get_roll flat should expose natural_roll when raw tree is simple"
 ---
 ---
-name: get_roll flat should expose naturalRoll when raw tree is simple
+name: get_roll flat should expose natural_roll when raw tree is simple
+
+!rolls -testcase "get_roll flat d20 should set crit flags from natural_roll"
+---
+---
+name: get_roll flat d20 should set crit flags from natural_roll
+
+!rolls -testcase "get_d20 should build disadvantage and mi ma ro snippets"
+---
+---
+name: get_d20 should build disadvantage and mi ma ro snippets
+
+!rolls -testcase "get_default_ability_for_save should map ability saves"
+---
+---
+name: get_default_ability_for_save should map ability saves
+
+!rolls -testcase "get_default_ability_for_skill should map persuasion to charisma"
+---
+---
+name: get_default_ability_for_skill should map persuasion to charisma
+
+!rolls -testcase "get_readable_name_for_attack should show ability when not default"
+---
+---
+name: get_readable_name_for_attack should show ability when not default
+
+!rolls -testcase "resolve_skill_input should map substring to skill key"
+---
+---
+name: resolve_skill_input should map substring to skill key
+
+!rolls -testcase "resolve_skill_input should err on empty input"
+---
+---
+name: resolve_skill_input should err on empty input
+
+!rolls -testcase "resolve_skill_input should err when no skill matches"
+---
+---
+name: resolve_skill_input should err when no skill matches
+
+!rolls -testcase "resolve_save_input should err on ambiguous partial"
+---
+---
+name: resolve_save_input should err on ambiguous partial
+
+!rolls -testcase "resolve_save_input should err on empty input"
+---
+---
+name: resolve_save_input should err on empty input
+
+!rolls -testcase "resolve_save_input should map honor shorthand"
+---
+---
+name: resolve_save_input should map honor shorthand
+
+!rolls -testcase "character_has_halfling_luck should be true for halfling race"
+---
+---
+name: character_has_halfling_luck should be true for halfling race
+character:
+  race: Lightfoot Halfling
+
+!rolls -testcase "character_has_reliable_talent should be true at rogue 11"
+---
+---
+name: character_has_reliable_talent should be true at rogue 11
+character:
+  levels:
+    Rogue: 11
+
+!rolls -testcase "character_has_observant should read feats cvar"
+---
+---
+name: character_has_observant should read feats cvar
+character:
+  cvars:
+    feats: Observant
+
+!rolls -testcase "character_has_indomitable_might should be true at barbarian 18"
+---
+---
+name: character_has_indomitable_might should be true at barbarian 18
+character:
+  levels:
+    Barbarian: 18
+
+!rolls -testcase "get_mod_override should return modifier delta for active character"
+---
+---
+name: get_mod_override should return modifier delta for active character
+
+!rolls -testcase "get_roll passive should omit natural_roll and skip crit flags"
+---
+---
+name: get_roll passive should omit natural_roll and skip crit flags
+
+!rolls -testcase "get_roll check should resolve skill and build d20 string"
+---
+---
+name: get_roll check should resolve skill and build d20 string
+
+!rolls -testcase "get_roll save should resolve shorthand save name"
+---
+---
+name: get_roll save should resolve shorthand save name
+
+!rolls -testcase "get_roll attack melee should label and include d20"
+---
+---
+name: get_roll attack melee should label and include d20
+
+!rolls -testcase "get_roll save death should default dc to ten"
+---
+---
+name: get_roll save death should default dc to ten
+
+!rolls -testcase "get_roll check should honor explicit mc flag"
+---
+---
+name: get_roll check should honor explicit mc flag
+
+!rolls -testcase "get_roll check should add guidance bonus when flagged"
+---
+---
+name: get_roll check should add guidance bonus when flagged
+
+!rolls -testcase "get_roll save should add resistance bonus when flagged"
+---
+---
+name: get_roll save should add resistance bonus when flagged
+
+!rolls -testcase "get_roll attack should add bless bonus when flagged"
+---
+---
+name: get_roll attack should add bless bonus when flagged
+
+!rolls -testcase "get_roll should remap bonus argparse key via arg_aliases"
+---
+---
+name: get_roll should remap bonus argparse key via arg_aliases
+
+!rolls -testcase "get_roll should err on unknown roll_type"
+---
+---
+name: get_roll should err on unknown roll_type
+
+!rolls -testcase "get_roll check should include halfling lucky reroll"
+---
+---
+name: get_roll check should include halfling lucky reroll
+character:
+  race: Lightfoot Halfling
+
+!rolls -testcase "get_roll check should merge csettings reroll into d20"
+---
+---
+name: get_roll check should merge csettings reroll into d20
+character:
+  csettings:
+    reroll: 2
+    compact_coins: false
+
+!rolls -testcase "get_roll check should apply reliable talent floor on proficient skill"
+---
+---
+name: get_roll check should apply reliable talent floor on proficient skill
+character:
+  levels:
+    Rogue: 11
+  skills:
+    investigation:
+      prof: 1
+      value: 5
+      bonus: 0
+      adv: null
+
+!rolls -testcase "get_roll check should apply talent csetting floor when proficient"
+---
+---
+name: get_roll check should apply talent csetting floor when proficient
+character:
+  csettings:
+    talent: true
+    compact_coins: false
+  skills:
+    insight:
+      prof: 1
+      value: 4
+      bonus: 0
+      adv: null
+
+!rolls -testcase "get_roll check should use dexterity override from args"
+---
+---
+name: get_roll check should use dexterity override from args
