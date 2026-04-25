@@ -2,6 +2,8 @@
 
 This folder lives under **`.cursor/avrae-reference/`** next to **`.cursor/rules/`**. It holds **copies of official Avrae Read the Docs sources** for Cursor agents and contributors—not part of the shipped Drac2 product docs under `docs/`.
 
+For **avrae-ls** (`.alias-test`, `.avraels.json`, `--run-tests`), see **`.cursor/avrae-ls-reference/README.md`**.
+
 | File | Canonical URL (HTML) | RST source URL (what `refresh-avrae-docs.sh` downloads) |
 |------|----------------------|-----------------------------------------------------------|
 | `aliasing-api.rst.txt` | https://avrae.readthedocs.io/en/latest/aliasing/api.html | https://avrae.readthedocs.io/en/latest/_sources/aliasing/api.rst.txt |
