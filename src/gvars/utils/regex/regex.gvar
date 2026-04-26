@@ -563,15 +563,36 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps):
                 _caps_restore(caps, entry_snap)
                 return -1
             snap0 = _caps_clone(caps)
+            # Build repeat endpoints once (and capture snapshots for each count) so
+            # greedy backoff does not re-run the first k units from scratch each time.
+            ends = [p]
+            cap_snaps = None
+            if caps != None:
+                cap_snaps = [snap0]
+            pp = p
+            built = 0
+            while built < max_c:
+                nx = _match_one_unit(atom, text, pp, lim, caps)
+                if nx < 0:
+                    break
+                pp = nx
+                ends.append(pp)
+                built = built + 1
+                if cap_snaps != None:
+                    cap_snaps.append(_caps_clone(caps))
+            if built < max_c:
+                max_c = built
+                if max_c < lo:
+                    _caps_restore(caps, entry_snap)
+                    return -1
             k = max_c
             while k >= lo:
-                if snap0 != None:
-                    _caps_restore(caps, snap0)
-                p2 = _after_n_units(atom, text, p, lim, k, caps)
-                if p2 >= 0:
-                    rest = _match_seq_bt(nodes, text, p2, lim, i + 1, caps)
-                    if rest >= 0:
-                        return rest
+                if cap_snaps != None:
+                    _caps_restore(caps, cap_snaps[k])
+                p2 = ends[k]
+                rest = _match_seq_bt(nodes, text, p2, lim, i + 1, caps)
+                if rest >= 0:
+                    return rest
                 k = k - 1
             _caps_restore(caps, entry_snap)
             return -1

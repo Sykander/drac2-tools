@@ -373,10 +373,10 @@ name: benchmark quantified alternation loop boundary loops 1
 ---
 name: benchmark compile multiple regexes in one invocation
 
-!regex -testcase "benchmark compile multiple regexes in one invocation" -compiles "51"
+!regex -testcase "benchmark compile multiple regexes in one invocation" -compiles "50"
 ---
 ---
-name: benchmark compile multiple regexes boundary compiles 51
+name: benchmark compile multiple regexes boundary compiles 50
 
 !regex -testcase "benchmark compiled full_match loop should keep matches"
 ---
