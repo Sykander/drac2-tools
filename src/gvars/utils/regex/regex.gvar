@@ -5,11 +5,12 @@ docs/gvars/regex.md
 program). ``compile_program()`` → opcode list for ``match_from``, ``full_match``, ``search_from``, etc.
 
 Supported: literals, ``.``, ``\\d``..``\\S``, ``?`` ``*`` ``+``, ``{n}``/``{n,}``/``{n,m}``, ``()`` captures,
-``(?:)``, ``[]`` classes, ``|``.
+``(?:)``, ``[]`` classes, ``|``, ``^`` / ``$`` as **string** anchors (start / end of haystack; no multiline flags).
 
 In ``[]``: literals, ``a-z``/``A-Z``/``0-9`` ranges, only ``\\d`` ``\\w`` ``\\s``. ``\\|`` for literal ``|``.
+Use ``\\^`` for a literal caret outside a class.
 
-Not: ``^`` ``$`` anchors, backrefs, ``(?P<name>)``, ``\\D``/``\\W``/``\\S`` inside classes (use e.g. ``[^0-9]``).
+Not: multiline line anchors, backrefs, ``(?P<name>)``, ``\\D``/``\\W``/``\\S`` inside classes (use e.g. ``[^0-9]``).
 
 Quantifiers backtrack; alternation tries each arm in source order.
 
@@ -113,6 +114,8 @@ def _parse_escape(pat: str, i: int):
         return {"k": "cls", "c": "S"}, i + 2
     if n == "|":
         return {"k": "lit", "v": "|"}, i + 2
+    if n == "^":
+        return {"k": "lit", "v": "^"}, i + 2
     return {"k": "lit", "v": n}, i + 2
 
 
@@ -318,11 +321,24 @@ def _parse_seq_concat(pat: str, i: int, in_group: bool, cap_counter: list, group
             i = i + 1
         elif c == "\\":
             atom, i = _parse_escape(pat, i)
+        elif c == "^":
+            atom = {"k": "beg"}
+            i = i + 1
+        elif c == "$":
+            atom = {"k": "end"}
+            i = i + 1
         elif c == "{" or c == "}" or c == "*" or c == "+" or c == "?" or c == "]":
             _rx_err(f"unexpected {c}", i)
         else:
             atom = {"k": "lit", "v": c}
             i = i + 1
+        if atom["k"] == "beg" or atom["k"] == "end":
+            if i < len(pat):
+                q = pat[i]
+                if q == "?" or q == "*" or q == "+" or q == "{":
+                    _rx_err("^ and $ cannot be quantified", i)
+            nodes.append(atom)
+            continue
         atom, i = _parse_quant(pat, i, atom)
         nodes.append(atom)
     if in_group:
@@ -561,6 +577,14 @@ def _match_node_plain(node, text: str, pos: int, lim: int):
 
 def _match_one_unit(atom, text: str, pos: int, lim: int, caps):
     """One repetition step: a plain atom or a parenthesized sub-pattern."""
+    if atom["k"] == "beg":
+        if pos != 0:
+            return -1
+        return pos
+    if atom["k"] == "end":
+        if pos != lim:
+            return -1
+        return pos
     if atom["k"] == "grp":
         r = _match_seq_bt(atom["g"], text, pos, lim, 0, caps, atom.get("mc", 0))
         if r < 0:
@@ -726,6 +750,70 @@ def _match_all(nodes: list, text: str, pos: int, lim: int, caps, nodes_mc: int =
     return _match_seq_bt(nodes, text, pos, lim, 0, caps, nodes_mc)
 
 
+def _search_prefilter_skip_anchors(program: list, idx: int) -> int:
+    """Advance ``idx`` past leading ``beg`` / ``end`` nodes (zero-width)."""
+    n = len(program)
+    while idx < n:
+        k = program[idx]["k"]
+        if k == "beg" or k == "end":
+            idx = idx + 1
+            continue
+        break
+    return idx
+
+
+def _leading_beg_chain(nodes: list) -> bool:
+    """True iff ``nodes`` starts with one or more ``beg`` anchors (before any other node)."""
+    if len(nodes) == 0 or nodes[0]["k"] != "beg":
+        return False
+    j = 0
+    n = len(nodes)
+    while j < n and nodes[j]["k"] == "beg":
+        j = j + 1
+    return j > 0
+
+
+def _compute_program_requires_start_index_zero(program: list) -> bool:
+    """
+    True iff every top-level alternative begins with at least one ``^`` (``beg``), so a
+    successful ``search_from`` can only start at text index ``0``.
+    """
+    n = len(program)
+    if n == 0:
+        return False
+    f = program[0]
+    fk = f["k"]
+    if fk == "beg":
+        return True
+    if fk != "alt":
+        return False
+    arms = f["arms"]
+    if len(arms) == 0:
+        return False
+    ai = 0
+    while ai < len(arms):
+        if not _leading_beg_chain(arms[ai]):
+            return False
+        ai = ai + 1
+    return True
+
+
+def _program_req0_cached(program: list) -> bool:
+    """
+    Return whether ``search*`` can only match at text index ``0``. Reads cached ``_rx_req0`` on
+    ``program[0]`` when present; otherwise computes once, stores it there for later calls, and
+    returns it (matchers ignore unknown keys on IR dicts).
+    """
+    if len(program) > 0:
+        d0 = program[0]
+        if "_rx_req0" in d0:
+            return d0["_rx_req0"]
+    v = _compute_program_requires_start_index_zero(program)
+    if len(program) > 0:
+        program[0]["_rx_req0"] = v
+    return v
+
+
 def _search_prefilter_node(program: list):
     """
     Return a plain atom node (lit/cls/set) that must match the first consumed character
@@ -733,7 +821,13 @@ def _search_prefilter_node(program: list):
     """
     if len(program) == 0:
         return None
-    node = program[0]
+    i0 = 0
+    k0 = program[0]["k"]
+    if k0 == "beg" or k0 == "end":
+        i0 = _search_prefilter_skip_anchors(program, 0)
+    if i0 >= len(program):
+        return None
+    node = program[i0]
     k = node["k"]
     if k == "rep":
         if node["lo"] < 1:
@@ -789,19 +883,29 @@ def search_from(program: list, text: str, pos: int = 0):
     """First match with ``start >= pos``: ``{"start", "end"}`` or ``None``."""
     lim = len(text)
     lead = _search_prefilter_node(program)
+    req0 = _program_req0_cached(program)
+    if req0 and pos > 0:
+        return None
     s = pos
+    if req0:
+        s = 0
     if s < 0:
         s = 0
-    while s <= lim:
+    last_s = 0 if req0 else lim
+    while s <= last_s:
         if lead != None:
             if s >= lim:
                 return None
             if _match_node_plain(lead, text, s, lim) < 0:
+                if req0:
+                    return None
                 s = s + 1
                 continue
         e = _match_all(program, text, s, lim, None)
         if e >= 0:
             return {"start": s, "end": e}
+        if req0:
+            return None
         s = s + 1
     return None
 
@@ -815,14 +919,22 @@ def search_from_captures(program: list, text: str, pos: int = 0, group_total: in
     ng = group_total
     lim = len(text)
     lead = _search_prefilter_node(program)
+    req0 = _program_req0_cached(program)
+    if req0 and pos > 0:
+        return None
     s = pos
+    if req0:
+        s = 0
     if s < 0:
         s = 0
-    while s <= lim:
+    last_s = 0 if req0 else lim
+    while s <= last_s:
         if lead != None:
             if s >= lim:
                 return None
             if _match_node_plain(lead, text, s, lim) < 0:
+                if req0:
+                    return None
                 s = s + 1
                 continue
         caps = [None] * (ng + 1)
@@ -830,6 +942,8 @@ def search_from_captures(program: list, text: str, pos: int = 0, group_total: in
         if end >= 0:
             caps[0] = text[s:end]
             return {"start": s, "end": end, "groups": caps}
+        if req0:
+            return None
         s = s + 1
     return None
 

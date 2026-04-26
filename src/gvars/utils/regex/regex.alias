@@ -560,4 +560,62 @@ elif testcase == "search_from_captures should find nested alt capture":
     expect(hit.groups[0]).to.be("yz")
     expect(hit.groups[1]).to.be("yz")
     expect(hit.groups[2]).to.be("yz")
+elif testcase == "full_match should accept string anchors ^ and $":
+    p = regex.compile_program("^a$")
+
+    expect(regex.full_match(p, "a")).to.be(True)
+    expect(regex.full_match(p, "ab")).to.be(False)
+    expect(regex.full_match(p, "ba")).to.be(False)
+elif testcase == "search_from should respect ^ only at string index zero":
+    p = regex.compile_program("^foo")
+    hit = regex.search_from(p, "foo", 0)
+
+    expect(hit != None).to.be(True)
+    expect(hit.start).to.be(0)
+    expect(hit.end).to.be(3)
+    expect(regex.search_from(p, "xfoo", 0)).to.be(None)
+elif testcase == "search_from should return None for leading ^ when pos gt zero":
+    p = regex.compile_program("^foo")
+
+    expect(regex.search_from(p, "foo", 1)).to.be(None)
+elif testcase == "search_from should find arm without ^ across offsets":
+    p = regex.compile_program("^a|b")
+    hit = regex.search_from(p, "xb", 0)
+
+    expect(hit != None).to.be(True)
+    expect(hit.start).to.be(1)
+    expect(hit.end).to.be(2)
+elif testcase == "full_match should accept escaped caret as literal":
+    p = regex.compile_program("\\^x")
+
+    expect(regex.full_match(p, "^x")).to.be(True)
+    expect(regex.full_match(p, "x")).to.be(False)
+elif testcase == "full_match should accept empty string for ^$":
+    p = regex.compile_program("^$")
+
+    expect(regex.full_match(p, "")).to.be(True)
+    expect(regex.full_match(p, "x")).to.be(False)
+elif testcase == "compile_program should err on quantified ^":
+    errt, prog = regex.diagnostic_compile_program("^?")
+
+    expect(prog).to.be(None)
+    expect(errt != None).to.be(True)
+elif testcase == "match_from_captures should work with leading ^ and captures":
+    p = regex.compile_program("^(a)$")
+    m = regex.match_from_captures(p, "a", 0)
+
+    expect(m != None).to.be(True)
+    expect(m.groups[0]).to.be("a")
+    expect(m.groups[1]).to.be("a")
+elif testcase == "match_from should fail ^ when start not at string zero even if suffix matches":
+    p = regex.compile_program("^a")
+
+    expect(regex.match_from(p, "aa", 1)).to.be(None)
+elif testcase == "search_from_captures should honor all arms leading ^":
+    p = regex.compile_program("^a|^bc")
+    hit = regex.search_from_captures(p, "bc", 0)
+
+    expect(hit != None).to.be(True)
+    expect(hit.start).to.be(0)
+    expect(hit.groups[0]).to.be("bc")
 </drac2>

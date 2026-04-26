@@ -4,7 +4,7 @@
 
 A **small regular-expression subset** for Drac2 where Python’s `re` module is unavailable. Patterns compile once to an internal **program** (opcode list); matching walks the text with tight loops so Avrae is less likely to hit **too many statements** than ad‑hoc character-by-character re-parsing of the pattern string.
 
-This is **not** a full PCRE engine. **`|`** is **alternation** at the same parenthesis level (e.g. `ab|cd` is `(ab)|(cd)`). Use **`\|`** for a literal pipe outside a character class. Unsupported: `^` / `$` as **anchors** (a literal `$` is still just a character), **backreferences** to captures, **`(?P<name>…)`** named captures, and flags.
+This is **not** a full PCRE engine. **`|`** is **alternation** at the same parenthesis level (e.g. `ab|cd` is `(ab)|(cd)`). Use **`\|`** for a literal pipe outside a character class. **`^`** and **`$`** are **string** anchors only: **`^`** matches only at **index 0** of the haystack; **`$`** only when the current index equals **end of string** (no multiline / **`re.M`** flags). Plain **`$`** is always the end anchor—use **`\$`** for a literal dollar sign. Plain **`^`** outside a class is the start anchor—use **`\^`** for a literal caret. Unsupported: **backreferences** to captures, **`(?P<name>…)`** named captures, and flags.
 
 **Quantifiers (minimal backtracking):** each `?`, `*`, `+`, and `{…}` repetition tries a **greedy** count first, then **reduces** the count if the rest of the pattern fails—enough for cases like `(ha)?ha` on **`ha`**. **Alternation** tries each `|` arm in order when the rest of the pattern needs it. Catastrophic slowdown on pathological patterns is still possible (classic NFA backtracking behavior).
 
@@ -17,6 +17,7 @@ This is **not** a full PCRE engine. **`|`** is **alternation** at the same paren
 - **Quantifiers** — `?` (0–1), `*` (0+), `+` (1+), `{n}` (exactly `n`), `{n,}` (at least `n`), `{n,m}` (between `n` and `m`, greedy).
 - **Groups** — `(...)` is a **capturing** group (see **`match_from_captures`** / **`search_captures`**). **`(?:...)`** groups without capturing (does not consume a group index). Quantifiers apply to the whole parenthesized unit (e.g. `(ab){2}`).
 - **Alternation** — `|` splits alternatives among concatenations at the same depth; first successful arm wins, then matching continues with the rest of the pattern. Nested parentheses create nested alternation scopes. Inside `[...]`, `|` is a normal class character unless you escape it for clarity.
+- **Anchors** — **`^`** (start of string) and **`$`** (end of string). They are **zero-width** and **cannot** take **`?` `*` `+` `{…}`**. Inside **`[...]`**, **`^`** at the first position after **`[`** still means **negated class** only; elsewhere in the class **`^`** is a literal class member (e.g. **`[^^]`** is “any character except **`^`**”).
 
 ## Import
 
@@ -79,7 +80,7 @@ Drac2 does not support binding a caught exception (**`except … as`**), so read
 
 ### `match_from(program, text: str, start: int = 0) -> int | None`
 
-Try to match `program` against `text` beginning at `start`. Returns the **exclusive end index** on success, or `None` on failure.
+Try to match `program` against `text` beginning at `start`. Returns the **exclusive end index** on success, or `None` on failure. A **`^`** in the pattern still requires the **current** text index to be **`0`** (start of the full string), not **`start`**, matching common **`re`** behavior for a non-multiline pattern.
 
 ### `full_match(program, text: str, pos: int = 0) -> bool`
 
@@ -113,7 +114,7 @@ Rough guidance (exact thresholds vary by pattern, other code in the same alias, 
 
 | Concern | What to expect |
 |--------|----------------|
-| **`search` / `search_from`** | Tries the pattern from **each** start index until something matches. Cost scales with **haystack length ×** work per attempt. Long buffers (order of **many hundreds of characters** of “boring” prefix before a hit, or more) can exhaust the budget faster than a single **`full_match`** on a string of similar size. Prefer anchoring with **`match_from`** when you know where matching should start, or narrow the haystack before regex. |
+| **`search` / `search_from`** | Tries the pattern from **each** start index until something matches. Cost scales with **haystack length ×** work per attempt. Long buffers (order of **many hundreds of characters** of “boring” prefix before a hit, or more) can exhaust the budget faster than a single **`full_match`** on a string of similar size. Prefer anchoring with **`match_from`** when you know where matching should start, or narrow the haystack before regex. If **every** top-level alternation arm begins with **`^`**, the implementation only considers start index **`0`** (and returns **`None`** from **`search*`** when **`pos > 0`**). |
 | **`full_match` / `match_from`** | A **single** pass from a known index is usually cheaper than scanning the whole string. Braced repeats and classes in the **low hundreds** of code units per match are often fine; **thousands** of code units can still work for simple programs (e.g. `.*`, `\d{n}`), but keep an eye on budget if the alias does other heavy work in the same run. |
 | **Deeply nested `(` … `)`** | Each nesting level uses **stack** in the matcher. **Many dozen** levels of purely nested groups can hit **maximum recursion depth** (failure before the statement cap). Flatten or simplify nesting if you need a lot of wrappers. |
 | **Alternation and `full_match`** | Arms are tried **in order**. If an earlier arm matches the **beginning** of the text but not the **whole** string, and nothing follows that alternation in the pattern, **`full_match` still fails**—there is no automatic “try a longer arm” pass. Design alternatives so they are not **strict prefixes** of each other (e.g. fixed-width codes `a00`, `a01`, …), or put shared prefixes **outside** the alternation. |
