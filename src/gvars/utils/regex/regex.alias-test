@@ -333,6 +333,21 @@ name: stress word class brace two fifty
 ---
 name: stress mixed alts quantifiers and classes
 
+!regex -testcase "benchmark search loop should keep correct spans"
+---
+---
+name: benchmark search loop should keep correct spans
+
+!regex -testcase "benchmark class brace loop should keep full matches"
+---
+---
+name: benchmark class brace loop should keep full matches
+
+!regex -testcase "benchmark quantified alternation loop should keep matches"
+---
+---
+name: benchmark quantified alternation loop should keep matches
+
 !regex -testcase "match_from_captures should return two groups"
 ---
 ---

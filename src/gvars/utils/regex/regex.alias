@@ -413,6 +413,56 @@ elif testcase == "stress mixed alts quantifiers and classes":
     body = "01" * 50 + "ww"
 
     expect(regex.full_match(p, body)).to.be(True)
+elif testcase == "benchmark search loop should keep correct spans":
+    # Benchmark sentinel: compare wall time for this testcase across revisions.
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    pad = "x" * 400
+    hay = pad + "needle" + pad
+    rx = regex.compile("needle")
+    checksum = 0
+    misses = 0
+    i = 0
+    while i < loops:
+        hit = rx.search(hay)
+        if hit == None:
+            misses = misses + 1
+        elif hit.start != 400 or hit.end != 406:
+            misses = misses + 1
+        else:
+            checksum = checksum + hit.start + hit.end
+        i = i + 1
+    expect(misses).to.be(0)
+    expect(checksum).to.be((400 + 406) * loops)
+elif testcase == "benchmark class brace loop should keep full matches":
+    # Benchmark sentinel: class-heavy full_match loop.
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    p = regex.compile_program("\\w{250}")
+    text = "a" * 250
+    misses = 0
+    i = 0
+    while i < loops:
+        if not regex.full_match(p, text):
+            misses = misses + 1
+        i = i + 1
+    expect(misses).to.be(0)
+elif testcase == "benchmark quantified alternation loop should keep matches":
+    # Benchmark sentinel: repetition + alternation hot path loop.
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    p = regex.compile_program("([01]{2}|aa){50}(z|ww)")
+    body = "01" * 50 + "ww"
+    misses = 0
+    i = 0
+    while i < loops:
+        if not regex.full_match(p, body):
+            misses = misses + 1
+        i = i + 1
+    expect(misses).to.be(0)
 elif testcase == "match_from_captures should return two groups":
     p = regex.compile_program("(ID)-(\\d{4})")
     m = regex.match_from_captures(p, "ID-0007", 0)

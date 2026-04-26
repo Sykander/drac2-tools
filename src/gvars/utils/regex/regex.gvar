@@ -51,10 +51,11 @@ def _digit_val(ch: str) -> int:
 
 
 def _parse_int(pat: str, i: int):
-    if i >= len(pat) or pat[i] < "0" or pat[i] > "9":
+    n_pat = len(pat)
+    if i >= n_pat or pat[i] < "0" or pat[i] > "9":
         return None, i
     n = 0
-    while i < len(pat) and pat[i] >= "0" and pat[i] <= "9":
+    while i < n_pat and pat[i] >= "0" and pat[i] <= "9":
         n = n * 10 + _digit_val(pat[i])
         i = i + 1
     return n, i
@@ -195,7 +196,11 @@ def _parse_class(pat: str, i: int):
     if pat[j] == "^":
         neg = True
         j = j + 1
-    acc = ""
+    acc_parts = []
+
+    def _acc_add(s: str):
+        if len(s) > 0:
+            acc_parts.append(s)
     pending = None
     while j < len(pat) and pat[j] != "]":
         c = pat[j]
@@ -203,37 +208,43 @@ def _parse_class(pat: str, i: int):
             e, j2 = _parse_escape(pat, j)
             ex = _expand_set_escape(e, j)
             if pending != None:
-                acc += pending
+                _acc_add(pending)
                 pending = None
-            acc += ex
+            _acc_add(ex)
             j = j2
             continue
         if c == "-" and pending != None and j + 1 < len(pat) and pat[j + 1] != "]":
             hi = pat[j + 1]
             if hi == "\\":
                 _rx_err("range end must be literal", j + 1)
-            acc += _range_expand(pending, hi, j)
+            _acc_add(_range_expand(pending, hi, j))
             pending = None
             j = j + 2
             continue
         if c == "-":
             if pending != None:
-                acc += pending
+                _acc_add(pending)
                 pending = None
             pending = "-"
             j = j + 1
             continue
         if pending != None:
-            acc += pending
+            _acc_add(pending)
         pending = c
         j = j + 1
     if j >= len(pat):
         _rx_err("unclosed [", i)
     if pending != None:
-        acc += pending
+        _acc_add(pending)
+    acc = "".join(acc_parts)
     if len(acc) == 0 and not neg:
         _rx_err("empty []", j)
-    return {"k": "set", "n": neg, "s": acc}, j + 1
+    set_map = {}
+    k = 0
+    while k < len(acc):
+        set_map[acc[k]] = True
+        k = k + 1
+    return {"k": "set", "n": neg, "s": acc, "m": set_map}, j + 1
 
 
 def _char_in_set(ch: str, s: str) -> bool:
@@ -432,25 +443,25 @@ def group_count(program: list) -> int:
 def _match_node_plain(node, text: str, pos: int, lim: int):
     """Match one literal, dot, class escape (``\\d`` etc.), or ``[...]`` set token."""
     k = node["k"]
-    if pos > lim:
+    if pos >= lim:
         return -1
     if k == "lit":
-        if pos < len(text) and text[pos] == node["v"]:
+        if text[pos] == node["v"]:
             return pos + 1
         return -1
     if k == "dot":
-        if pos < len(text):
-            return pos + 1
-        return -1
+        return pos + 1
     if k == "cls":
-        if pos < len(text) and _cls_ok(text[pos], node["c"]):
+        if _cls_ok(text[pos], node["c"]):
             return pos + 1
         return -1
     if k == "set":
-        if pos >= len(text):
-            return -1
         ch = text[pos]
-        ok = _char_in_set(ch, node["s"])
+        set_map = node.get("m", None)
+        if set_map == None:
+            ok = _char_in_set(ch, node["s"])
+        else:
+            ok = set_map.get(ch, False)
         if node["n"]:
             ok = not ok
         if ok:
@@ -493,7 +504,7 @@ def _greedy_max_take(atom, text: str, pos: int, lim: int, hi):
     p = pos
     c = 0
     guard = 0
-    max_guard = len(text) + len(text) + 128
+    max_guard = lim + lim + 128
     while guard < max_guard:
         guard = guard + 1
         if hi != None and c >= hi:
@@ -523,7 +534,8 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps):
     n_nodes = len(nodes)
     while i < n_nodes:
         node = nodes[i]
-        if node["k"] == "alt":
+        node_k = node["k"]
+        if node_k == "alt":
             arms = node["arms"]
             ai = 0
             matched = -1
@@ -542,7 +554,7 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps):
                 return -1
             i = i + 1
             continue
-        if node["k"] == "rep":
+        if node_k == "rep":
             lo = node["lo"]
             hi = node["hi"]
             atom = node["a"]
