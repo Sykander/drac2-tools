@@ -618,4 +618,16 @@ elif testcase == "search_from_captures should honor all arms leading ^":
     expect(hit != None).to.be(True)
     expect(hit.start).to.be(0)
     expect(hit.groups[0]).to.be("bc")
+elif testcase == "match_from should return None when start past end":
+    p = regex.compile_program("a")
+
+    expect(regex.match_from(p, "x", 2)).to.be(None)
+elif testcase == "full_match should be false when pos past end":
+    p = regex.compile_program("a")
+
+    expect(regex.full_match(p, "x", 2)).to.be(False)
+elif testcase == "search_from should return None when pos past haystack end":
+    p = regex.compile_program("a")
+
+    expect(regex.search_from(p, "x", 2)).to.be(None)
 </drac2>

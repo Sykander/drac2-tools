@@ -33,6 +33,7 @@ Normalizes the pattern string (same rules as **`compile_program`**), parses it, 
 
 - Optional prefix **`re:`** is stripped (handy when copying patterns from file-based fixtures that mimic that convention).
 - If the string **starts and ends with `/`**, those slashes are stripped (body only; no flags suffix).
+- The dict may include **`_search_meta`** (``req0`` + ``lead`` for search fast paths). It lives in the same LRU entry as the rest of the compiled dict (see **Performance notes**); treat it as implementation detail, not a stable extension surface.
 
 | Key | Type | Role |
 |-----|------|------|
@@ -46,6 +47,7 @@ Normalizes the pattern string (same rules as **`compile_program`**), parses it, 
 | **`match_from_captures`** | `(text, start=0) -> dict \| None` | Same as module **`match_from_captures`**. |
 | **`search_captures`** | `(text, pos=0, endpos=None) -> dict \| None` | Same as module **`search_from_captures`** with optional **`pos`**. |
 | **`program`** | `list` | Opcode list for low-level calls. |
+| **`_search_meta`** | `dict` \| absent | Present on dicts from **`compile()`**: ``{"req0": bool, "lead": …}`` shared by **`search`** / **`search_captures`** through internal scan helpers. Evicted with the compile-cache entry. |
 
 Example:
 
@@ -80,23 +82,23 @@ Drac2 does not support binding a caught exception (**`except … as`**), so read
 
 ### `match_from(program, text: str, start: int = 0) -> int | None`
 
-Try to match `program` against `text` beginning at `start`. Returns the **exclusive end index** on success, or `None` on failure. A **`^`** in the pattern still requires the **current** text index to be **`0`** (start of the full string), not **`start`**, matching common **`re`** behavior for a non-multiline pattern.
+Try to match `program` against `text` beginning at `start`. Returns the **exclusive end index** on success, or `None` on failure. If **`start > len(text)`**, returns **`None`** without running the matcher. A **`^`** in the pattern still requires the **current** text index to be **`0`** (start of the full string), not **`start`**, matching common **`re`** behavior for a non-multiline pattern.
 
 ### `full_match(program, text: str, pos: int = 0) -> bool`
 
-`True` iff the suffix **`text[pos:]`** is matched in full (exclusive end equals **`len(text)`**).
+`True` iff the suffix **`text[pos:]`** is matched in full (exclusive end equals **`len(text)`**). If **`pos > len(text)`**, returns **`False`** without invoking the matcher.
 
 ### `search_from(program, text: str, pos: int = 0) -> dict | None`
 
-Left‑to‑right scan from **`pos`**: returns **`{"start": i, "end": j}`** for the first match, or **`None`**.
+Left‑to‑right scan from **`pos`**: returns **`{"start": i, "end": j}`** for the first match, or **`None`**. If **`pos > len(text)`**, returns **`None`** immediately. Rebuilds search hints each call; **`compile()`**’s **`search`** uses the cached **`_search_meta`** object via an internal helper so repeated **`rx.search`** does not.
 
 ### `match_from_captures(program, text: str, start: int = 0) -> dict | None`
 
 Returns **`None`** on failure. On success: **`{"end": exclusive_index, "groups": list}`** with **`groups`** as described above (**`groups[0]`** is **`text[start:end]`**).
 
-### `search_from_captures(program, text: str, pos: int = 0) -> dict | None`
+### `search_from_captures(program, text: str, pos: int = 0, group_total=None, program_mc=None) -> dict | None`
 
-Returns **`None`** or **`{"start", "end", "groups"}`** with the same **`groups`** list layout as **`match_from_captures`**, scanning from **`pos`**.
+Returns **`None`** or **`{"start", "end", "groups"}`** with the same **`groups`** list layout as **`match_from_captures`**, scanning from **`pos`**. **`compile()`**’s **`search_captures`** reuses the cached **`_search_meta`** via an internal helper when the pattern has captures.
 
 ### `group_count(program: list) -> int`
 
@@ -105,6 +107,8 @@ Largest capturing group index (same count idea as Python’s pattern group count
 ## Performance notes
 
 Compile **once** per static pattern (e.g. at alias load or in a gvar constant), then reuse the program for many strings. Avoid recompiling inside a tight loop over long inputs.
+
+**`compile()`** builds search hints (**`_search_meta`**: whether every top-level arm forces start index ``0``, plus the optional first-character prefilter atom) **once** per cache miss and stores them on the returned dict; **`rx.search`** / **`rx.search_captures`** reuse that object for the pattern’s lifetime in the LRU cache—no second map to keep in sync with **`compile_program`** output.
 
 ## Limits and scale (Avrae)
 
