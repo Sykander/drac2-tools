@@ -17,6 +17,8 @@ TEST_CASES = [
     ("benchmark class brace loop should keep full matches", "loops"),
     ("benchmark quantified alternation loop should keep matches", "loops"),
     ("benchmark compile multiple regexes in one invocation", "compiles"),
+    ("benchmark compile cache hit loop should keep matches", "compiles"),
+    ("benchmark compile cache miss loop should keep matches", "compiles"),
     ("benchmark compiled full_match loop should keep matches", "loops"),
     ("benchmark compiled fullmatch alias loop should keep matches", "loops"),
     ("benchmark compiled match loop should keep end index", "loops"),

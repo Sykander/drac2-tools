@@ -69,6 +69,33 @@ elif testcase == "benchmark compile multiple regexes in one invocation":
         expect(rx.full_match(checks[pi])).to.be(True)
         i = i + 1
     expect(i).to.be(compiles)
+elif testcase == "benchmark compile cache hit loop should keep matches":
+    compiles = int(args.last("compiles", "5"))
+    if compiles < 1:
+        compiles = 1
+    pat = "abc123xyz"
+    text = "abc123xyz"
+    misses = 0
+    i = 0
+    while i < compiles:
+        rx = regex.compile(pat)
+        if not rx.full_match(text):
+            misses = misses + 1
+        i = i + 1
+    expect(misses).to.be(0)
+elif testcase == "benchmark compile cache miss loop should keep matches":
+    compiles = int(args.last("compiles", "5"))
+    if compiles < 1:
+        compiles = 1
+    misses = 0
+    i = 0
+    while i < compiles:
+        pat = "abc" + str(i) + "xyz"
+        rx = regex.compile(pat)
+        if not rx.full_match(pat):
+            misses = misses + 1
+        i = i + 1
+    expect(misses).to.be(0)
 elif testcase == "benchmark compiled full_match loop should keep matches":
     loops = int(args.last("loops", "1"))
     if loops < 1:

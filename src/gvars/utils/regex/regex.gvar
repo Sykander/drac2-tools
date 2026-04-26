@@ -12,6 +12,7 @@
 
 # Last ``_rx_err`` payload for diagnostics (e.g. tests): ``(message, index_or_None)`` before ``err()`` fires.
 _RX_DIAG = {"last": None}
+_RX_COMPILE_CACHE = {"map": {}, "order": [], "max_size": 64}
 
 
 def _rx_err(msg: str, idx: int = None):
@@ -818,6 +819,56 @@ def _normalize_pattern_string(pat: str) -> str:
     return pat
 
 
+def _program_literal(program: list):
+    """Return literal text iff ``program`` is only ``lit`` nodes; else ``None``."""
+    i = 0
+    parts = []
+    while i < len(program):
+        node = program[i]
+        if node["k"] != "lit":
+            return None
+        parts.append(node["v"])
+        i = i + 1
+    return "".join(parts)
+
+
+def _compile_cache_get(key: str):
+    c_map = _RX_COMPILE_CACHE["map"]
+    hit = c_map.get(key, None)
+    if hit == None:
+        return None
+    order = _RX_COMPILE_CACHE["order"]
+    j = 0
+    while j < len(order):
+        if order[j] == key:
+            order.pop(j)
+            break
+        j = j + 1
+    order.append(key)
+    return hit
+
+
+def _compile_cache_put(key: str, compiled):
+    c_map = _RX_COMPILE_CACHE["map"]
+    order = _RX_COMPILE_CACHE["order"]
+    if c_map.get(key, None) != None:
+        c_map[key] = compiled
+        j = 0
+        while j < len(order):
+            if order[j] == key:
+                order.pop(j)
+                break
+            j = j + 1
+        order.append(key)
+        return
+    c_map[key] = compiled
+    order.append(key)
+    max_size = _RX_COMPILE_CACHE["max_size"]
+    while len(order) > max_size:
+        old = order.pop(0)
+        c_map.pop(old, None)
+
+
 def compile(pat: str):
     """
     Compile ``pat`` and return a dict for use from aliases: normalized ``pattern`` string,
@@ -830,17 +881,61 @@ def compile(pat: str):
     always sees the full ``text``). Details: ``docs/gvars/regex.md``.
     """
     pat_norm = _normalize_pattern_string(pat)
+    cached = _compile_cache_get(pat_norm)
+    if cached != None:
+        return dict(cached)
     prog = compile_program(pat_norm)
     ng = _nodes_capture_mc(prog)
+    lit = _program_literal(prog) if ng == 0 else None
+    lit_len = len(lit) if lit != None else 0
+
+    def _match_lit(t, start = 0):
+        if lit == None:
+            return match_from(prog, t, start)
+        if start < 0:
+            return match_from(prog, t, start)
+        end = start + lit_len
+        if end > len(t):
+            return None
+        if t[start:end] == lit:
+            return end
+        return None
+
+    def _search_lit(t, pos = 0):
+        if lit == None:
+            return search_from(prog, t, pos)
+        s = pos
+        if s < 0:
+            s = 0
+        lim = len(t)
+        if lit_len == 0:
+            if s <= lim:
+                return {"start": s, "end": s}
+            return None
+        i = t.find(lit, s)
+        if i < 0:
+            return None
+        return {"start": i, "end": i + lit_len}
+
+    def _fullmatch_lit(t, pos = 0, endpos = None):
+        if lit == None:
+            return full_match(prog, t, pos)
+        if pos < 0:
+            return full_match(prog, t, pos)
+        end = pos + lit_len
+        if end != len(t):
+            return False
+        return t[pos:end] == lit
+
     if ng == 0:
         def _mfc0(t, start = 0):
-            end = match_from(prog, t, start)
+            end = _match_lit(t, start)
             if end == None:
                 return None
             return {"end": end, "groups": [t[start:end]]}
 
         def _sfc0(t, pos = 0, endpos = None):
-            hit = search_from(prog, t, pos)
+            hit = _search_lit(t, pos)
             if hit == None:
                 return None
             s = hit["start"]
@@ -849,18 +944,20 @@ def compile(pat: str):
     else:
         _mfc0 = lambda t, start = 0: match_from_captures(prog, t, start, ng, ng)
         _sfc0 = lambda t, pos = 0, endpos = None: search_from_captures(prog, t, pos, ng, ng)
-    return {
+    compiled = {
         "pattern": pat_norm,
         "groups": ng,
-        "fullmatch": lambda t, pos = 0, endpos = None: full_match(prog, t, pos),
-        "full_match": lambda t, pos = 0, endpos = None: full_match(prog, t, pos),
-        "match": lambda t, pos = 0, endpos = None: match_from(prog, t, pos),
-        "search": lambda t, pos = 0, endpos = None: search_from(prog, t, pos),
-        "match_from": lambda t, start = 0: match_from(prog, t, start),
+        "fullmatch": _fullmatch_lit,
+        "full_match": _fullmatch_lit,
+        "match": lambda t, pos = 0, endpos = None: _match_lit(t, pos),
+        "search": lambda t, pos = 0, endpos = None: _search_lit(t, pos),
+        "match_from": lambda t, start = 0: _match_lit(t, start),
         "match_from_captures": _mfc0,
         "search_captures": _sfc0,
         "program": prog,
     }
+    _compile_cache_put(pat_norm, compiled)
+    return dict(compiled)
 
 
 def diagnostic_compile(pat: str):

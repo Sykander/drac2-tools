@@ -538,6 +538,276 @@ name: ladder benchmark compile multiple regexes in one invocation 800
 ---
 name: ladder benchmark compile multiple regexes in one invocation 900
 
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "1"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 1
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "2"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 2
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "3"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 3
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "4"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 4
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "5"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 5
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "6"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 6
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "7"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 7
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "8"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 8
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "9"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 9
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "10"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 10
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "20"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 20
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "30"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 30
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "40"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 40
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "50"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 50
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "60"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 60
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "70"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 70
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "80"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 80
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "90"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 90
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "100"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 100
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "200"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 200
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "300"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 300
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "400"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 400
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "500"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 500
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "600"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 600
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "700"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 700
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "800"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 800
+
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "900"
+---
+---
+name: ladder benchmark compile cache hit loop should keep matches 900
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "1"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 1
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "2"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 2
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "3"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 3
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "4"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 4
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "5"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 5
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "6"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 6
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "7"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 7
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "8"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 8
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "9"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 9
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "10"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 10
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "20"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 20
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "30"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 30
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "40"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 40
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "50"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 50
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "60"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 60
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "70"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 70
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "80"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 80
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "90"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 90
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "100"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 100
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "200"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 200
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "300"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 300
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "400"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 400
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "500"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 500
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "600"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 600
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "700"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 700
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "800"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 800
+
+!regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "900"
+---
+---
+name: ladder benchmark compile cache miss loop should keep matches 900
+
 !regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "1"
 ---
 ---
