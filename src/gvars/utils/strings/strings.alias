@@ -110,4 +110,20 @@ elif testcase == "replace_all should return original when search never appears":
     result = strings.replace_all(given, search, repl)
 
     expect(result).to.be(given)
+elif testcase == "get_cardinal_text should spell small and hundreds numbers":
+    expect(strings.get_cardinal_text(0)).to.be("Zero")
+    expect(strings.get_cardinal_text(1)).to.be("One")
+    expect(strings.get_cardinal_text(21)).to.be("Twenty One")
+    expect(strings.get_cardinal_text(100)).to.be("One Hundred")
+    expect(strings.get_cardinal_text(193)).to.be("One Hundred and Ninety Three")
+elif testcase == "get_ordinal_text should spell ordinals including hundreds":
+    expect(strings.get_ordinal_text(1)).to.be("First")
+    expect(strings.get_ordinal_text(21)).to.be("Twenty First")
+    expect(strings.get_ordinal_text(100)).to.be("One Hundredth")
+    expect(strings.get_ordinal_text(193)).to.be("One Hundred and Ninety Third")
+elif testcase == "get_ordinal_text should combine scales with lowest ordinal chunk":
+    expect(strings.get_ordinal_text(1000)).to.be("One Thousandth")
+    expect(strings.get_ordinal_text(1000001)).to.be("One Million First")
+elif testcase == "get_cardinal_text should join thousand groups":
+    expect(strings.get_cardinal_text(1001)).to.be("One Thousand One")
 </drac2>

@@ -47,3 +47,23 @@ name: replace should return original string when search is absent
 ---
 ---
 name: replace_all should return original when search never appears
+
+!strings -testcase "get_cardinal_text should spell small and hundreds numbers"
+---
+---
+name: get_cardinal_text should spell small and hundreds numbers
+
+!strings -testcase "get_ordinal_text should spell ordinals including hundreds"
+---
+---
+name: get_ordinal_text should spell ordinals including hundreds
+
+!strings -testcase "get_ordinal_text should combine scales with lowest ordinal chunk"
+---
+---
+name: get_ordinal_text should combine scales with lowest ordinal chunk
+
+!strings -testcase "get_cardinal_text should join thousand groups"
+---
+---
+name: get_cardinal_text should join thousand groups
