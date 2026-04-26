@@ -1,0 +1,10 @@
+# Copy to e.g. my-probe-dims.txt, edit lines, then run:
+#   python3 .cursor/scripts/probe_perf_boundaries.py \
+#     --alias-dir src/gvars/utils/foo \
+#     --stress-alias foo-perf \
+#     --dimensions-file my-probe-dims.txt
+#
+# Each non-comment line: testcase_title,param,baseline,cap
+# testcase_title must match the elif testcase == "..." string in *-perf.alias exactly.
+
+# benchmark example loop should stay correct,loops,50,8000

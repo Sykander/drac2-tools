@@ -437,3 +437,68 @@ name: match_from_captures should split greedy plus groups
 ---
 ---
 name: search_from_captures should find nested alt capture
+
+!regex -testcase "full_match should accept string anchors ^ and $"
+---
+---
+name: full_match should accept string anchors ^ and $
+
+!regex -testcase "search_from should respect ^ only at string index zero"
+---
+---
+name: search_from should respect ^ only at string index zero
+
+!regex -testcase "search_from should return None for leading ^ when pos gt zero"
+---
+---
+name: search_from should return None for leading ^ when pos gt zero
+
+!regex -testcase "search_from should find arm without ^ across offsets"
+---
+---
+name: search_from should find arm without ^ across offsets
+
+!regex -testcase "full_match should accept escaped caret as literal"
+---
+---
+name: full_match should accept escaped caret as literal
+
+!regex -testcase "full_match should accept empty string for ^$"
+---
+---
+name: full_match should accept empty string for ^$
+
+!regex -testcase "compile_program should err on quantified ^"
+---
+---
+name: compile_program should err on quantified ^
+
+!regex -testcase "match_from_captures should work with leading ^ and captures"
+---
+---
+name: match_from_captures should work with leading ^ and captures
+
+!regex -testcase "match_from should fail ^ when start not at string zero even if suffix matches"
+---
+---
+name: match_from should fail ^ when start not at string zero even if suffix matches
+
+!regex -testcase "search_from_captures should honor all arms leading ^"
+---
+---
+name: search_from_captures should honor all arms leading ^
+
+!regex -testcase "match_from should return None when start past end"
+---
+---
+name: match_from should return None when start past end
+
+!regex -testcase "full_match should be false when pos past end"
+---
+---
+name: full_match should be false when pos past end
+
+!regex -testcase "search_from should return None when pos past haystack end"
+---
+---
+name: search_from should return None when pos past haystack end

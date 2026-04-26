@@ -2,14 +2,16 @@
 docs/gvars/regex.md
 
 ``compile()`` → dict (pattern string, groups count, fullmatch/match/search, capture helpers,
-program). ``compile_program()`` → opcode list for ``match_from``, ``full_match``, ``search_from``, etc.
+program, optional ``_search_meta`` tied to the compile LRU entry). ``compile_program()`` → opcode list
+for ``match_from``, ``full_match``, ``search_from``, etc.
 
 Supported: literals, ``.``, ``\\d``..``\\S``, ``?`` ``*`` ``+``, ``{n}``/``{n,}``/``{n,m}``, ``()`` captures,
-``(?:)``, ``[]`` classes, ``|``.
+``(?:)``, ``[]`` classes, ``|``, ``^`` / ``$`` as **string** anchors (start / end of haystack; no multiline flags).
 
 In ``[]``: literals, ``a-z``/``A-Z``/``0-9`` ranges, only ``\\d`` ``\\w`` ``\\s``. ``\\|`` for literal ``|``.
+Use ``\\^`` for a literal caret outside a class.
 
-Not: ``^`` ``$`` anchors, backrefs, ``(?P<name>)``, ``\\D``/``\\W``/``\\S`` inside classes (use e.g. ``[^0-9]``).
+Not: multiline line anchors, backrefs, ``(?P<name>)``, ``\\D``/``\\W``/``\\S`` inside classes (use e.g. ``[^0-9]``).
 
 Quantifiers backtrack; alternation tries each arm in source order.
 
@@ -113,6 +115,8 @@ def _parse_escape(pat: str, i: int):
         return {"k": "cls", "c": "S"}, i + 2
     if n == "|":
         return {"k": "lit", "v": "|"}, i + 2
+    if n == "^":
+        return {"k": "lit", "v": "^"}, i + 2
     return {"k": "lit", "v": n}, i + 2
 
 
@@ -318,11 +322,24 @@ def _parse_seq_concat(pat: str, i: int, in_group: bool, cap_counter: list, group
             i = i + 1
         elif c == "\\":
             atom, i = _parse_escape(pat, i)
+        elif c == "^":
+            atom = {"k": "beg"}
+            i = i + 1
+        elif c == "$":
+            atom = {"k": "end"}
+            i = i + 1
         elif c == "{" or c == "}" or c == "*" or c == "+" or c == "?" or c == "]":
             _rx_err(f"unexpected {c}", i)
         else:
             atom = {"k": "lit", "v": c}
             i = i + 1
+        if atom["k"] == "beg" or atom["k"] == "end":
+            if i < len(pat):
+                q = pat[i]
+                if q == "?" or q == "*" or q == "+" or q == "{":
+                    _rx_err("^ and $ cannot be quantified", i)
+            nodes.append(atom)
+            continue
         atom, i = _parse_quant(pat, i, atom)
         nodes.append(atom)
     if in_group:
@@ -561,6 +578,14 @@ def _match_node_plain(node, text: str, pos: int, lim: int):
 
 def _match_one_unit(atom, text: str, pos: int, lim: int, caps):
     """One repetition step: a plain atom or a parenthesized sub-pattern."""
+    if atom["k"] == "beg":
+        if pos != 0:
+            return -1
+        return pos
+    if atom["k"] == "end":
+        if pos != lim:
+            return -1
+        return pos
     if atom["k"] == "grp":
         r = _match_seq_bt(atom["g"], text, pos, lim, 0, caps, atom.get("mc", 0))
         if r < 0:
@@ -590,6 +615,8 @@ def _greedy_max_take(atom, text: str, pos: int, lim: int, hi):
     Greedy repeat count for ``atom`` from ``pos`` (``hi`` ``None`` means unbounded).
     Probes with ``caps`` unset so measuring repeats does not write capture slots.
     """
+    if hi != None and hi == 0:
+        return 0, pos
     p = pos
     c = 0
     guard = 0
@@ -726,6 +753,65 @@ def _match_all(nodes: list, text: str, pos: int, lim: int, caps, nodes_mc: int =
     return _match_seq_bt(nodes, text, pos, lim, 0, caps, nodes_mc)
 
 
+def _search_prefilter_skip_anchors(program: list, idx: int) -> int:
+    """Advance ``idx`` past leading ``beg`` / ``end`` nodes (zero-width)."""
+    n = len(program)
+    while idx < n:
+        k = program[idx]["k"]
+        if k == "beg" or k == "end":
+            idx = idx + 1
+            continue
+        break
+    return idx
+
+
+def _leading_beg_chain(nodes: list) -> bool:
+    """True iff ``nodes`` starts with one or more ``beg`` anchors (before any other node)."""
+    if len(nodes) == 0 or nodes[0]["k"] != "beg":
+        return False
+    j = 0
+    n = len(nodes)
+    while j < n and nodes[j]["k"] == "beg":
+        j = j + 1
+    return j > 0
+
+
+def _compute_program_requires_start_index_zero(program: list) -> bool:
+    """
+    True iff every top-level alternative begins with at least one ``^`` (``beg``), so a
+    successful ``search_from`` can only start at text index ``0``.
+    """
+    n = len(program)
+    if n == 0:
+        return False
+    f = program[0]
+    fk = f["k"]
+    if fk == "beg":
+        return True
+    if fk != "alt":
+        return False
+    arms = f["arms"]
+    if len(arms) == 0:
+        return False
+    ai = 0
+    while ai < len(arms):
+        if not _leading_beg_chain(arms[ai]):
+            return False
+        ai = ai + 1
+    return True
+
+
+def _build_search_meta(program: list):
+    """
+    One-shot search hints for ``program``: ``req0`` (only index ``0`` can start a match) and
+    ``lead`` (plain first-consumed atom for haystack prefilter, or ``None``).
+    """
+    return {
+        "req0": _compute_program_requires_start_index_zero(program),
+        "lead": _search_prefilter_node(program),
+    }
+
+
 def _search_prefilter_node(program: list):
     """
     Return a plain atom node (lit/cls/set) that must match the first consumed character
@@ -733,7 +819,13 @@ def _search_prefilter_node(program: list):
     """
     if len(program) == 0:
         return None
-    node = program[0]
+    i0 = 0
+    k0 = program[0]["k"]
+    if k0 == "beg" or k0 == "end":
+        i0 = _search_prefilter_skip_anchors(program, 0)
+    if i0 >= len(program):
+        return None
+    node = program[i0]
     k = node["k"]
     if k == "rep":
         if node["lo"] < 1:
@@ -750,6 +842,8 @@ def _search_prefilter_node(program: list):
 def match_from(program: list, text: str, start: int = 0):
     """If ``program`` matches ``text`` from ``start``, return exclusive end index; else ``None``."""
     lim = len(text)
+    if start > lim:
+        return None
     end = _match_all(program, text, start, lim, None)
     if end < 0:
         return None
@@ -771,6 +865,8 @@ def match_from_captures(program: list, text: str, start: int = 0, group_total: i
     ng = group_total
     caps = [None] * (ng + 1)
     lim = len(text)
+    if start > lim:
+        return None
     end = _match_all(program, text, start, lim, caps, program_mc)
     if end < 0:
         return None
@@ -781,27 +877,84 @@ def match_from_captures(program: list, text: str, start: int = 0, group_total: i
 def full_match(program: list, text: str, pos: int = 0) -> bool:
     """True iff ``text[pos:]`` is matched in full (match ends at ``len(text)``)."""
     lim = len(text)
+    if pos > lim:
+        return False
     e = _match_all(program, text, pos, lim, None)
     return e >= 0 and e == lim
 
 
-def search_from(program: list, text: str, pos: int = 0):
-    """First match with ``start >= pos``: ``{"start", "end"}`` or ``None``."""
-    lim = len(text)
-    lead = _search_prefilter_node(program)
+def _search_from_core(program, text, pos, lim, sm):
+    """Shared scan for ``search_from``; ``sm`` is ``_build_search_meta(program)``."""
+    if pos > lim:
+        return None
+    lead = sm["lead"]
+    req0 = sm["req0"]
+    if req0 and pos > 0:
+        return None
     s = pos
+    if req0:
+        s = 0
     if s < 0:
         s = 0
-    while s <= lim:
+    last_s = 0 if req0 else lim
+    while s <= last_s:
         if lead != None:
             if s >= lim:
                 return None
             if _match_node_plain(lead, text, s, lim) < 0:
+                if req0:
+                    return None
                 s = s + 1
                 continue
         e = _match_all(program, text, s, lim, None)
         if e >= 0:
             return {"start": s, "end": e}
+        if req0:
+            return None
+        s = s + 1
+    return None
+
+
+def search_from(program: list, text: str, pos: int = 0):
+    """First match with ``start >= pos``: ``{"start", "end"}`` or ``None``."""
+    lim = len(text)
+    sm = _build_search_meta(program)
+    return _search_from_core(program, text, pos, lim, sm)
+
+
+def _search_from_captures_core(program, text, pos, lim, cfg):
+    """Shared scan for ``search_from_captures``; ``cfg`` has ``ng``, ``pm`` (program_mc), ``sm``."""
+    if pos > lim:
+        return None
+    ng = cfg["ng"]
+    program_mc = cfg["pm"]
+    sm = cfg["sm"]
+    lead = sm["lead"]
+    req0 = sm["req0"]
+    if req0 and pos > 0:
+        return None
+    s = pos
+    if req0:
+        s = 0
+    if s < 0:
+        s = 0
+    last_s = 0 if req0 else lim
+    while s <= last_s:
+        if lead != None:
+            if s >= lim:
+                return None
+            if _match_node_plain(lead, text, s, lim) < 0:
+                if req0:
+                    return None
+                s = s + 1
+                continue
+        caps = [None] * (ng + 1)
+        end = _match_all(program, text, s, lim, caps, program_mc)
+        if end >= 0:
+            caps[0] = text[s:end]
+            return {"start": s, "end": end, "groups": caps}
+        if req0:
+            return None
         s = s + 1
     return None
 
@@ -812,26 +965,9 @@ def search_from_captures(program: list, text: str, pos: int = 0, group_total: in
         group_total = _nodes_capture_mc(program)
     if program_mc == None:
         program_mc = group_total
-    ng = group_total
     lim = len(text)
-    lead = _search_prefilter_node(program)
-    s = pos
-    if s < 0:
-        s = 0
-    while s <= lim:
-        if lead != None:
-            if s >= lim:
-                return None
-            if _match_node_plain(lead, text, s, lim) < 0:
-                s = s + 1
-                continue
-        caps = [None] * (ng + 1)
-        end = _match_all(program, text, s, lim, caps, program_mc)
-        if end >= 0:
-            caps[0] = text[s:end]
-            return {"start": s, "end": end, "groups": caps}
-        s = s + 1
-    return None
+    cfg = {"ng": group_total, "pm": program_mc, "sm": _build_search_meta(program)}
+    return _search_from_captures_core(program, text, pos, lim, cfg)
 
 
 def _normalize_pattern_string(pat: str) -> str:
@@ -910,12 +1046,17 @@ def compile(pat: str):
     indices, or small dicts rather than CPython ``Match`` objects. Optional ``endpos``
     arguments are accepted for call-site similarity to ``re`` but are ignored (the engine
     always sees the full ``text``). Details: ``docs/gvars/regex.md``.
+
+    The returned dict may include ``_search_meta`` (``req0`` + ``lead`` for ``search*``); it is
+    tied to the same LRU entry as the rest of the dict and is not part of the stable public
+    surface beyond what ``search`` / ``search_captures`` consume.
     """
     pat_norm = _normalize_pattern_string(pat)
     cached = _compile_cache_get(pat_norm)
     if cached != None:
         return dict(cached)
     prog = compile_program(pat_norm)
+    sm = _build_search_meta(prog)
     ng = _nodes_capture_mc(prog)
     lit = _program_literal(prog) if ng == 0 else None
     lit_len = len(lit) if lit != None else 0
@@ -934,7 +1075,7 @@ def compile(pat: str):
 
     def _search_lit(t, pos = 0):
         if lit == None:
-            return search_from(prog, t, pos)
+            return _search_from_core(prog, t, pos, len(t), sm)
         s = pos
         if s < 0:
             s = 0
@@ -973,8 +1114,9 @@ def compile(pat: str):
             e = hit["end"]
             return {"start": s, "end": e, "groups": [t[s:e]]}
     else:
+        cap_search_cfg = {"ng": ng, "pm": ng, "sm": sm}
         _mfc0 = lambda t, start = 0: match_from_captures(prog, t, start, ng, ng)
-        _sfc0 = lambda t, pos = 0, endpos = None: search_from_captures(prog, t, pos, ng, ng)
+        _sfc0 = lambda t, pos = 0, endpos = None, cfg = cap_search_cfg: _search_from_captures_core(prog, t, pos, len(t), cfg)
     compiled = {
         "pattern": pat_norm,
         "groups": ng,
@@ -986,6 +1128,7 @@ def compile(pat: str):
         "match_from_captures": _mfc0,
         "search_captures": _sfc0,
         "program": prog,
+        "_search_meta": sm,
     }
     _compile_cache_put(pat_norm, compiled)
     return dict(compiled)
