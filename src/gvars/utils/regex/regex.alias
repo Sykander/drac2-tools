@@ -349,6 +349,24 @@ elif testcase == "compile wrapper should reuse program for repeated checks":
     expect(rx.full_match("a")).to.be(True)
     expect(rx.full_match("a")).to.be(True)
     expect(rx.full_match("b")).to.be(False)
+elif testcase == "compile wrapper captures helpers should work with zero groups":
+    rx = regex.compile("abc")
+
+    expect(rx.groups).to.be(0)
+    m = rx.match_from_captures("xabc", 1)
+    expect(m != None).to.be(True)
+    expect(m.end).to.be(4)
+    expect(m.groups).to.have.length(1)
+    expect(m.groups[0]).to.be("abc")
+    expect(rx.match_from_captures("xab", 1)).to.be(None)
+
+    hit = rx.search_captures("zzabcqq")
+    expect(hit != None).to.be(True)
+    expect(hit.start).to.be(2)
+    expect(hit.end).to.be(5)
+    expect(hit.groups).to.have.length(1)
+    expect(hit.groups[0]).to.be("abc")
+    expect(rx.search_captures("zzz")).to.be(None)
 elif testcase == "full_match should handle complex email like token":
     rx = regex.compile_program("[\\w.]+@[\\w]+")
 
@@ -463,6 +481,139 @@ elif testcase == "benchmark quantified alternation loop should keep matches":
             misses = misses + 1
         i = i + 1
     expect(misses).to.be(0)
+elif testcase == "benchmark compile multiple regexes in one invocation":
+    # Benchmark sentinel: compile path throughput (statement-budget bound).
+    compiles = int(args.last("compiles", "5"))
+    if compiles < 1:
+        compiles = 1
+    patterns = ["a+", "\\d{3}", "[a-z]{2}", "(cat|dog)", "x{2,3}y"]
+    checks = ["aaaa", "123", "ab", "dog", "xxy"]
+    i = 0
+    while i < compiles:
+        pi = i % len(patterns)
+        rx = regex.compile(patterns[pi])
+        expect(rx.full_match(checks[pi])).to.be(True)
+        i = i + 1
+    expect(i).to.be(compiles)
+elif testcase == "benchmark compiled full_match loop should keep matches":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    rx = regex.compile("abc")
+    misses = 0
+    i = 0
+    while i < loops:
+        if not rx.full_match("abc"):
+            misses = misses + 1
+        i = i + 1
+    expect(misses).to.be(0)
+elif testcase == "benchmark compiled fullmatch alias loop should keep matches":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    rx = regex.compile("abc")
+    misses = 0
+    i = 0
+    while i < loops:
+        if not rx.fullmatch("abc"):
+            misses = misses + 1
+        i = i + 1
+    expect(misses).to.be(0)
+elif testcase == "benchmark compiled match loop should keep end index":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    rx = regex.compile("abc")
+    checksum = 0
+    misses = 0
+    i = 0
+    while i < loops:
+        got = rx.match("abcx", 0)
+        if got != 3:
+            misses = misses + 1
+        else:
+            checksum = checksum + got
+        i = i + 1
+    expect(misses).to.be(0)
+    expect(checksum).to.be(3 * loops)
+elif testcase == "benchmark compiled search loop should keep span":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    rx = regex.compile("abc")
+    checksum = 0
+    misses = 0
+    i = 0
+    while i < loops:
+        hit = rx.search("zzabcqq")
+        if hit == None:
+            misses = misses + 1
+        elif hit.start != 2 or hit.end != 5:
+            misses = misses + 1
+        else:
+            checksum = checksum + hit.start + hit.end
+        i = i + 1
+    expect(misses).to.be(0)
+    expect(checksum).to.be((2 + 5) * loops)
+elif testcase == "benchmark compiled match_from loop should keep end index":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    rx = regex.compile("abc")
+    checksum = 0
+    misses = 0
+    i = 0
+    while i < loops:
+        got = rx.match_from("xabc", 1)
+        if got != 4:
+            misses = misses + 1
+        else:
+            checksum = checksum + got
+        i = i + 1
+    expect(misses).to.be(0)
+    expect(checksum).to.be(4 * loops)
+elif testcase == "benchmark compiled match_from_captures loop should keep captures":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    rx = regex.compile("(a)(b)c")
+    misses = 0
+    checksum = 0
+    i = 0
+    while i < loops:
+        m = rx.match_from_captures("xabc", 1)
+        if m == None:
+            misses = misses + 1
+        elif m.end != 4:
+            misses = misses + 1
+        elif m.groups[0] != "abc" or m.groups[1] != "a" or m.groups[2] != "b":
+            misses = misses + 1
+        else:
+            checksum = checksum + m.end + len(m.groups[0])
+        i = i + 1
+    expect(misses).to.be(0)
+    expect(checksum).to.be((4 + 3) * loops)
+elif testcase == "benchmark compiled search_captures loop should keep captures":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    rx = regex.compile("(a)(b)c")
+    misses = 0
+    checksum = 0
+    i = 0
+    while i < loops:
+        hit = rx.search_captures("zzabcqq")
+        if hit == None:
+            misses = misses + 1
+        elif hit.start != 2 or hit.end != 5:
+            misses = misses + 1
+        elif hit.groups[0] != "abc" or hit.groups[1] != "a" or hit.groups[2] != "b":
+            misses = misses + 1
+        else:
+            checksum = checksum + hit.start + hit.end + len(hit.groups[0])
+        i = i + 1
+    expect(misses).to.be(0)
+    expect(checksum).to.be((2 + 5 + 3) * loops)
 elif testcase == "match_from_captures should return two groups":
     p = regex.compile_program("(ID)-(\\d{4})")
     m = regex.match_from_captures(p, "ID-0007", 0)
