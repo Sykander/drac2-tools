@@ -1,9 +1,9 @@
 """regex — small regexp engine for Drac2 (no stdlib ``re``). Syntax, public API, Avrae limits:
 docs/gvars/regex.md
 
-``compile()`` → dict (pattern string, groups count, fullmatch/match/search, capture helpers,
-program, optional ``_search_meta`` tied to the compile LRU entry). ``compile_program()`` → opcode list
-for ``match_from``, ``full_match``, ``search_from``, etc.
+``compile()`` → dict (``pattern``, ``groups``, and callables mirroring ``re.Pattern``). Opcode lists and search hints
+are closed over by those callables, not exposed as dict keys. ``_compile_program()`` builds the opcode list;
+matching uses ``_match_from``, ``_full_match``, ``_search_from_core``, etc.
 
 Supported: literals, ``.``, ``\\d``..``\\S``, ``?`` ``*`` ``+``, ``{n}``/``{n,}``/``{n,m}``, ``()`` captures,
 ``(?:)``, ``[]`` classes, ``|``, ``^`` / ``$`` as **string** anchors (start / end of haystack; no multiline flags).
@@ -31,11 +31,11 @@ def _rx_err(msg: str, idx: int = None):
     - ``pattern is None`` — not a string, so there is no code-unit offset in a pattern.
     - ``internal: expected plain atom`` — matcher invariant / bug; not tied to a user pattern
       character (the bad ``node`` comes from an already-compiled program).
-    - ``trailing junk`` — post-parse guard: ``compile_program`` requires the whole ``pat`` to be
+    - ``trailing junk`` — post-parse guard: ``_compile_program`` requires the whole ``pat`` to be
       consumed. If ``i != len(pat)`` after ``_parse_alt``, this reports the first unconsumed index.
       For the supported grammar today, other branches already reject leftovers, so this path is
       defensive (kept with an index for consistency if a future change makes it reachable).
-    - ``range endpoints must be single chars`` inside ``_range_expand`` — ``compile_program`` only
+    - ``range endpoints must be single chars`` inside ``_range_expand`` — ``_compile_program`` only
       passes single-character endpoints from ``_parse_class``; the index is still passed for
       consistency if that invariant ever breaks.
     - ``bad escape in class`` inside ``_expand_set_escape`` — current ``_parse_escape`` output is
@@ -417,35 +417,21 @@ def _annotate_capture_mc_nodes(nodes: list) -> int:
     return m
 
 
-def last_parse_error():
+def _last_parse_error():
     """
-    After ``compile_program`` / ``compile`` fail with a ``regex: ...`` parse error, returns
+    After ``_compile_program`` / ``compile`` fail with a ``regex: ...`` parse error, returns
     ``(short_message, index_or_None)`` matching the arguments passed to the internal reporter
     (``index`` is ``None`` when the error is not tied to a pattern offset). Resets to ``None`` on
-    successful ``compile_program``. Useful when the host cannot bind ``except ... as``.
+    successful ``_compile_program``. Useful when the host cannot bind ``except ... as``.
 
     Note: in some hosts each cross-module call may reload library state; prefer
-    ``diagnostic_compile_program`` when you need a reliable ``(error_tuple, program_or_none)``
-    pair from tests.
+    ``diagnostic_compile`` when you need a reliable ``(error_tuple, result_or_none)``
+    pair from aliases.
     """
     return _RX_DIAG["last"]
 
 
-def diagnostic_compile_program(pat: str):
-    """
-    Like ``compile_program``, but returns ``(None, program)`` on success or ``(last_parse_error(), None)``
-    on parse failure, without re-raising—so callers (and tests) can read the tuple in the same
-    interpreter instance that ran the parser.
-    """
-    _RX_DIAG["last"] = None
-    try:
-        p = compile_program(pat)
-        return (None, p)
-    except:
-        return (last_parse_error(), None)
-
-
-def compile_program(pat: str) -> list:
+def _compile_program(pat: str) -> list:
     """Parse ``pat`` into an opcode list. Raises ``regex: ...`` on syntax errors.
 
     Trailing unconsumed input becomes ``trailing junk`` at the first unused index (see ``_rx_err``).
@@ -494,56 +480,6 @@ def _nodes_capture_mc(nodes: list) -> int:
             m = nm
         i = i + 1
     return m
-
-
-def _max_capture_id(nodes: list) -> int:
-    m = 0
-    i = 0
-    while i < len(nodes):
-        m = max(m, _max_capture_id_node(nodes[i]))
-        i = i + 1
-    return m
-
-
-def _max_capture_id_node(node) -> int:
-    k = node["k"]
-    if k == "grp":
-        inn = _max_capture_id(node["g"])
-        cid = node.get("cap", None)
-        if cid != None:
-            return max(inn, cid)
-        return inn
-    if k == "alt":
-        m = 0
-        arms = node["arms"]
-        ai = 0
-        while ai < len(arms):
-            m = max(m, _max_capture_id(arms[ai]))
-            ai = ai + 1
-        return m
-    if k == "rep":
-        return _max_capture_id_atom(node["a"])
-    return 0
-
-
-def _max_capture_id_atom(atom) -> int:
-    if atom["k"] == "grp":
-        inn = _max_capture_id(atom["g"])
-        cid = atom.get("cap", None)
-        if cid != None:
-            return max(inn, cid)
-        return inn
-    return 0
-
-
-def group_count(program: list) -> int:
-    """Return the number of capturing ``(`` groups in ``program`` (highest 1-based index).
-
-    Uses ``compile_program``'s subtree ``mc`` annotations when present.
-    """
-    if len(program) == 0 or program[0].get("mc", None) != None:
-        return _nodes_capture_mc(program)
-    return _max_capture_id(program)
 
 
 def _match_node_plain(node, text: str, pos: int, lim: int):
@@ -597,19 +533,6 @@ def _match_one_unit(atom, text: str, pos: int, lim: int, caps):
     return _match_node_plain(atom, text, pos, lim)
 
 
-def _after_n_units(atom, text: str, pos: int, lim: int, n: int, caps):
-    """Exclusive end after matching `atom` exactly `n` times in a row, or -1."""
-    p = pos
-    t = 0
-    while t < n:
-        nx = _match_one_unit(atom, text, p, lim, caps)
-        if nx < 0:
-            return -1
-        p = nx
-        t = t + 1
-    return p
-
-
 def _greedy_max_take(atom, text: str, pos: int, lim: int, hi):
     """
     Greedy repeat count for ``atom`` from ``pos`` (``hi`` ``None`` means unbounded).
@@ -641,7 +564,7 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps, no
     """
     Match the remaining program from ``pos``; return exclusive end index or ``-1``.
 
-    ``caps``: ``None`` skips capture writes; else a list of length ``group_count(program)+1``
+    ``caps``: ``None`` skips capture writes; else a list of length ``nodes_mc + 1``
     where indices ``1..`` hold capture substrings (or ``None``) when recording.
 
     Repeat handling: exact-count repeats (``hi == lo``) with no captures skip greedy count
@@ -839,7 +762,7 @@ def _search_prefilter_node(program: list):
     return None
 
 
-def match_from(program: list, text: str, start: int = 0):
+def _match_from(program: list, text: str, start: int = 0):
     """If ``program`` matches ``text`` from ``start``, return exclusive end index; else ``None``."""
     lim = len(text)
     if start > lim:
@@ -850,9 +773,9 @@ def match_from(program: list, text: str, start: int = 0):
     return end
 
 
-def match_from_captures(program: list, text: str, start: int = 0, group_total: int = None, program_mc: int = None):
+def _match_from_captures(program: list, text: str, start: int = 0, group_total: int = None, program_mc: int = None):
     """
-    Like ``match_from``, but on success also fills capture strings.
+    Like ``_match_from``, but on success also fills capture strings.
 
     Returns ``None`` on failure. On success ``{"end": int, "groups": list}``: ``groups[0]``
     is ``text[start:end]``; ``groups[i]`` for ``i >= 1`` is capture ``i`` or ``None`` if that
@@ -874,7 +797,7 @@ def match_from_captures(program: list, text: str, start: int = 0, group_total: i
     return {"end": end, "groups": caps}
 
 
-def full_match(program: list, text: str, pos: int = 0) -> bool:
+def _full_match(program: list, text: str, pos: int = 0) -> bool:
     """True iff ``text[pos:]`` is matched in full (match ends at ``len(text)``)."""
     lim = len(text)
     if pos > lim:
@@ -884,7 +807,7 @@ def full_match(program: list, text: str, pos: int = 0) -> bool:
 
 
 def _search_from_core(program, text, pos, lim, sm):
-    """Shared scan for ``search_from``; ``sm`` is ``_build_search_meta(program)``."""
+    """Left-to-right scan for a match from ``pos``; ``sm`` is ``_build_search_meta(program)``."""
     if pos > lim:
         return None
     lead = sm["lead"]
@@ -915,15 +838,8 @@ def _search_from_core(program, text, pos, lim, sm):
     return None
 
 
-def search_from(program: list, text: str, pos: int = 0):
-    """First match with ``start >= pos``: ``{"start", "end"}`` or ``None``."""
-    lim = len(text)
-    sm = _build_search_meta(program)
-    return _search_from_core(program, text, pos, lim, sm)
-
-
 def _search_from_captures_core(program, text, pos, lim, cfg):
-    """Shared scan for ``search_from_captures``; ``cfg`` has ``ng``, ``pm`` (program_mc), ``sm``."""
+    """Scan with captures; ``cfg`` has ``ng``, ``pm`` (program_mc), ``sm``."""
     if pos > lim:
         return None
     ng = cfg["ng"]
@@ -957,17 +873,6 @@ def _search_from_captures_core(program, text, pos, lim, cfg):
             return None
         s = s + 1
     return None
-
-
-def search_from_captures(program: list, text: str, pos: int = 0, group_total: int = None, program_mc: int = None):
-    """Like ``search_from``, plus a ``groups`` list (same layout as ``match_from_captures``)."""
-    if group_total == None:
-        group_total = _nodes_capture_mc(program)
-    if program_mc == None:
-        program_mc = group_total
-    lim = len(text)
-    cfg = {"ng": group_total, "pm": program_mc, "sm": _build_search_meta(program)}
-    return _search_from_captures_core(program, text, pos, lim, cfg)
 
 
 def _normalize_pattern_string(pat: str) -> str:
@@ -1039,23 +944,22 @@ def _compile_cache_put(key: str, compiled):
 def compile(pat: str):
     """
     Compile ``pat`` and return a dict for use from aliases: normalized ``pattern`` string,
-    capture count ``groups``, callables ``fullmatch`` / ``full_match``, ``match``, ``search``,
-    ``match_from``, ``match_from_captures``, ``search_captures``, and the opcode ``program``.
+    capture count ``groups``, and callables ``fullmatch`` / ``full_match``, ``match``, ``search``,
+    ``match_from``, ``match_from_captures``, and ``search_captures``.
 
     Callables follow ``re.Pattern``-style names where possible; they return bool, span
     indices, or small dicts rather than CPython ``Match`` objects. Optional ``endpos``
     arguments are accepted for call-site similarity to ``re`` but are ignored (the engine
     always sees the full ``text``). Details: ``docs/gvars/regex.md``.
 
-    The returned dict may include ``_search_meta`` (``req0`` + ``lead`` for ``search*``); it is
-    tied to the same LRU entry as the rest of the dict and is not part of the stable public
-    surface beyond what ``search`` / ``search_captures`` consume.
+    The opcode program and search prefilter state (``req0`` + ``lead``) are built once per cache
+    miss and closed over by the callables; neither is a key on the returned dict.
     """
     pat_norm = _normalize_pattern_string(pat)
     cached = _compile_cache_get(pat_norm)
     if cached != None:
         return dict(cached)
-    prog = compile_program(pat_norm)
+    prog = _compile_program(pat_norm)
     sm = _build_search_meta(prog)
     ng = _nodes_capture_mc(prog)
     lit = _program_literal(prog) if ng == 0 else None
@@ -1063,9 +967,9 @@ def compile(pat: str):
 
     def _match_lit(t, start = 0):
         if lit == None:
-            return match_from(prog, t, start)
+            return _match_from(prog, t, start)
         if start < 0:
-            return match_from(prog, t, start)
+            return _match_from(prog, t, start)
         end = start + lit_len
         if end > len(t):
             return None
@@ -1091,9 +995,9 @@ def compile(pat: str):
 
     def _fullmatch_lit(t, pos = 0, endpos = None):
         if lit == None:
-            return full_match(prog, t, pos)
+            return _full_match(prog, t, pos)
         if pos < 0:
-            return full_match(prog, t, pos)
+            return _full_match(prog, t, pos)
         end = pos + lit_len
         if end != len(t):
             return False
@@ -1115,7 +1019,7 @@ def compile(pat: str):
             return {"start": s, "end": e, "groups": [t[s:e]]}
     else:
         cap_search_cfg = {"ng": ng, "pm": ng, "sm": sm}
-        _mfc0 = lambda t, start = 0: match_from_captures(prog, t, start, ng, ng)
+        _mfc0 = lambda t, start = 0: _match_from_captures(prog, t, start, ng, ng)
         _sfc0 = lambda t, pos = 0, endpos = None, cfg = cap_search_cfg: _search_from_captures_core(prog, t, pos, len(t), cfg)
     compiled = {
         "pattern": pat_norm,
@@ -1127,8 +1031,6 @@ def compile(pat: str):
         "match_from": lambda t, start = 0: _match_lit(t, start),
         "match_from_captures": _mfc0,
         "search_captures": _sfc0,
-        "program": prog,
-        "_search_meta": sm,
     }
     _compile_cache_put(pat_norm, compiled)
     return dict(compiled)
@@ -1136,11 +1038,11 @@ def compile(pat: str):
 
 def diagnostic_compile(pat: str):
     """
-    Like ``compile``, but returns ``(None, pattern_dict)`` on success or ``(last_parse_error(), None)``
+    Like ``compile``, but returns ``(None, pattern_dict)`` on success or ``(_last_parse_error(), None)``
     on failure (including ``_normalize_pattern_string`` failures), without re-raising.
     """
     _RX_DIAG["last"] = None
     try:
         return (None, compile(pat))
     except:
-        return (last_parse_error(), None)
+        return (_last_parse_error(), None)

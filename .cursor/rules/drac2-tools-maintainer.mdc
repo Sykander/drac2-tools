@@ -5,9 +5,31 @@ alwaysApply: true
 
 # drac2-tools maintenance
 
+## Gvar imports (`using`) vs documentation
+
+In Draconic / Avrae, **`using(...)`** binds a gvar module by the names it defines **without** a leading **`_`**. Names that start with **`_`** are **not** accessible from aliases (e.g. **`regex._compile_program`** is rejected). **Do not document `_*` symbols in `docs/`**—they are implementation details in **`.gvar`** sources for maintainers reading code, not a consumer API.
+
+## Documentation surfaces (keep in sync)
+
+When behavior or user-facing surfaces change, update prose as needed in:
+
+- **`docs/`** — library consumers (API, behavior, workshop/deploy notes that affect them).
+- **`README.md`** — project overview, how to find deeper docs, high-level orientation.
+- **`DEVELOPMENT.md`** — local setup, envs, sourcemaps, deploy flow, contributor-facing workflow.
+
+Treat **`README.md`** and **`DEVELOPMENT.md`** as first-class documentation alongside **`docs/`**, not “out of scope” for edits when the change warrants it.
+
+## `docs/` style
+
+- **Forward-looking only:** describe what exists and how to use it. **Do not** document removed APIs, old names, or “we used to …” history—noise for readers.
+- **Clarity first:** short top-level explanation; push edge cases and detail into later subsections.
+- **Examples:** prefer **working Drac2 snippets** in fenced blocks (see **`drac2-avrae-sources.mdc`** → Docs for attribute vs bracket style on dicts).
+
+---
+
 When you change **behavior or public API** (not typo-only or formatting):
 
-1. **Documentation** — Update any **markdown under `docs/`** that documents the changed surface (signatures, parameters, return shapes, edge cases, workshop or deploy notes). If you add a new public surface, add or extend the right doc path and link it from **`docs/README.md`** when appropriate (not only under `docs/gvars/`).
+1. **Documentation** — Update any **markdown under `docs/`** that documents the changed surface (signatures, parameters, return shapes, edge cases, workshop or deploy notes). If you add a new public surface, add or extend the right doc path and link it from **`docs/README.md`** when appropriate (not only under `docs/gvars/`). Update **`README.md`** / **`DEVELOPMENT.md`** when the change affects onboarding, workflows, or how people discover or run the project.
 
    In Drac2 fenced code blocks under **`docs/`**, prefer attribute access (e.g. **`rx.fullmatch(...)`**, **`hit.start`**) over **`rx["fullmatch"]`** when the key is a valid identifier (see **`drac2-avrae-sources.mdc`** → Docs).
 
