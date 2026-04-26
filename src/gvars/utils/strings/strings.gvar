@@ -1,5 +1,4 @@
-# Strings
-# A place to store reusable string functions
+"""Strings — reusable string helpers."""
 
 
 def get_readable_list(items: list[str], delim: str = ", ", final_delim: str = " and ") -> str:

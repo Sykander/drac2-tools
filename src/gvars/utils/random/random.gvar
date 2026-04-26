@@ -1,5 +1,4 @@
-# Random
-# random number generator which works from a seed value for deterministic results
+"""Random — seeded PRNG for deterministic integer and float draws."""
 
 SEED_CURRENT = "current"
 SEED_INITIAL = "initial"
@@ -35,9 +34,12 @@ def xorShift(seed: int) -> int:
     return int(seed)
 
 
-# Generates number based off seed, inclusive of both endpoints
-# If a seed is given, that is used instead, and the current seed is not changed.
 def get_random_integer(start, stop, seed = None):
+    """Random integer in ``[start, stop]`` inclusive.
+
+    With ``seed=None``, uses and updates the module current seed. With an explicit
+    ``seed``, uses that value only and does not advance stored state.
+    """
     if start == stop:
         return start
 
@@ -56,3 +58,25 @@ def get_random_integer(start, stop, seed = None):
         value[SEED_CURRENT] = val
 
     return round(val % range_length) + start
+
+
+_R31_DENOM = 2**31 - 1
+
+
+def get_float(seed = None):
+    """Uniform float in the closed interval ``[0, 1]``.
+
+    With ``seed=None``, uses and updates the module current seed. With an explicit
+    ``seed``, uses that value only and does not advance stored state.
+    """
+    updateSeed = False
+    if seed == None:
+        updateSeed = True
+        seed = value[SEED_CURRENT]
+
+    val = xorShift(int(seed))
+
+    if updateSeed:
+        value[SEED_CURRENT] = val
+
+    return float(val) / float(_R31_DENOM)

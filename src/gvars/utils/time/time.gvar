@@ -1,6 +1,4 @@
-# time
-#
-# A library for dealing with timestamps and converting time
+"""Time — timestamps, readable breakdowns, and Discord time markers."""
 
 SECOND = 1
 MINUTE = 60 * SECOND
@@ -11,6 +9,7 @@ ROUND = 6 * SECOND
 
 
 def get_ts_from_combat():
+    """Seconds offset from combat round count (``0`` if no combat)."""
     try:
         com_rounds = combat().round_num
     except:
@@ -20,6 +19,7 @@ def get_ts_from_combat():
 
 
 def get_time(ts: float = time()) -> dict[str, int]:
+    """Break ``ts`` into days, hours, minutes, seconds (floored components)."""
     days = floor(ts / DAY)
     hours = floor((ts % DAY) / HOUR)
     minutes = floor((ts % HOUR) / MINUTE)
@@ -34,6 +34,7 @@ def get_time(ts: float = time()) -> dict[str, int]:
 
 
 def get_readable_time(ts: float = time()):
+    """Human-readable duration string from ``get_time`` (omits zero higher units)."""
     time = get_time(ts)
     days_part = time.days + " days " if time.days != 0 else ""
     hours_part = time.hours + " hours " if time.hours != 0 else ""
@@ -47,5 +48,6 @@ def get_readable_time(ts: float = time()):
 
 
 def get_discord_timestamp(ts: float = time()):
-    ts = floor(ts)  # md can't handle decimals
+    """Absolute and relative Discord ``<t:…>`` markers; ``ts`` is floored (markdown cannot use decimals)."""
+    ts = floor(ts)
     return f"<t:{ts}><t:{ts}:R>"

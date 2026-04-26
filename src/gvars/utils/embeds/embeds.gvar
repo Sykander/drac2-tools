@@ -3,13 +3,14 @@ using(
     commands = env.gvars.commands,
 )
 
-# Embed
-# A general purpose embed handler for creating embeds
-#
-# For a one off embed use `get_embed` but if you have multiple embed exit points use `configure_get_embed` instead
+"""Embed — general-purpose ``!embed`` command string helpers.
+
+For a one-off embed use ``get_embed``; for several exit points, ``configure_get_embed`` fixes defaults.
+"""
 
 
 def format_to_length(content: str, length: int) -> str:
+    """Truncate ``content`` to ``length`` with an ellipsis suffix when longer."""
     if len(content) < length:
         return content
 
@@ -17,11 +18,10 @@ def format_to_length(content: str, length: int) -> str:
 
 
 def get_field(title, text = "", inline = False):
+    """One ``-f`` field fragment: ``title|text`` plus ``|inline`` when requested."""
     return f"{title}|{text}{'|inline' if inline else ''}"
 
 
-# get_embed
-# check `!help embed -here`
 def get_embed(
     desc: str | None = None,
     title: str | None = None,
@@ -32,6 +32,7 @@ def get_embed(
     color: str | None = None,
     timeout: int | None = None
 ) -> str:
+    """Return an ``!embed`` command string. See ``!help embed`` in Avrae."""
     if fields == None:
         fields = []
 
@@ -73,6 +74,7 @@ def configure_get_embed(
     color: str | None = None,
     timeout: int | None = None
 ):
+    """Return a callable that supplies these defaults to ``get_embed`` (partial application)."""
     if fields == None:
         fields = []
 

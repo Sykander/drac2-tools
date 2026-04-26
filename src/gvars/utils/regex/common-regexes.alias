@@ -6,6 +6,11 @@ using(
 )
 expect = expect.expect
 
+"""Composite regex tests: web/data validation, Avrae dice tokens, Discord mentions.
+
+In-branch section labels stay as ``#`` lines; a standalone string would break ``if``/``elif`` chaining.
+"""
+
 args = argparse(&ARGS&)
 testcase = args.last("testcase", None)
 

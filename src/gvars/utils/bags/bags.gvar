@@ -1,8 +1,11 @@
-# Bags
-# A reusable library for interacting with bags
-# https://avrae.io/dashboard/workshop/6296b723c964982e890e5315
+"""Bags — reusable library for interacting with bags.
 
-# Use get_bag, set_bag and modify_bag to interact with bags
+https://avrae.io/dashboard/workshop/6296b723c964982e890e5315
+
+Use ``get_bag``, ``set_bag``, and ``modify_bag`` to interact with bags.
+
+``bags_cache`` — in-memory per-character bag list so multiple updates batch before persisting.
+"""
 
 bags_code = "bags"
 
@@ -25,7 +28,6 @@ def _require_character(char = None, context: str = "this operation"):
     return c
 
 
-# So that we can do multiple updates on the bags
 bags_cache = {}
 
 
@@ -70,21 +72,24 @@ def set_bag(bag_name: str, bag_contents: dict, char = None) -> None:
     set_bags(bags, char)
 
 
-# modify_bag
-# modifies the characters bag
-#
-# item - the name of the item
-# count - OPTIONAL 1 - the amount to add or remove
-# bag - OPTIONAL Equipment - the bag to modify
-# char - OPTIONAL the active character - the character to modify bags for
-#
-# returns a Tuple [did_update, update_message]
 def modify_bag(
     item: str,
     count: int | None = None,
     bag: str | None = None,
     char = None,
 ) -> Tuple[bool, str]:
+    """Modify the character's bag.
+
+    ``item`` — name of the item.
+
+    ``count`` — optional; default ``1``; amount to add (positive) or remove (negative).
+
+    ``bag`` — optional; default ``Equipment``; which bag to modify.
+
+    ``char`` — optional; defaults to active character.
+
+    Returns ``(did_update, update_message)``.
+    """
     count = count if count != None else 1
     bag = bag if bag != None else "Equipment"
     char = _require_character(char, "bag operations")

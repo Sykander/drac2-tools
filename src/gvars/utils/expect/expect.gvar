@@ -3,6 +3,8 @@ using(
     dicts = env.gvars.dicts,
 )
 
+"""Expect — chained assertions (``expect(x).to.be(y)``) for alias tests."""
+
 
 def to_equal(arg, val, message: str | None = None):
     if arg != val:
