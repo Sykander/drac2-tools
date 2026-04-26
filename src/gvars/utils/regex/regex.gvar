@@ -340,6 +340,60 @@ def _parse_alt(pat: str, i: int, in_group: bool, cap_counter: list, group_start:
     return [{"k": "alt", "arms": arms}], j
 
 
+def _annotate_capture_mc_atom(atom) -> int:
+    """Annotate ``atom`` with ``mc`` = max capture index reachable from this atom."""
+    if atom["k"] == "grp":
+        m = _annotate_capture_mc_nodes(atom["g"])
+        cid = atom.get("cap", None)
+        if cid != None and cid > m:
+            m = cid
+        atom["mc"] = m
+        return m
+    atom["mc"] = 0
+    return 0
+
+
+def _annotate_capture_mc_node(node) -> int:
+    """Annotate one parsed node with ``mc`` = max capture index in its subtree."""
+    k = node["k"]
+    if k == "grp":
+        m = _annotate_capture_mc_nodes(node["g"])
+        cid = node.get("cap", None)
+        if cid != None and cid > m:
+            m = cid
+        node["mc"] = m
+        return m
+    if k == "alt":
+        m = 0
+        arms = node["arms"]
+        ai = 0
+        while ai < len(arms):
+            am = _annotate_capture_mc_nodes(arms[ai])
+            if am > m:
+                m = am
+            ai = ai + 1
+        node["mc"] = m
+        return m
+    if k == "rep":
+        m = _annotate_capture_mc_atom(node["a"])
+        node["mc"] = m
+        return m
+    node["mc"] = 0
+    return 0
+
+
+def _annotate_capture_mc_nodes(nodes: list) -> int:
+    """Annotate a node list with per-node ``mc`` values and return list max capture index."""
+    m = 0
+    i = 0
+    while i < len(nodes):
+        nm = _annotate_capture_mc_node(nodes[i])
+        if nm > m:
+            m = nm
+        i = i + 1
+    return m
+
+
 def last_parse_error():
     """
     After ``compile_program`` / ``compile`` fail with a ``regex: ...`` parse error, returns
@@ -376,6 +430,7 @@ def compile_program(pat: str) -> list:
     if i != len(pat):
         # See ``_rx_err`` docstring: defensive for current grammar; index is first unconsumed offset.
         _rx_err("trailing junk", i)
+    _annotate_capture_mc_nodes(nodes)
     _RX_DIAG["last"] = None
     return nodes
 
@@ -537,10 +592,11 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps):
         node_k = node["k"]
         if node_k == "alt":
             arms = node["arms"]
+            alt_mc = node.get("mc", 0)
             ai = 0
             matched = -1
             while ai < len(arms):
-                snap_a = _caps_clone(caps)
+                snap_a = _caps_clone(caps) if caps != None and alt_mc > 0 else None
                 r = _match_seq_bt(arms[ai], text, p, lim, 0, caps)
                 if r >= 0:
                     p = r
@@ -558,6 +614,7 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps):
             lo = node["lo"]
             hi = node["hi"]
             atom = node["a"]
+            rep_mc = node.get("mc", 0)
             max_c, _p_g = _greedy_max_take(atom, text, p, lim, hi)
             if max_c < lo:
                 _caps_restore(caps, entry_snap)
@@ -578,7 +635,7 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps):
                 pp = nx
                 ends.append(pp)
                 built = built + 1
-                if cap_snaps != None:
+                if cap_snaps != None and rep_mc > 0:
                     cap_snaps.append(_caps_clone(caps))
             if built < max_c:
                 max_c = built
@@ -587,7 +644,7 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps):
                     return -1
             k = max_c
             while k >= lo:
-                if cap_snaps != None:
+                if cap_snaps != None and rep_mc > 0:
                     _caps_restore(caps, cap_snaps[k])
                 p2 = ends[k]
                 rest = _match_seq_bt(nodes, text, p2, lim, i + 1, caps)

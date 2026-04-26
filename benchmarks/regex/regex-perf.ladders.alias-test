@@ -1,0 +1,604 @@
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "1"
+---
+---
+name: ladder benchmark search loop should keep correct spans 1
+
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "2"
+---
+---
+name: ladder benchmark search loop should keep correct spans 2
+
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "4"
+---
+---
+name: ladder benchmark search loop should keep correct spans 4
+
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "8"
+---
+---
+name: ladder benchmark search loop should keep correct spans 8
+
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "16"
+---
+---
+name: ladder benchmark search loop should keep correct spans 16
+
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "32"
+---
+---
+name: ladder benchmark search loop should keep correct spans 32
+
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "64"
+---
+---
+name: ladder benchmark search loop should keep correct spans 64
+
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "128"
+---
+---
+name: ladder benchmark search loop should keep correct spans 128
+
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "256"
+---
+---
+name: ladder benchmark search loop should keep correct spans 256
+
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "512"
+---
+---
+name: ladder benchmark search loop should keep correct spans 512
+
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "1024"
+---
+---
+name: ladder benchmark search loop should keep correct spans 1024
+
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "1"
+---
+---
+name: ladder benchmark class brace loop should keep full matches 1
+
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "2"
+---
+---
+name: ladder benchmark class brace loop should keep full matches 2
+
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "4"
+---
+---
+name: ladder benchmark class brace loop should keep full matches 4
+
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "8"
+---
+---
+name: ladder benchmark class brace loop should keep full matches 8
+
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "16"
+---
+---
+name: ladder benchmark class brace loop should keep full matches 16
+
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "32"
+---
+---
+name: ladder benchmark class brace loop should keep full matches 32
+
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "64"
+---
+---
+name: ladder benchmark class brace loop should keep full matches 64
+
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "128"
+---
+---
+name: ladder benchmark class brace loop should keep full matches 128
+
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "256"
+---
+---
+name: ladder benchmark class brace loop should keep full matches 256
+
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "512"
+---
+---
+name: ladder benchmark class brace loop should keep full matches 512
+
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "1024"
+---
+---
+name: ladder benchmark class brace loop should keep full matches 1024
+
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "1"
+---
+---
+name: ladder benchmark quantified alternation loop should keep matches 1
+
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "2"
+---
+---
+name: ladder benchmark quantified alternation loop should keep matches 2
+
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "4"
+---
+---
+name: ladder benchmark quantified alternation loop should keep matches 4
+
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "8"
+---
+---
+name: ladder benchmark quantified alternation loop should keep matches 8
+
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "16"
+---
+---
+name: ladder benchmark quantified alternation loop should keep matches 16
+
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "32"
+---
+---
+name: ladder benchmark quantified alternation loop should keep matches 32
+
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "64"
+---
+---
+name: ladder benchmark quantified alternation loop should keep matches 64
+
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "128"
+---
+---
+name: ladder benchmark quantified alternation loop should keep matches 128
+
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "256"
+---
+---
+name: ladder benchmark quantified alternation loop should keep matches 256
+
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "512"
+---
+---
+name: ladder benchmark quantified alternation loop should keep matches 512
+
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "1024"
+---
+---
+name: ladder benchmark quantified alternation loop should keep matches 1024
+
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "1"
+---
+---
+name: ladder benchmark compile multiple regexes in one invocation 1
+
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "2"
+---
+---
+name: ladder benchmark compile multiple regexes in one invocation 2
+
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "4"
+---
+---
+name: ladder benchmark compile multiple regexes in one invocation 4
+
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "8"
+---
+---
+name: ladder benchmark compile multiple regexes in one invocation 8
+
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "16"
+---
+---
+name: ladder benchmark compile multiple regexes in one invocation 16
+
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "32"
+---
+---
+name: ladder benchmark compile multiple regexes in one invocation 32
+
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "64"
+---
+---
+name: ladder benchmark compile multiple regexes in one invocation 64
+
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "128"
+---
+---
+name: ladder benchmark compile multiple regexes in one invocation 128
+
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "256"
+---
+---
+name: ladder benchmark compile multiple regexes in one invocation 256
+
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "512"
+---
+---
+name: ladder benchmark compile multiple regexes in one invocation 512
+
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "1024"
+---
+---
+name: ladder benchmark compile multiple regexes in one invocation 1024
+
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "1"
+---
+---
+name: ladder benchmark compiled full_match loop should keep matches 1
+
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "2"
+---
+---
+name: ladder benchmark compiled full_match loop should keep matches 2
+
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "4"
+---
+---
+name: ladder benchmark compiled full_match loop should keep matches 4
+
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "8"
+---
+---
+name: ladder benchmark compiled full_match loop should keep matches 8
+
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "16"
+---
+---
+name: ladder benchmark compiled full_match loop should keep matches 16
+
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "32"
+---
+---
+name: ladder benchmark compiled full_match loop should keep matches 32
+
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "64"
+---
+---
+name: ladder benchmark compiled full_match loop should keep matches 64
+
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "128"
+---
+---
+name: ladder benchmark compiled full_match loop should keep matches 128
+
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "256"
+---
+---
+name: ladder benchmark compiled full_match loop should keep matches 256
+
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "512"
+---
+---
+name: ladder benchmark compiled full_match loop should keep matches 512
+
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "1024"
+---
+---
+name: ladder benchmark compiled full_match loop should keep matches 1024
+
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "1"
+---
+---
+name: ladder benchmark compiled fullmatch alias loop should keep matches 1
+
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "2"
+---
+---
+name: ladder benchmark compiled fullmatch alias loop should keep matches 2
+
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "4"
+---
+---
+name: ladder benchmark compiled fullmatch alias loop should keep matches 4
+
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "8"
+---
+---
+name: ladder benchmark compiled fullmatch alias loop should keep matches 8
+
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "16"
+---
+---
+name: ladder benchmark compiled fullmatch alias loop should keep matches 16
+
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "32"
+---
+---
+name: ladder benchmark compiled fullmatch alias loop should keep matches 32
+
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "64"
+---
+---
+name: ladder benchmark compiled fullmatch alias loop should keep matches 64
+
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "128"
+---
+---
+name: ladder benchmark compiled fullmatch alias loop should keep matches 128
+
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "256"
+---
+---
+name: ladder benchmark compiled fullmatch alias loop should keep matches 256
+
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "512"
+---
+---
+name: ladder benchmark compiled fullmatch alias loop should keep matches 512
+
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "1024"
+---
+---
+name: ladder benchmark compiled fullmatch alias loop should keep matches 1024
+
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "1"
+---
+---
+name: ladder benchmark compiled match loop should keep end index 1
+
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "2"
+---
+---
+name: ladder benchmark compiled match loop should keep end index 2
+
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "4"
+---
+---
+name: ladder benchmark compiled match loop should keep end index 4
+
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "8"
+---
+---
+name: ladder benchmark compiled match loop should keep end index 8
+
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "16"
+---
+---
+name: ladder benchmark compiled match loop should keep end index 16
+
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "32"
+---
+---
+name: ladder benchmark compiled match loop should keep end index 32
+
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "64"
+---
+---
+name: ladder benchmark compiled match loop should keep end index 64
+
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "128"
+---
+---
+name: ladder benchmark compiled match loop should keep end index 128
+
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "256"
+---
+---
+name: ladder benchmark compiled match loop should keep end index 256
+
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "512"
+---
+---
+name: ladder benchmark compiled match loop should keep end index 512
+
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "1024"
+---
+---
+name: ladder benchmark compiled match loop should keep end index 1024
+
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "1"
+---
+---
+name: ladder benchmark compiled search loop should keep span 1
+
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "2"
+---
+---
+name: ladder benchmark compiled search loop should keep span 2
+
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "4"
+---
+---
+name: ladder benchmark compiled search loop should keep span 4
+
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "8"
+---
+---
+name: ladder benchmark compiled search loop should keep span 8
+
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "16"
+---
+---
+name: ladder benchmark compiled search loop should keep span 16
+
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "32"
+---
+---
+name: ladder benchmark compiled search loop should keep span 32
+
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "64"
+---
+---
+name: ladder benchmark compiled search loop should keep span 64
+
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "128"
+---
+---
+name: ladder benchmark compiled search loop should keep span 128
+
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "256"
+---
+---
+name: ladder benchmark compiled search loop should keep span 256
+
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "512"
+---
+---
+name: ladder benchmark compiled search loop should keep span 512
+
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "1024"
+---
+---
+name: ladder benchmark compiled search loop should keep span 1024
+
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "1"
+---
+---
+name: ladder benchmark compiled match_from loop should keep end index 1
+
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "2"
+---
+---
+name: ladder benchmark compiled match_from loop should keep end index 2
+
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "4"
+---
+---
+name: ladder benchmark compiled match_from loop should keep end index 4
+
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "8"
+---
+---
+name: ladder benchmark compiled match_from loop should keep end index 8
+
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "16"
+---
+---
+name: ladder benchmark compiled match_from loop should keep end index 16
+
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "32"
+---
+---
+name: ladder benchmark compiled match_from loop should keep end index 32
+
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "64"
+---
+---
+name: ladder benchmark compiled match_from loop should keep end index 64
+
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "128"
+---
+---
+name: ladder benchmark compiled match_from loop should keep end index 128
+
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "256"
+---
+---
+name: ladder benchmark compiled match_from loop should keep end index 256
+
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "512"
+---
+---
+name: ladder benchmark compiled match_from loop should keep end index 512
+
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "1024"
+---
+---
+name: ladder benchmark compiled match_from loop should keep end index 1024
+
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "1"
+---
+---
+name: ladder benchmark compiled match_from_captures loop should keep captures 1
+
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "2"
+---
+---
+name: ladder benchmark compiled match_from_captures loop should keep captures 2
+
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "4"
+---
+---
+name: ladder benchmark compiled match_from_captures loop should keep captures 4
+
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "8"
+---
+---
+name: ladder benchmark compiled match_from_captures loop should keep captures 8
+
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "16"
+---
+---
+name: ladder benchmark compiled match_from_captures loop should keep captures 16
+
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "32"
+---
+---
+name: ladder benchmark compiled match_from_captures loop should keep captures 32
+
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "64"
+---
+---
+name: ladder benchmark compiled match_from_captures loop should keep captures 64
+
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "128"
+---
+---
+name: ladder benchmark compiled match_from_captures loop should keep captures 128
+
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "256"
+---
+---
+name: ladder benchmark compiled match_from_captures loop should keep captures 256
+
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "512"
+---
+---
+name: ladder benchmark compiled match_from_captures loop should keep captures 512
+
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "1024"
+---
+---
+name: ladder benchmark compiled match_from_captures loop should keep captures 1024
+
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "1"
+---
+---
+name: ladder benchmark compiled search_captures loop should keep captures 1
+
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "2"
+---
+---
+name: ladder benchmark compiled search_captures loop should keep captures 2
+
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "4"
+---
+---
+name: ladder benchmark compiled search_captures loop should keep captures 4
+
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "8"
+---
+---
+name: ladder benchmark compiled search_captures loop should keep captures 8
+
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "16"
+---
+---
+name: ladder benchmark compiled search_captures loop should keep captures 16
+
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "32"
+---
+---
+name: ladder benchmark compiled search_captures loop should keep captures 32
+
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "64"
+---
+---
+name: ladder benchmark compiled search_captures loop should keep captures 64
+
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "128"
+---
+---
+name: ladder benchmark compiled search_captures loop should keep captures 128
+
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "256"
+---
+---
+name: ladder benchmark compiled search_captures loop should keep captures 256
+
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "512"
+---
+---
+name: ladder benchmark compiled search_captures loop should keep captures 512
+
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "1024"
+---
+---
+name: ladder benchmark compiled search_captures loop should keep captures 1024
