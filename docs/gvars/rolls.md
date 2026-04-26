@@ -96,6 +96,22 @@ Returns the difference between the two ability modifiers when overriding which a
 
 Module-level maps `skills_abilities`, `save_abilities`, and `attack_type_abilities` define default pairings used by the helpers above.
 
+## Performance notes (`get_roll`)
+
+`get_roll` always ends with **`vroll(roll_str)`**, which is engine-native and dominates wall time in real aliases. The surrounding Drac2 work is mostly **linear in the amount of branching you hit** for the chosen `roll_type`: argument and alias-key normalization, optional **`arg_aliases`** remapping, resolving **`roll_name`** (`resolve_skill_input` / `resolve_save_input` where applicable), building a readable label, pulling modifiers from the sheet, assembling the d20 expression (`get_d20`, **`join_roll_strings`**), then **`_natural_roll_from_result`** (walks the shallow `roll.raw` tree once, except for `"passive"` where `natural_roll` is skipped).
+
+**Relative cost (avrae-ls statement budget, one invocation):** stress harness **`rolls-perf.alias-test`** runs five tight loops per file (mock sheet from **`avrae-ls`**). Probed maxima on this repo’s runner (see **`python3 .cursor/scripts/probe_perf_boundaries.py --preset rolls`**) were approximately:
+
+| Scenario | Loops per invocation at boundary |
+| --- | ---: |
+| Flat `get_roll` (`"roll"`, `"1d1"`, no sheet) | 287 |
+| Check (`"letics"` → athletics) | 110 |
+| Save (`dex`) | 132 |
+| Attack (`melee`) | 166 |
+| Passive (`perception`) | 121 |
+
+Higher numbers mean **more interpreter statements per `get_roll` call** for that path under the cap. Flat rolls do the least sheet work; checks do skill resolution, proficiency, reliable-talent / reroll wiring, then `vroll`. Re-tune boundaries after large `get_roll` refactors using **`.cursor/scripts/probe_perf_boundaries.py`** and **`.cursor/rules/gvar-perf-boundaries.mdc`**.
+
 ## Internal helpers (unsupported)
 
 Names starting with **`_`** in `rolls.gvar` (for example `_get_skill_for_character`, `_natural_roll_from_result`, `_d20_reroll_list`) are implementation details; do not call them from other modules.

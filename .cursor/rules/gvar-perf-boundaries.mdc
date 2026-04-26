@@ -3,7 +3,8 @@ description: Fast Avrae statement-budget probing for any util *-perf stress test
 globs:
   - "**/*-perf.alias-test"
   - "**/*-perf.alias"
-  - "**/utils/probe*.py"
+  - "**/.cursor/scripts/probe_perf_boundaries.py"
+  - "**/.cursor/templates/probe-perf-dimensions.example.txt"
   - "**/_probe*.alias-test"
 alwaysApply: false
 ---
@@ -46,10 +47,11 @@ Find the **largest** parameter values that still **pass**, without brute-forcing
 
 If perf is only in the main `<name>.alias` testcases, you can still use a **one-block** `.alias-test` that hits a single branch; the important part is **one scenario per `avrae-ls` invocation**.
 
-## Reference implementation (regex)
+## Tooling and reference harnesses
 
-- Script: **`utils/probe_regex_perf_boundaries.py`** — copy/adapt for another util (dimensions, `line_for`, caps, testcase titles).
-- Pair: **`regex-perf.alias`** + **`regex-perf.alias-test`**; probe path gitignored in **`.gitignore`**.
+- **Script:** **`python3 .cursor/scripts/probe_perf_boundaries.py`** — `--preset regex` or `--preset rolls`, or **`--alias-dir`**, **`--stress-alias`**, and **`--dimension`** / **`--dimensions-file`** (see **`--help`**). Optional copy **`.cursor/templates/probe-perf-dimensions.example.txt`** when defining new dimensions.
+- **Regex:** **`regex-perf.alias`** + **`regex-perf.alias-test`**; ephemeral probe files under **`src/gvars/utils/**/_probe.*.alias-test`** are gitignored.
+- **Rolls (`get_roll`):** **`rolls-perf.alias`** + **`rolls-perf.alias-test`** (same gitignore pattern).
 
 ## Anti-patterns
 

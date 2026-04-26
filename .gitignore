@@ -1,2 +1,2 @@
 node_modules/
-src/gvars/utils/regex/_probe.regex-perf.alias-test
+src/gvars/utils/**/_probe.*.alias-test

@@ -1,0 +1,24 @@
+!rolls-perf -testcase "benchmark get_roll flat 1d1 loop should keep totals" -loops "287"
+---
+---
+name: benchmark get_roll flat 1d1 boundary loops 287
+
+!rolls-perf -testcase "benchmark get_roll check loop should keep athletics" -loops "110"
+---
+---
+name: benchmark get_roll check boundary loops 110
+
+!rolls-perf -testcase "benchmark get_roll save loop should keep dexterity" -loops "132"
+---
+---
+name: benchmark get_roll save boundary loops 132
+
+!rolls-perf -testcase "benchmark get_roll attack loop should keep melee" -loops "166"
+---
+---
+name: benchmark get_roll attack boundary loops 166
+
+!rolls-perf -testcase "benchmark get_roll passive loop should keep perception" -loops "121"
+---
+---
+name: benchmark get_roll passive boundary loops 121

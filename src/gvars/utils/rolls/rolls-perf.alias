@@ -1,0 +1,81 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    rolls = env.gvars.rolls,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "benchmark get_roll flat 1d1 loop should keep totals":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    parsed = argparse("")
+    checksum = 0
+    misses = 0
+    i = 0
+    while i < loops:
+        result = rolls.get_roll(None, "1d1", parsed, "roll")
+        if result.total != 1 or result.name != "Roll" or result.roll_string != "1d1":
+            misses = misses + 1
+        else:
+            checksum = checksum + result.total
+        i = i + 1
+    expect(misses).to.be(0)
+    expect(checksum).to.be(loops)
+elif testcase == "benchmark get_roll check loop should keep athletics":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    parsed = argparse("")
+    misses = 0
+    i = 0
+    while i < loops:
+        result = rolls.get_roll(None, "letics", parsed, "check")
+        if result.name != "Athletics Check" or "1d20" not in result.roll_string:
+            misses = misses + 1
+        i = i + 1
+    expect(misses).to.be(0)
+elif testcase == "benchmark get_roll save loop should keep dexterity":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    parsed = argparse("")
+    misses = 0
+    i = 0
+    while i < loops:
+        result = rolls.get_roll(None, "dex", parsed, "save")
+        if result.name != "Dexterity Saving Throw" or "1d20" not in result.roll_string:
+            misses = misses + 1
+        i = i + 1
+    expect(misses).to.be(0)
+elif testcase == "benchmark get_roll attack loop should keep melee":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    parsed = argparse("")
+    misses = 0
+    i = 0
+    while i < loops:
+        result = rolls.get_roll(None, "melee", parsed, "attack")
+        if result.name != "Melee Attack" or "1d20" not in result.roll_string:
+            misses = misses + 1
+        i = i + 1
+    expect(misses).to.be(0)
+elif testcase == "benchmark get_roll passive loop should keep perception":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    parsed = argparse("")
+    misses = 0
+    i = 0
+    while i < loops:
+        result = rolls.get_roll(None, "perception", parsed, "passive")
+        if result.name != "Passive Perception Check" or result.natural_roll != None:
+            misses = misses + 1
+        i = i + 1
+    expect(misses).to.be(0)
+</drac2>
