@@ -1,0 +1,99 @@
+!common-regexes -testcase "common regexes alias loads"
+---
+---
+name: common regexes alias loads
+
+!common-regexes -testcase "email practical format should match common addresses"
+---
+---
+name: email practical format should match common addresses
+
+!common-regexes -testcase "uuid v4 should match canonical lowercase and uppercase"
+---
+---
+name: uuid v4 should match canonical lowercase and uppercase
+
+!common-regexes -testcase "url http https should match host and optional path"
+---
+---
+name: url http https should match host and optional path
+
+!common-regexes -testcase "ipv4 should enforce octet ranges"
+---
+---
+name: ipv4 should enforce octet ranges
+
+!common-regexes -testcase "iso date should match yyyy mm dd shape"
+---
+---
+name: iso date should match yyyy mm dd shape
+
+!common-regexes -testcase "hex color should match three or six digits"
+---
+---
+name: hex color should match three or six digits
+
+!common-regexes -testcase "url slug should match kebab case"
+---
+---
+name: url slug should match kebab case
+
+!common-regexes -testcase "us zip should match five or nine digits"
+---
+---
+name: us zip should match five or nine digits
+
+!common-regexes -testcase "mac address should match colon hex pairs"
+---
+---
+name: mac address should match colon hex pairs
+
+!common-regexes -testcase "gvar and workshop ids should match uuid style ids"
+---
+---
+name: gvar and workshop ids should match uuid style ids
+
+!common-regexes -testcase "dice expression should match practical avrae subset"
+---
+---
+name: dice expression should match practical avrae subset
+
+!common-regexes -testcase "multi term dice expression should match joined terms"
+---
+---
+name: multi term dice expression should match joined terms
+
+!common-regexes -testcase "attack save check token should match common shorthand"
+---
+---
+name: attack save check token should match common shorthand
+
+!common-regexes -testcase "damage roll with type should match common damage strings"
+---
+---
+name: damage roll with type should match common damage strings
+
+!common-regexes -testcase "discord user mention should match id wrappers"
+---
+---
+name: discord user mention should match id wrappers
+
+!common-regexes -testcase "discord channel mention should match id wrappers"
+---
+---
+name: discord channel mention should match id wrappers
+
+!common-regexes -testcase "discord role mention should match id wrappers"
+---
+---
+name: discord role mention should match id wrappers
+
+!common-regexes -testcase "avrae flag token should match dash prefixed args"
+---
+---
+name: avrae flag token should match dash prefixed args
+
+!common-regexes -testcase "coin bundle token should match common currency units"
+---
+---
+name: coin bundle token should match common currency units

@@ -466,6 +466,11 @@ elif testcase == "compiled dict groups key should skip noncapturing group":
 
     expect(m2 != None).to.be(True)
     expect(m2.groups[1]).to.be("c")
+elif testcase == "full_match with leading empty alternation arm should not try later arm":
+    p = regex.compile_program("|ab")
+
+    expect(regex.full_match(p, "")).to.be(True)
+    expect(regex.full_match(p, "ab")).to.be(False)
 elif testcase == "compile_program should err on unsupported question paren":
     expect(lambda: regex.compile_program("(?P<x>a)")).to.raise_exception()
 </drac2>

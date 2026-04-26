@@ -358,6 +358,11 @@ name: search_captures should include groups in hit
 ---
 name: compiled dict groups key should skip noncapturing group
 
+!regex -testcase "full_match with leading empty alternation arm should not try later arm"
+---
+---
+name: full_match with leading empty alternation arm should not try later arm
+
 !regex -testcase "compile_program should err on unsupported question paren"
 ---
 ---

@@ -1,0 +1,156 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    regex = env.gvars.regex,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "common regexes alias loads":
+    expect(True).to.be(True)
+# Web and data validation patterns
+elif testcase == "email practical format should match common addresses":
+    rx = regex.compile("[-\\w.%+]+@[-\\w.]+\\.[A-Za-z]{2,}")
+
+    expect(rx.full_match("user@example.com")).to.be(True)
+    expect(rx.full_match("first.last+tag@sub.domain.org")).to.be(True)
+    expect(rx.full_match("invalid@")).to.be(False)
+    expect(rx.full_match("@example.com")).to.be(False)
+elif testcase == "uuid v4 should match canonical lowercase and uppercase":
+    rx = regex.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}")
+
+    expect(rx.full_match("550e8400-e29b-41d4-a716-446655440000")).to.be(True)
+    expect(rx.full_match("550E8400-E29B-41D4-B716-446655440000")).to.be(True)
+    expect(rx.full_match("550e8400-e29b-31d4-a716-446655440000")).to.be(False)
+    expect(rx.full_match("550e8400e29b41d4a716446655440000")).to.be(False)
+elif testcase == "url http https should match host and optional path":
+    rx = regex.compile("https?://[-\\w.]+(/[-\\w./?%&=+~]*)?")
+
+    expect(rx.full_match("https://example.com")).to.be(True)
+    expect(rx.full_match("http://sub.example.co.uk/path/to/page?x=1&y=two")).to.be(True)
+    expect(rx.full_match("ftp://example.com")).to.be(False)
+    expect(rx.full_match("https://")).to.be(False)
+elif testcase == "ipv4 should enforce octet ranges":
+    rx = regex.compile("(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}")
+
+    expect(rx.full_match("192.168.1.1")).to.be(True)
+    expect(rx.full_match("10.0.0.255")).to.be(True)
+    expect(rx.full_match("256.1.1.1")).to.be(False)
+    expect(rx.full_match("192.168.1")).to.be(False)
+elif testcase == "iso date should match yyyy mm dd shape":
+    rx = regex.compile("\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])")
+
+    expect(rx.full_match("2026-12-31")).to.be(True)
+    expect(rx.full_match("2026-02-30")).to.be(True)
+    expect(rx.full_match("2026-13-01")).to.be(False)
+    expect(rx.full_match("26-12-31")).to.be(False)
+elif testcase == "hex color should match three or six digits":
+    rx = regex.compile("#?([0-9a-fA-F]{6}|[0-9a-fA-F]{3})")
+
+    expect(rx.full_match("#ff00aa")).to.be(True)
+    expect(rx.full_match("ABC")).to.be(True)
+    expect(rx.full_match("#abcd")).to.be(False)
+    expect(rx.full_match("#gg00aa")).to.be(False)
+elif testcase == "url slug should match kebab case":
+    rx = regex.compile("[a-z0-9]+(-[a-z0-9]+)*")
+
+    expect(rx.full_match("drac2-tools")).to.be(True)
+    expect(rx.full_match("release-2026-q2")).to.be(True)
+    expect(rx.full_match("Not-Kebab")).to.be(False)
+    expect(rx.full_match("double--dash")).to.be(False)
+elif testcase == "us zip should match five or nine digits":
+    rx = regex.compile("\\d{5}(-\\d{4})?")
+
+    expect(rx.full_match("12345")).to.be(True)
+    expect(rx.full_match("12345-6789")).to.be(True)
+    expect(rx.full_match("1234")).to.be(False)
+    expect(rx.full_match("12345-678")).to.be(False)
+elif testcase == "mac address should match colon hex pairs":
+    rx = regex.compile("([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}")
+
+    expect(rx.full_match("00:1A:2B:3C:4D:5E")).to.be(True)
+    expect(rx.full_match("aa:bb:cc:dd:ee:ff")).to.be(True)
+    expect(rx.full_match("00:1A:2B:3C:4D")).to.be(False)
+    expect(rx.full_match("00:1A:2B:3C:4D:ZZ")).to.be(False)
+elif testcase == "gvar and workshop ids should match uuid style ids":
+    rx = regex.compile("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
+
+    expect(rx.full_match("844087ed-cb06-4b66-9b36-b640519aa86f")).to.be(True)
+    expect(rx.full_match("550e8400-e29b-41d4-a716-446655440000")).to.be(True)
+    expect(rx.full_match("not-a-uuid")).to.be(False)
+    expect(rx.full_match("844087edcb064b669b36b640519aa86f")).to.be(False)
+# Avrae rolls and command-token patterns
+elif testcase == "dice expression should match practical avrae subset":
+    rx = regex.compile("\\d+d\\d+([kK][hHlL]\\d+)?([rR][oO]?[<>]?\\d+)?([+\\-]\\d+)?")
+
+    expect(rx.full_match("1d20")).to.be(True)
+    expect(rx.full_match("2d20kh1")).to.be(True)
+    expect(rx.full_match("4d6kh3+2")).to.be(True)
+    expect(rx.full_match("8d6ro<3-1")).to.be(True)
+    expect(rx.full_match("d20")).to.be(False)
+    expect(rx.full_match("2d")).to.be(False)
+elif testcase == "multi term dice expression should match joined terms":
+    rx = regex.compile("\\d+d\\d+([kK][hHlL]\\d+)?([+\\-]\\d+d\\d+([kK][hHlL]\\d+)?)*([+\\-]\\d+)?")
+
+    expect(rx.full_match("1d20+5")).to.be(True)
+    expect(rx.full_match("2d6+1d4+3")).to.be(True)
+    expect(rx.full_match("4d6kh3-1")).to.be(True)
+    expect(rx.full_match("2d6++1")).to.be(False)
+    expect(rx.full_match("+2d6")).to.be(False)
+elif testcase == "attack save check token should match common shorthand":
+    rx = regex.compile("(atk|attack|save|check|skill)(:[A-Za-z_]+)?")
+
+    expect(rx.full_match("save")).to.be(True)
+    expect(rx.full_match("check:stealth")).to.be(True)
+    expect(rx.full_match("attack:longsword")).to.be(True)
+    expect(rx.full_match("initiative")).to.be(False)
+elif testcase == "damage roll with type should match common damage strings":
+    rx = regex.compile("\\d+d\\d+([+\\-]\\d+)?\\s*(acid|cold|fire|force|lightning|necrotic|poison|psychic|radiant|thunder|bludgeoning|piercing|slashing)")
+
+    expect(rx.full_match("2d6+3 fire")).to.be(True)
+    expect(rx.full_match("1d8 piercing")).to.be(True)
+    expect(rx.full_match("4d10-1lightning")).to.be(True)
+    expect(rx.full_match("2d6 holy")).to.be(False)
+# Discord mention patterns
+elif testcase == "discord user mention should match id wrappers":
+    rx = regex.compile("<@!?[0-9]{17,20}>")
+
+    expect(rx.full_match("<@12345678901234567>")).to.be(True)
+    expect(rx.full_match("<@!123456789012345678>")).to.be(True)
+    expect(rx.full_match("<@abc>")).to.be(False)
+    expect(rx.full_match("@12345678901234567")).to.be(False)
+elif testcase == "discord channel mention should match id wrappers":
+    rx = regex.compile("<#[0-9]{17,20}>")
+
+    expect(rx.full_match("<#12345678901234567>")).to.be(True)
+    expect(rx.full_match("<#1234567890123456789>")).to.be(True)
+    expect(rx.full_match("<#1234>")).to.be(False)
+    expect(rx.full_match("#12345678901234567")).to.be(False)
+elif testcase == "discord role mention should match id wrappers":
+    rx = regex.compile("<@&[0-9]{17,20}>")
+
+    expect(rx.full_match("<@&12345678901234567>")).to.be(True)
+    expect(rx.full_match("<@&1234567890123456789>")).to.be(True)
+    expect(rx.full_match("<@&abc>")).to.be(False)
+    expect(rx.full_match("@&12345678901234567")).to.be(False)
+elif testcase == "avrae flag token should match dash prefixed args":
+    rx = regex.compile("-[A-Za-z][A-Za-z0-9_]*")
+
+    expect(rx.full_match("-adv")).to.be(True)
+    expect(rx.full_match("-save_mod")).to.be(True)
+    expect(rx.full_match("-dc2")).to.be(True)
+    expect(rx.full_match("--bad")).to.be(False)
+    expect(rx.full_match("-1bad")).to.be(False)
+elif testcase == "coin bundle token should match common currency units":
+    rx = regex.compile("\\d+\\s*(cp|sp|ep|gp|pp)")
+
+    expect(rx.full_match("150 gp")).to.be(True)
+    expect(rx.full_match("3pp")).to.be(True)
+    expect(rx.full_match("0 sp")).to.be(True)
+    expect(rx.full_match("20 xp")).to.be(False)
+else:
+    err(f"Unknown testcase: {testcase}")
+</drac2>
