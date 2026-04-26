@@ -12,6 +12,7 @@
 
 # Last ``_rx_err`` payload for diagnostics (e.g. tests): ``(message, index_or_None)`` before ``err()`` fires.
 _RX_DIAG = {"last": None}
+_RX_COMPILE_CACHE = {"map": {}, "order": [], "max_size": 64}
 
 
 def _rx_err(msg: str, idx: int = None):
@@ -51,10 +52,11 @@ def _digit_val(ch: str) -> int:
 
 
 def _parse_int(pat: str, i: int):
-    if i >= len(pat) or pat[i] < "0" or pat[i] > "9":
+    n_pat = len(pat)
+    if i >= n_pat or pat[i] < "0" or pat[i] > "9":
         return None, i
     n = 0
-    while i < len(pat) and pat[i] >= "0" and pat[i] <= "9":
+    while i < n_pat and pat[i] >= "0" and pat[i] <= "9":
         n = n * 10 + _digit_val(pat[i])
         i = i + 1
     return n, i
@@ -195,7 +197,11 @@ def _parse_class(pat: str, i: int):
     if pat[j] == "^":
         neg = True
         j = j + 1
-    acc = ""
+    acc_parts = []
+
+    def _acc_add(s: str):
+        if len(s) > 0:
+            acc_parts.append(s)
     pending = None
     while j < len(pat) and pat[j] != "]":
         c = pat[j]
@@ -203,37 +209,43 @@ def _parse_class(pat: str, i: int):
             e, j2 = _parse_escape(pat, j)
             ex = _expand_set_escape(e, j)
             if pending != None:
-                acc += pending
+                _acc_add(pending)
                 pending = None
-            acc += ex
+            _acc_add(ex)
             j = j2
             continue
         if c == "-" and pending != None and j + 1 < len(pat) and pat[j + 1] != "]":
             hi = pat[j + 1]
             if hi == "\\":
                 _rx_err("range end must be literal", j + 1)
-            acc += _range_expand(pending, hi, j)
+            _acc_add(_range_expand(pending, hi, j))
             pending = None
             j = j + 2
             continue
         if c == "-":
             if pending != None:
-                acc += pending
+                _acc_add(pending)
                 pending = None
             pending = "-"
             j = j + 1
             continue
         if pending != None:
-            acc += pending
+            _acc_add(pending)
         pending = c
         j = j + 1
     if j >= len(pat):
         _rx_err("unclosed [", i)
     if pending != None:
-        acc += pending
+        _acc_add(pending)
+    acc = "".join(acc_parts)
     if len(acc) == 0 and not neg:
         _rx_err("empty []", j)
-    return {"k": "set", "n": neg, "s": acc}, j + 1
+    set_map = {}
+    k = 0
+    while k < len(acc):
+        set_map[acc[k]] = True
+        k = k + 1
+    return {"k": "set", "n": neg, "s": acc, "m": set_map}, j + 1
 
 
 def _char_in_set(ch: str, s: str) -> bool:
@@ -329,6 +341,60 @@ def _parse_alt(pat: str, i: int, in_group: bool, cap_counter: list, group_start:
     return [{"k": "alt", "arms": arms}], j
 
 
+def _annotate_capture_mc_atom(atom) -> int:
+    """Annotate ``atom`` with ``mc`` = max capture index reachable from this atom."""
+    if atom["k"] == "grp":
+        m = _annotate_capture_mc_nodes(atom["g"])
+        cid = atom.get("cap", None)
+        if cid != None and cid > m:
+            m = cid
+        atom["mc"] = m
+        return m
+    atom["mc"] = 0
+    return 0
+
+
+def _annotate_capture_mc_node(node) -> int:
+    """Annotate one parsed node with ``mc`` = max capture index in its subtree."""
+    k = node["k"]
+    if k == "grp":
+        m = _annotate_capture_mc_nodes(node["g"])
+        cid = node.get("cap", None)
+        if cid != None and cid > m:
+            m = cid
+        node["mc"] = m
+        return m
+    if k == "alt":
+        m = 0
+        arms = node["arms"]
+        ai = 0
+        while ai < len(arms):
+            am = _annotate_capture_mc_nodes(arms[ai])
+            if am > m:
+                m = am
+            ai = ai + 1
+        node["mc"] = m
+        return m
+    if k == "rep":
+        m = _annotate_capture_mc_atom(node["a"])
+        node["mc"] = m
+        return m
+    node["mc"] = 0
+    return 0
+
+
+def _annotate_capture_mc_nodes(nodes: list) -> int:
+    """Annotate a node list with per-node ``mc`` values and return list max capture index."""
+    m = 0
+    i = 0
+    while i < len(nodes):
+        nm = _annotate_capture_mc_node(nodes[i])
+        if nm > m:
+            m = nm
+        i = i + 1
+    return m
+
+
 def last_parse_error():
     """
     After ``compile_program`` / ``compile`` fail with a ``regex: ...`` parse error, returns
@@ -365,14 +431,24 @@ def compile_program(pat: str) -> list:
     if i != len(pat):
         # See ``_rx_err`` docstring: defensive for current grammar; index is first unconsumed offset.
         _rx_err("trailing junk", i)
+    # Capture annotations are only needed when the pattern has capturing groups.
+    if cap_counter[0] > 0:
+        _annotate_capture_mc_nodes(nodes)
     _RX_DIAG["last"] = None
     return nodes
 
 
-def _caps_clone(caps):
+def _caps_clone(caps, max_idx: int = None):
     if caps == None:
         return None
-    return caps[:]
+    if max_idx == None:
+        return caps[:]
+    n = max_idx + 1
+    if n < 0:
+        n = 0
+    if n > len(caps):
+        n = len(caps)
+    return caps[:n]
 
 
 def _caps_restore(dst, src):
@@ -382,6 +458,18 @@ def _caps_restore(dst, src):
     while i < len(src):
         dst[i] = src[i]
         i = i + 1
+
+
+def _nodes_capture_mc(nodes: list) -> int:
+    """Max capture index reachable from this node list (0 means no captures)."""
+    m = 0
+    i = 0
+    while i < len(nodes):
+        nm = nodes[i].get("mc", 0)
+        if nm > m:
+            m = nm
+        i = i + 1
+    return m
 
 
 def _max_capture_id(nodes: list) -> int:
@@ -426,31 +514,34 @@ def _max_capture_id_atom(atom) -> int:
 
 def group_count(program: list) -> int:
     """Return the number of capturing ``(`` groups in ``program`` (highest 1-based index)."""
+    # ``compile_program`` annotates each node with subtree ``mc``; use that fast path.
+    if len(program) == 0 or program[0].get("mc", None) != None:
+        return _nodes_capture_mc(program)
     return _max_capture_id(program)
 
 
 def _match_node_plain(node, text: str, pos: int, lim: int):
     """Match one literal, dot, class escape (``\\d`` etc.), or ``[...]`` set token."""
     k = node["k"]
-    if pos > lim:
+    if pos >= lim:
         return -1
     if k == "lit":
-        if pos < len(text) and text[pos] == node["v"]:
+        if text[pos] == node["v"]:
             return pos + 1
         return -1
     if k == "dot":
-        if pos < len(text):
-            return pos + 1
-        return -1
+        return pos + 1
     if k == "cls":
-        if pos < len(text) and _cls_ok(text[pos], node["c"]):
+        if _cls_ok(text[pos], node["c"]):
             return pos + 1
         return -1
     if k == "set":
-        if pos >= len(text):
-            return -1
         ch = text[pos]
-        ok = _char_in_set(ch, node["s"])
+        set_map = node.get("m", None)
+        if set_map == None:
+            ok = _char_in_set(ch, node["s"])
+        else:
+            ok = set_map.get(ch, False)
         if node["n"]:
             ok = not ok
         if ok:
@@ -462,7 +553,7 @@ def _match_node_plain(node, text: str, pos: int, lim: int):
 def _match_one_unit(atom, text: str, pos: int, lim: int, caps):
     """One repetition step: a plain atom or a parenthesized sub-pattern."""
     if atom["k"] == "grp":
-        r = _match_seq_bt(atom["g"], text, pos, lim, 0, caps)
+        r = _match_seq_bt(atom["g"], text, pos, lim, 0, caps, atom.get("mc", 0))
         if r < 0:
             return -1
         gid = atom.get("cap", None)
@@ -493,7 +584,7 @@ def _greedy_max_take(atom, text: str, pos: int, lim: int, hi):
     p = pos
     c = 0
     guard = 0
-    max_guard = len(text) + len(text) + 128
+    max_guard = lim + lim + 128
     while guard < max_guard:
         guard = guard + 1
         if hi != None and c >= hi:
@@ -510,26 +601,31 @@ def _greedy_max_take(atom, text: str, pos: int, lim: int, hi):
     return c, p
 
 
-def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps):
+def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps, nodes_mc: int = None):
     """
     Match the remaining program from ``pos``; return exclusive end index or ``-1``.
 
     ``caps``: ``None`` skips capture writes; else a list of length ``group_count(program)+1``
     where indices ``1..`` hold capture substrings (or ``None``) when recording.
     """
-    entry_snap = _caps_clone(caps)
+    has_caps = caps != None
+    if has_caps and nodes_mc == None:
+        nodes_mc = _nodes_capture_mc(nodes)
+    entry_snap = _caps_clone(caps, nodes_mc) if has_caps else None
     p = pos
     i = idx
     n_nodes = len(nodes)
     while i < n_nodes:
         node = nodes[i]
-        if node["k"] == "alt":
+        node_k = node["k"]
+        if node_k == "alt":
             arms = node["arms"]
+            alt_mc = node.get("mc", 0)
             ai = 0
             matched = -1
+            snap_a = _caps_clone(caps, alt_mc) if has_caps and alt_mc > 0 else None
             while ai < len(arms):
-                snap_a = _caps_clone(caps)
-                r = _match_seq_bt(arms[ai], text, p, lim, 0, caps)
+                r = _match_seq_bt(arms[ai], text, p, lim, 0, caps, alt_mc)
                 if r >= 0:
                     p = r
                     matched = 0
@@ -538,42 +634,109 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps):
                     _caps_restore(caps, snap_a)
                 ai = ai + 1
             if matched < 0:
-                _caps_restore(caps, entry_snap)
+                if has_caps:
+                    _caps_restore(caps, entry_snap)
                 return -1
             i = i + 1
             continue
-        if node["k"] == "rep":
+        if node_k == "rep":
             lo = node["lo"]
             hi = node["hi"]
             atom = node["a"]
+            rep_mc = node.get("mc", 0)
+            if (not has_caps) and hi == lo:
+                # Exact-count repeats have a single legal count, so they do not need
+                # greedy probing or backoff over counts.
+                pp = p
+                need = lo
+                took = 0
+                while took < need:
+                    nx = _match_one_unit(atom, text, pp, lim, None)
+                    if nx < 0:
+                        return -1
+                    pp = nx
+                    took = took + 1
+                p = pp
+                i = i + 1
+                continue
             max_c, _p_g = _greedy_max_take(atom, text, p, lim, hi)
             if max_c < lo:
-                _caps_restore(caps, entry_snap)
+                if has_caps:
+                    _caps_restore(caps, entry_snap)
                 return -1
-            snap0 = _caps_clone(caps)
+            # If this repeat is terminal and no captures are being recorded, greedy
+            # success is final; no endpoint/snapshot build or backoff is needed.
+            if (not has_caps) and i + 1 >= n_nodes:
+                return _p_g
+            snap0 = _caps_clone(caps, rep_mc) if has_caps and rep_mc > 0 else None
+            # Build repeat endpoints once (and capture snapshots for each count) so
+            # greedy backoff does not re-run the first k units from scratch each time.
+            ends = [p]
+            cap_snaps = None
+            if snap0 != None:
+                cap_snaps = [snap0]
+            pp = p
+            built = 0
+            while built < max_c:
+                nx = _match_one_unit(atom, text, pp, lim, caps)
+                if nx < 0:
+                    break
+                pp = nx
+                ends.append(pp)
+                built = built + 1
+                if cap_snaps != None:
+                    cap_snaps.append(_caps_clone(caps, rep_mc))
+            if built < max_c:
+                max_c = built
+                if max_c < lo:
+                    if has_caps:
+                        _caps_restore(caps, entry_snap)
+                    return -1
             k = max_c
             while k >= lo:
-                if snap0 != None:
-                    _caps_restore(caps, snap0)
-                p2 = _after_n_units(atom, text, p, lim, k, caps)
-                if p2 >= 0:
-                    rest = _match_seq_bt(nodes, text, p2, lim, i + 1, caps)
-                    if rest >= 0:
-                        return rest
+                if cap_snaps != None:
+                    _caps_restore(caps, cap_snaps[k])
+                p2 = ends[k]
+                rest = _match_seq_bt(nodes, text, p2, lim, i + 1, caps, nodes_mc)
+                if rest >= 0:
+                    return rest
                 k = k - 1
-            _caps_restore(caps, entry_snap)
+            if has_caps:
+                _caps_restore(caps, entry_snap)
             return -1
         nx = _match_one_unit(node, text, p, lim, caps)
         if nx < 0:
-            _caps_restore(caps, entry_snap)
+            if has_caps:
+                _caps_restore(caps, entry_snap)
             return -1
         p = nx
         i = i + 1
     return p
 
 
-def _match_all(nodes: list, text: str, pos: int, lim: int, caps):
-    return _match_seq_bt(nodes, text, pos, lim, 0, caps)
+def _match_all(nodes: list, text: str, pos: int, lim: int, caps, nodes_mc: int = None):
+    return _match_seq_bt(nodes, text, pos, lim, 0, caps, nodes_mc)
+
+
+def _search_prefilter_node(program: list):
+    """
+    Return a plain atom node (lit/cls/set) that must match the first consumed character
+    for any successful match attempt at a start index, else ``None``.
+    """
+    if len(program) == 0:
+        return None
+    node = program[0]
+    k = node["k"]
+    if k == "rep":
+        if node["lo"] < 1:
+            return None
+        atom = node["a"]
+        if atom["k"] == "lit" or atom["k"] == "cls" or atom["k"] == "set":
+            return atom
+        return None
+    if k == "lit" or k == "cls" or k == "set":
+        return node
+    return None
 
 
 def match_from(program: list, text: str, start: int = 0):
@@ -585,7 +748,7 @@ def match_from(program: list, text: str, start: int = 0):
     return end
 
 
-def match_from_captures(program: list, text: str, start: int = 0):
+def match_from_captures(program: list, text: str, start: int = 0, group_total: int = None, program_mc: int = None):
     """
     Like ``match_from``, but on success also fills capture strings.
 
@@ -593,10 +756,14 @@ def match_from_captures(program: list, text: str, start: int = 0):
     is ``text[start:end]``; ``groups[i]`` for ``i >= 1`` is capture ``i`` or ``None`` if that
     group did not participate (e.g. an unused optional branch).
     """
-    ng = group_count(program)
+    if group_total == None:
+        group_total = _nodes_capture_mc(program)
+    if program_mc == None:
+        program_mc = group_total
+    ng = group_total
     caps = [None] * (ng + 1)
     lim = len(text)
-    end = _match_all(program, text, start, lim, caps)
+    end = _match_all(program, text, start, lim, caps, program_mc)
     if end < 0:
         return None
     caps[0] = text[start:end]
@@ -605,17 +772,25 @@ def match_from_captures(program: list, text: str, start: int = 0):
 
 def full_match(program: list, text: str, pos: int = 0) -> bool:
     """True iff ``text[pos:]`` is matched in full (match ends at ``len(text)``)."""
-    e = match_from(program, text, pos)
-    return e != None and e == len(text)
+    lim = len(text)
+    e = _match_all(program, text, pos, lim, None)
+    return e >= 0 and e == lim
 
 
 def search_from(program: list, text: str, pos: int = 0):
     """First match with ``start >= pos``: ``{"start", "end"}`` or ``None``."""
     lim = len(text)
+    lead = _search_prefilter_node(program)
     s = pos
     if s < 0:
         s = 0
     while s <= lim:
+        if lead != None:
+            if s >= lim:
+                return None
+            if _match_node_plain(lead, text, s, lim) < 0:
+                s = s + 1
+                continue
         e = _match_all(program, text, s, lim, None)
         if e >= 0:
             return {"start": s, "end": e}
@@ -623,16 +798,27 @@ def search_from(program: list, text: str, pos: int = 0):
     return None
 
 
-def search_from_captures(program: list, text: str, pos: int = 0):
+def search_from_captures(program: list, text: str, pos: int = 0, group_total: int = None, program_mc: int = None):
     """Like ``search_from``, plus a ``groups`` list (same layout as ``match_from_captures``)."""
-    ng = group_count(program)
+    if group_total == None:
+        group_total = _nodes_capture_mc(program)
+    if program_mc == None:
+        program_mc = group_total
+    ng = group_total
     lim = len(text)
+    lead = _search_prefilter_node(program)
     s = pos
     if s < 0:
         s = 0
     while s <= lim:
+        if lead != None:
+            if s >= lim:
+                return None
+            if _match_node_plain(lead, text, s, lim) < 0:
+                s = s + 1
+                continue
         caps = [None] * (ng + 1)
-        end = _match_all(program, text, s, lim, caps)
+        end = _match_all(program, text, s, lim, caps, program_mc)
         if end >= 0:
             caps[0] = text[s:end]
             return {"start": s, "end": end, "groups": caps}
@@ -652,6 +838,60 @@ def _normalize_pattern_string(pat: str) -> str:
     return pat
 
 
+def _program_literal(program: list):
+    """Return literal text iff ``program`` is only ``lit`` nodes; else ``None``."""
+    i = 0
+    parts = []
+    while i < len(program):
+        node = program[i]
+        if node["k"] != "lit":
+            return None
+        parts.append(node["v"])
+        i = i + 1
+    return "".join(parts)
+
+
+def _compile_cache_get(key: str):
+    c_map = _RX_COMPILE_CACHE["map"]
+    hit = c_map.get(key, None)
+    if hit == None:
+        return None
+    order = _RX_COMPILE_CACHE["order"]
+    if len(order) > 0 and order[-1] == key:
+        return hit
+    j = 0
+    while j < len(order):
+        if order[j] == key:
+            order.pop(j)
+            break
+        j = j + 1
+    order.append(key)
+    return hit
+
+
+def _compile_cache_put(key: str, compiled):
+    c_map = _RX_COMPILE_CACHE["map"]
+    order = _RX_COMPILE_CACHE["order"]
+    if c_map.get(key, None) != None:
+        c_map[key] = compiled
+        if len(order) > 0 and order[-1] == key:
+            return
+        j = 0
+        while j < len(order):
+            if order[j] == key:
+                order.pop(j)
+                break
+            j = j + 1
+        order.append(key)
+        return
+    c_map[key] = compiled
+    order.append(key)
+    max_size = _RX_COMPILE_CACHE["max_size"]
+    while len(order) > max_size:
+        old = order.pop(0)
+        c_map.pop(old, None)
+
+
 def compile(pat: str):
     """
     Compile ``pat`` and return a dict for use from aliases: normalized ``pattern`` string,
@@ -664,20 +904,83 @@ def compile(pat: str):
     always sees the full ``text``). Details: ``docs/gvars/regex.md``.
     """
     pat_norm = _normalize_pattern_string(pat)
+    cached = _compile_cache_get(pat_norm)
+    if cached != None:
+        return dict(cached)
     prog = compile_program(pat_norm)
-    ng = group_count(prog)
-    return {
+    ng = _nodes_capture_mc(prog)
+    lit = _program_literal(prog) if ng == 0 else None
+    lit_len = len(lit) if lit != None else 0
+
+    def _match_lit(t, start = 0):
+        if lit == None:
+            return match_from(prog, t, start)
+        if start < 0:
+            return match_from(prog, t, start)
+        end = start + lit_len
+        if end > len(t):
+            return None
+        if t[start:end] == lit:
+            return end
+        return None
+
+    def _search_lit(t, pos = 0):
+        if lit == None:
+            return search_from(prog, t, pos)
+        s = pos
+        if s < 0:
+            s = 0
+        lim = len(t)
+        if lit_len == 0:
+            if s <= lim:
+                return {"start": s, "end": s}
+            return None
+        i = t.find(lit, s)
+        if i < 0:
+            return None
+        return {"start": i, "end": i + lit_len}
+
+    def _fullmatch_lit(t, pos = 0, endpos = None):
+        if lit == None:
+            return full_match(prog, t, pos)
+        if pos < 0:
+            return full_match(prog, t, pos)
+        end = pos + lit_len
+        if end != len(t):
+            return False
+        return t[pos:end] == lit
+
+    if ng == 0:
+        def _mfc0(t, start = 0):
+            end = _match_lit(t, start)
+            if end == None:
+                return None
+            return {"end": end, "groups": [t[start:end]]}
+
+        def _sfc0(t, pos = 0, endpos = None):
+            hit = _search_lit(t, pos)
+            if hit == None:
+                return None
+            s = hit["start"]
+            e = hit["end"]
+            return {"start": s, "end": e, "groups": [t[s:e]]}
+    else:
+        _mfc0 = lambda t, start = 0: match_from_captures(prog, t, start, ng, ng)
+        _sfc0 = lambda t, pos = 0, endpos = None: search_from_captures(prog, t, pos, ng, ng)
+    compiled = {
         "pattern": pat_norm,
         "groups": ng,
-        "fullmatch": lambda t, pos = 0, endpos = None: full_match(prog, t, pos),
-        "full_match": lambda t, pos = 0, endpos = None: full_match(prog, t, pos),
-        "match": lambda t, pos = 0, endpos = None: match_from(prog, t, pos),
-        "search": lambda t, pos = 0, endpos = None: search_from(prog, t, pos),
-        "match_from": lambda t, start = 0: match_from(prog, t, start),
-        "match_from_captures": lambda t, start = 0: match_from_captures(prog, t, start),
-        "search_captures": lambda t, pos = 0, endpos = None: search_from_captures(prog, t, pos),
+        "fullmatch": _fullmatch_lit,
+        "full_match": _fullmatch_lit,
+        "match": lambda t, pos = 0, endpos = None: _match_lit(t, pos),
+        "search": lambda t, pos = 0, endpos = None: _search_lit(t, pos),
+        "match_from": lambda t, start = 0: _match_lit(t, start),
+        "match_from_captures": _mfc0,
+        "search_captures": _sfc0,
         "program": prog,
     }
+    _compile_cache_put(pat_norm, compiled)
+    return dict(compiled)
 
 
 def diagnostic_compile(pat: str):

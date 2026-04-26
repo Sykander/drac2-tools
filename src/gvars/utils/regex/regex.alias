@@ -349,6 +349,24 @@ elif testcase == "compile wrapper should reuse program for repeated checks":
     expect(rx.full_match("a")).to.be(True)
     expect(rx.full_match("a")).to.be(True)
     expect(rx.full_match("b")).to.be(False)
+elif testcase == "compile wrapper captures helpers should work with zero groups":
+    rx = regex.compile("abc")
+
+    expect(rx.groups).to.be(0)
+    m = rx.match_from_captures("xabc", 1)
+    expect(m != None).to.be(True)
+    expect(m.end).to.be(4)
+    expect(m.groups).to.have.length(1)
+    expect(m.groups[0]).to.be("abc")
+    expect(rx.match_from_captures("xab", 1)).to.be(None)
+
+    hit = rx.search_captures("zzabcqq")
+    expect(hit != None).to.be(True)
+    expect(hit.start).to.be(2)
+    expect(hit.end).to.be(5)
+    expect(hit.groups).to.have.length(1)
+    expect(hit.groups[0]).to.be("abc")
+    expect(rx.search_captures("zzz")).to.be(None)
 elif testcase == "full_match should handle complex email like token":
     rx = regex.compile_program("[\\w.]+@[\\w]+")
 
@@ -448,6 +466,11 @@ elif testcase == "compiled dict groups key should skip noncapturing group":
 
     expect(m2 != None).to.be(True)
     expect(m2.groups[1]).to.be("c")
+elif testcase == "full_match with leading empty alternation arm should not try later arm":
+    p = regex.compile_program("|ab")
+
+    expect(regex.full_match(p, "")).to.be(True)
+    expect(regex.full_match(p, "ab")).to.be(False)
 elif testcase == "compile_program should err on unsupported question paren":
     expect(lambda: regex.compile_program("(?P<x>a)")).to.raise_exception()
 </drac2>

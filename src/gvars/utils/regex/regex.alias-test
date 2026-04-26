@@ -283,6 +283,11 @@ name: full_match should combine alternation with suffix
 ---
 name: compile wrapper should reuse program for repeated checks
 
+!regex -testcase "compile wrapper captures helpers should work with zero groups"
+---
+---
+name: compile wrapper captures helpers should work with zero groups
+
 !regex -testcase "full_match should handle complex email like token"
 ---
 ---
@@ -352,6 +357,11 @@ name: search_captures should include groups in hit
 ---
 ---
 name: compiled dict groups key should skip noncapturing group
+
+!regex -testcase "full_match with leading empty alternation arm should not try later arm"
+---
+---
+name: full_match with leading empty alternation arm should not try later arm
 
 !regex -testcase "compile_program should err on unsupported question paren"
 ---
