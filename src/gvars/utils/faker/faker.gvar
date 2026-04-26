@@ -1,0 +1,328 @@
+# faker — plausibly shaped random data for Drac2 / Avrae tests and fixtures.
+# Uses a small xorshift PRNG (separate from ``random`` gvar) so this module is self-contained.
+
+_FAKER = {"seed": int(13371337 + int(time())) % 2**31}
+_HEX = "0123456789abcdef"
+
+_FIRST = [
+    "Aldo", "Bria", "Cedric", "Dana", "Eldon", "Fara", "Gareth", "Hana", "Ivor", "Juno",
+    "Kara", "Lio", "Mira", "Nolan", "Orin", "Pria", "Quinn", "Ria", "Soren", "Tess",
+    "Uma", "Venn", "Wren", "Xara", "Yorick", "Zed",
+]
+_LAST = [
+    "Ashford", "Blackwood", "Carrow", "Dusk", "Eldr", "Frost", "Glimmer", "Hollow", "Irons", "Jett",
+    "Keen", "Lark", "Morrow", "Nyte", "Oak", "Pike", "Quill", "Rook", "Stone", "Thorn",
+    "Underhill", "Vale", "Wolf", "Yarrow", "Zinn",
+]
+_TITLES = [
+    "the Bold", "the Swift", "of Silverpine", "the Grim", "the Lucky", "of Ash", "the Wise", "the Young",
+    "of Northreach", "the Dawnbreaker", "of Hollowfen", "the Restless", "of Stormwatch", "the Sly",
+    "of Emberfall", "the True", "the Lost", "of Deepmere", "the Bright", "the Oathbound",
+]
+_DND_CLASS = [
+    "Fighter", "Wizard", "Rogue", "Cleric", "Ranger", "Paladin", "Barbarian", "Bard", "Druid", "Sorcerer",
+    "Warlock", "Monk", "Artificer",
+]
+_RACE = [
+    "Human", "Elf", "Dwarf", "Halfling", "Dragonborn", "Gnome", "Half-Elf", "Half-Orc", "Tiefling", "Aasimar",
+    "Goliath", "Tabaxi", "Genasi", "Kenku", "Triton",
+]
+_BACKGROUND = [
+    "Soldier", "Acolyte", "Criminal", "Sage", "Noble", "Folk Hero", "Hermit", "Entertainer", "Sailor", "Outlander",
+    "Charlatan", "Guild Artisan", "Merchant", "Inquisitor", "Archaeologist", "Pirate", "Bounty Hunter", "Cloistered",
+]
+_WEAPON = [
+    "Longsword", "Greataxe", "Rapier", "Shortbow", "Dagger", "Mace", "Lance", "Glaive", "Warhammer", "Hand Crossbow",
+    "Trident", "Whip", "Flail", "Scimitar", "Longbow",
+]
+_VERB = ["Attack", "Strike", "Lunge", "Thrust", "Cleave", "Flurry", "Shot", "Slam", "Bite", "Swipe"]
+_DMG = [
+    "slashing", "piercing", "bludgeoning", "fire", "cold", "lightning", "acid", "necrotic", "psychic", "radiant",
+    "thunder", "poison", "force",
+]
+_SAVE = ["str", "dex", "con", "int", "wis", "cha"]
+_SKILLS = [
+    "Acrobatics", "Animal Handling", "Arcana", "Athletics", "Deception", "History", "Insight", "Intimidation",
+    "Investigation", "Medicine", "Nature", "Perception", "Performance", "Persuasion", "Religion", "Sleight of Hand",
+    "Stealth", "Survival",
+]
+_LOREM = [
+    "lorem", "ipsum", "dolor", "sit", "amet", "elit", "duo", "saepe", "vel", "eum", "nisl", "per", "in", "ante",
+    "ut", "nam", "sea", "ei", "ius", "modo", "aqua", "terra", "ignis", "ventus", "lux", "umbra", "vox", "fides",
+    "ars", "opus", "laus", "pes", "cor", "donum", "finis", "initium",
+]
+_GEAR = [
+    "Boots of Striding", "Cloak of Elvenkind", "Bag of Holding", "Ring of Protection", "Amulet of Health", "Belt of Dwarvenkind",
+    "Longbow +1", "Shield of Expression", "Immovable Rod", "Decanter of Endless Water", "Driftglobe", "Censer of Controlling",
+]
+_FEATURE_A = [
+    "Improved", "Extra", "Greater", "Cunning", "Divine", "Eldritch", "Fighting", "Martial", "Pact", "Spell", "Superior", "War",
+    "Crippling", "Distant", "Keen", "Lucky", "Resilient", "Sentinel", "Tough", "Warding",
+]
+_FEATURE_B = [
+    "Smite", "Attack", "Strike", "Adept", "Mastery", "Sneak", "Weave", "Surge", "Precision", "Reflexes", "Resilience", "Bane",
+    "Fury", "Vigor", "Focus", "Guile", "Wrath", "Prowess", "Edge", "Mark",
+]
+_MONSTER = [
+    "Cinderfang", "Dreadmaw", "Gloomtusk", "Hollowwight", "Ironjaw", "Mireborn", "Nightscale", "Rotwood", "Skullrend", "Voidsnap",
+    "Blightbeast", "Doomhowl", "Frostclaw", "Grimlash", "Shadowling", "Thundertusk", "Wraithling", "Bonegnasher", "Cinderspawn",
+    "Deeprod",
+]
+_SCHOOL = [
+    "Abjuration", "Conjuration", "Divination", "Enchantment", "Evocation", "Illusion", "Necromancy", "Transmutation",
+]
+_SPELL_VERB = ["Bolt", "Blast", "Word", "Smite", "Hand", "Sphere", "Ray", "Aura", "Shield", "Arrow", "Fog", "Circle"]
+_SPELL_PART = [
+    "Fire", "Frost", "Shock", "Acid", "Venom", "Mind", "Sun", "Moon", "Star", "Doom", "Dawn", "Grim", "True", "Arc", "Eld", "Gloom",
+]
+_REST = ["short", "long"]
+_COIN = ["cp", "sp", "ep", "gp", "pp"]
+_SIZES = ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"]
+
+
+def _xorshift(s: int) -> int:
+    s ^= s << 13
+    s ^= s >> 17
+    s ^= s << 5
+    s = s % 2**31
+    return int(s)
+
+
+def get_seed() -> int:
+    return _FAKER["seed"]
+
+
+def set_seed(n: int):
+    _FAKER["seed"] = int(n) % 2**31
+
+
+def rand_int(low: int, high: int) -> int:
+    if low == high:
+        return low
+    if low > high:
+        t = low
+        low = high
+        high = t
+    r = high - low + 1
+    s = _xorshift(int(_FAKER["seed"]))
+    _FAKER["seed"] = s
+    return low + int(s % r)
+
+
+def _choice(items: list) -> str:
+    if len(items) == 0:
+        return ""
+    return items[rand_int(0, len(items) - 1)]
+
+
+def _hex_n(n: int) -> str:
+    s = ""
+    i = 0
+    while i < n:
+        s = s + _HEX[rand_int(0, 15)]
+        i = i + 1
+    return s
+
+
+def gvar_id() -> str:
+    return _hex_n(8) + "-" + _hex_n(4) + "-" + _hex_n(4) + "-" + _hex_n(4) + "-" + _hex_n(12)
+
+
+def workshop_id() -> str:
+    return gvar_id()
+
+
+def cvar_name() -> str:
+    return "test_cvar_" + _hex_n(8)
+
+
+def first_name() -> str:
+    return _choice(_FIRST)
+
+
+def last_name() -> str:
+    return _choice(_LAST)
+
+
+def full_name() -> str:
+    return first_name() + " " + last_name()
+
+
+def display_name() -> str:
+    return first_name() + " " + _choice(_TITLES)
+
+
+def age(min_age: int = 8, max_age: int = 80) -> int:
+    return rand_int(min_age, max_age)
+
+
+def dnd_class() -> str:
+    return _choice(_DND_CLASS)
+
+
+def class_name() -> str:
+    return dnd_class()
+
+
+def level() -> int:
+    return rand_int(1, 20)
+
+
+def prof_bonus() -> int:
+    lv = level()
+    if lv <= 4:
+        return 2
+    if lv <= 8:
+        return 3
+    if lv <= 12:
+        return 4
+    if lv <= 16:
+        return 5
+    return 6
+
+
+def ability_score() -> int:
+    return rand_int(3, 18)
+
+
+def background() -> str:
+    return _choice(_BACKGROUND)
+
+
+def race() -> str:
+    return _choice(_RACE)
+
+
+def feature_name() -> str:
+    return _choice(_FEATURE_A) + " " + _choice(_FEATURE_B)
+
+
+def attack_name() -> str:
+    return _choice(_WEAPON) + " " + _choice(_VERB)
+
+
+def spell_name() -> str:
+    return _choice(_SPELL_PART) + " " + _choice(_SPELL_VERB) + " (" + _choice(_SCHOOL) + ")"
+
+
+def save_kind() -> str:
+    return _choice(_SAVE)
+
+
+def skill_name() -> str:
+    return _choice(_SKILLS)
+
+
+def damage_type() -> str:
+    return _choice(_DMG)
+
+
+def item_name() -> str:
+    return _choice(_GEAR)
+
+
+def weapon_name() -> str:
+    return _choice(_WEAPON)
+
+
+def monster_name() -> str:
+    return _choice(_MONSTER) + " " + str(rand_int(1, 9))
+
+
+def lorem_word() -> str:
+    return _choice(_LOREM)
+
+
+def lorem_words(count: int) -> str:
+    if count < 1:
+        return ""
+    out = lorem_word()
+    i = 1
+    while i < count:
+        out = out + " " + lorem_word()
+        i = i + 1
+    return out
+
+
+def sentence(word_count: int = 5) -> str:
+    t = lorem_words(word_count)
+    if len(t) == 0:
+        return t
+    c0 = t[0:1]
+    c0u = c0.upper()
+    return c0u + t[1:len(t)] + "."
+
+
+def email() -> str:
+    a = lorem_word()
+    b = lorem_word()
+    return a + "@" + b + ".test"
+
+
+def url() -> str:
+    return "https://example.test/" + lorem_word() + "/" + _hex_n(4)
+
+
+def tag() -> str:
+    return "#" + lorem_word() + str(rand_int(0, 99))
+
+
+def dice_notation() -> str:
+    n = rand_int(1, 4)
+    sides = _choice([4, 6, 8, 10, 12, 20, 100])
+    mod = rand_int(0, 10)
+    return str(n) + "d" + str(sides) + "+" + str(mod)
+
+
+def integer(low: int = 0, high: int = 100) -> int:
+    return rand_int(low, high)
+
+
+def coin_flip() -> bool:
+    return rand_int(0, 1) == 1
+
+
+def hp() -> int:
+    return rand_int(5, 200)
+
+
+def armor_class() -> int:
+    return rand_int(10, 22)
+
+
+def initiative() -> int:
+    return rand_int(-5, 10)
+
+
+def rest_kind() -> str:
+    return _choice(_REST)
+
+
+def coin_pouch() -> str:
+    return str(rand_int(1, 500)) + " " + _choice(_COIN)
+
+
+def size_category() -> str:
+    return _choice(_SIZES)
+
+
+def discord_snowflake() -> str:
+    n = 0
+    i = 0
+    while i < 19:
+        n = n * 10 + rand_int(0, 9)
+        i = i + 1
+    s = str(n)
+    while len(s) < 19:
+        s = "0" + s
+    return s
+
+
+def note_title() -> str:
+    w = lorem_word()
+    t = w[0:1].upper() + w[1:len(w)] if len(w) > 0 else w
+    return "Note " + str(rand_int(1, 9999)) + " — " + t
+
+
+def one_of(items: list) -> str:
+    return _choice(items)

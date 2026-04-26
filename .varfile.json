@@ -18,6 +18,9 @@
         "6c364b5c-83cc-40df-9b36-1f4437c42193": {
             "filePath": "src/gvars/utils/expect/expect.gvar"
         },
+        "e5ccc250-261c-4c02-80ac-cd2b2d659d7f": {
+            "filePath": "src/gvars/utils/faker/faker.gvar"
+        },
         "a2f94784-2002-40ed-b875-72de479efb1c": {
             "filePath": "src/gvars/utils/lists/lists.gvar"
         },

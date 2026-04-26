@@ -1,0 +1,29 @@
+!faker -testcase "faker gvar loads"
+---
+---
+name: faker gvar loads
+
+!faker -testcase "gvar_id should be deterministic for same seed"
+---
+---
+name: gvar_id should be deterministic for same seed
+
+!faker -testcase "level should be in one to twenty"
+---
+---
+name: level should be in one to twenty
+
+!faker -testcase "full_name should be two non empty parts"
+---
+---
+name: full_name should be two non empty parts
+
+!faker -testcase "gvar_id should look like a dashed workshop uuid length"
+---
+---
+name: gvar_id should look like a dashed workshop uuid length
+
+!faker -testcase "workshop_id should match gvar_id shape"
+---
+---
+name: workshop_id should match gvar_id shape

@@ -11,6 +11,7 @@ Drac2 global-variable helpers live under `src/gvars/utils/`. Production workshop
 | dicts | Check whether a value is dict-like before treating it as a mapping. | [gvars/dicts.md](gvars/dicts.md) |
 | embeds | Emit `!embed` commands with fields, limits, and optional defaults across many call sites. | [gvars/embeds.md](gvars/embeds.md) |
 | expect | Fluent assertions in alias tests (`err` on failure); not for player-facing commands. | [gvars/expect.md](gvars/expect.md) |
+| faker | Plausible random test data: names, D&D-style labels, ids, lorem, dice strings. | [gvars/faker.md](gvars/faker.md) |
 | lists | List → dict by key, random picks without replacement, list type check, search helpers. | [gvars/lists.md](gvars/lists.md) |
 | notes | Named per-character notebooks in cvars; append lines or replace whole notebooks. | [gvars/notes.md](gvars/notes.md) |
 | random | Seeded or one-shot random integers for reproducible or isolated rolls. | [gvars/random.md](gvars/random.md) |

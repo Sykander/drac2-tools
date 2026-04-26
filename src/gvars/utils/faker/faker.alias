@@ -1,0 +1,52 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    faker = env.gvars.faker,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "faker gvar loads":
+    s = faker.get_seed()
+
+    expect(s == int(s)).to.be(True)
+elif testcase == "gvar_id should be deterministic for same seed":
+    faker.set_seed(424242)
+    a = faker.gvar_id()
+    faker.set_seed(424242)
+    b = faker.gvar_id()
+
+    expect(a).to.be(b)
+elif testcase == "level should be in one to twenty":
+    faker.set_seed(999)
+    lv = faker.level()
+
+    expect(lv >= 1).to.be(True)
+    expect(lv <= 20).to.be(True)
+elif testcase == "full_name should be two non empty parts":
+    faker.set_seed(3)
+    n = faker.full_name()
+
+    expect(" " in n).to.be(True)
+    expect(len(n) > 2).to.be(True)
+elif testcase == "gvar_id should look like a dashed workshop uuid length":
+    faker.set_seed(7)
+    g = faker.gvar_id()
+
+    expect(len(g)).to.be(36)
+    expect(g[8] == "-").to.be(True)
+    expect(g[13] == "-").to.be(True)
+    expect(g[18] == "-").to.be(True)
+    expect(g[23] == "-").to.be(True)
+elif testcase == "workshop_id should match gvar_id shape":
+    faker.set_seed(11)
+    w = faker.workshop_id()
+
+    expect(len(w)).to.be(36)
+    expect(w[8] == "-").to.be(True)
+else:
+    err(f"Unknown testcase: {testcase}")
+</drac2>

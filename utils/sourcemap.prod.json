@@ -34,6 +34,11 @@
       "id": "27035eb1-fcf5-4d9d-907f-ea0ab2ba0df4"
     },
     {
+      "name": "faker",
+      "file": "src/gvars/utils/faker/faker.gvar",
+      "id": "d479ba35-1a10-472d-9054-c992a16a64b2"
+    },
+    {
       "name": "lists",
       "file": "src/gvars/utils/lists/lists.gvar",
       "id": "be56beeb-512b-4cc3-93e3-e3b9a8d2b70c"
