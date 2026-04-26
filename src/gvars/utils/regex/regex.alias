@@ -473,4 +473,91 @@ elif testcase == "full_match with leading empty alternation arm should not try l
     expect(regex.full_match(p, "ab")).to.be(False)
 elif testcase == "compile_program should err on unsupported question paren":
     expect(lambda: regex.compile_program("(?P<x>a)")).to.raise_exception()
+elif testcase == "full_match should treat brace min equal max as exact count":
+    p = regex.compile_program("a{1,1}")
+
+    expect(regex.full_match(p, "a")).to.be(True)
+    expect(regex.full_match(p, "")).to.be(False)
+    p2 = regex.compile_program("a{3,3}")
+
+    expect(regex.full_match(p2, "aaa")).to.be(True)
+    expect(regex.full_match(p2, "aa")).to.be(False)
+elif testcase == "full_match should accept hyphen only class":
+    p = regex.compile_program("[-]")
+
+    expect(regex.full_match(p, "-")).to.be(True)
+    expect(regex.full_match(p, "a")).to.be(False)
+elif testcase == "full_match should accept hyphen at class edge":
+    p = regex.compile_program("[-a]")
+
+    expect(regex.full_match(p, "-")).to.be(True)
+    expect(regex.full_match(p, "a")).to.be(True)
+    p2 = regex.compile_program("[a-]")
+
+    expect(regex.full_match(p2, "-")).to.be(True)
+    expect(regex.full_match(p2, "b")).to.be(False)
+elif testcase == "full_match should accept negated hyphen class":
+    p = regex.compile_program("[^-]")
+
+    expect(regex.full_match(p, "z")).to.be(True)
+    expect(regex.full_match(p, "-")).to.be(False)
+elif testcase == "full_match should let dot match newline":
+    p = regex.compile_program(".")
+
+    expect(regex.full_match(p, "\n")).to.be(True)
+elif testcase == "full_match should repeat noncapturing group":
+    p = regex.compile_program("(?:ab){2}")
+
+    expect(regex.full_match(p, "abab")).to.be(True)
+    expect(regex.full_match(p, "ab")).to.be(False)
+elif testcase == "full_match should accept trailing empty alternation arm":
+    p = regex.compile_program("a|")
+
+    expect(regex.full_match(p, "a")).to.be(True)
+    expect(regex.full_match(p, "")).to.be(True)
+    expect(regex.full_match(p, "b")).to.be(False)
+elif testcase == "full_match should accept escaped rbracket inside class":
+    p = regex.compile_program("[\\]]")
+
+    expect(regex.full_match(p, "]")).to.be(True)
+    expect(regex.full_match(p, "a")).to.be(False)
+elif testcase == "full_match should accept negated class excluding rbracket":
+    p = regex.compile_program("[^\\]]")
+
+    expect(regex.full_match(p, "a")).to.be(True)
+    expect(regex.full_match(p, "]")).to.be(False)
+elif testcase == "full_match should accept negated caret literal in class":
+    p = regex.compile_program("[^^]")
+
+    expect(regex.full_match(p, "a")).to.be(True)
+    expect(regex.full_match(p, "^")).to.be(False)
+elif testcase == "search_from should backtrack dot star for suffix":
+    p = regex.compile_program(".*c")
+    hit = regex.search_from(p, "xxxc")
+
+    expect(hit.start).to.be(0)
+    expect(hit.end).to.be(4)
+elif testcase == "full_match should handle nested alternation with suffix":
+    p = regex.compile_program("((a|b)c|d)e")
+
+    expect(regex.full_match(p, "ace")).to.be(True)
+    expect(regex.full_match(p, "bce")).to.be(True)
+    expect(regex.full_match(p, "de")).to.be(True)
+    expect(regex.full_match(p, "ae")).to.be(False)
+elif testcase == "match_from_captures should split greedy plus groups":
+    p = regex.compile_program("(a+)(b+)")
+    m = regex.match_from_captures(p, "aabbb", 0)
+
+    expect(m != None).to.be(True)
+    expect(m.groups[0]).to.be("aabbb")
+    expect(m.groups[1]).to.be("aa")
+    expect(m.groups[2]).to.be("bbb")
+elif testcase == "search_from_captures should find nested alt capture":
+    p = regex.compile_program("(x|(yz))")
+    hit = regex.search_from_captures(p, "qqyzz", 0)
+
+    expect(hit != None).to.be(True)
+    expect(hit.groups[0]).to.be("yz")
+    expect(hit.groups[1]).to.be("yz")
+    expect(hit.groups[2]).to.be("yz")
 </drac2>

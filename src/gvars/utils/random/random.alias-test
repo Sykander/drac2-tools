@@ -22,3 +22,13 @@ name: xorShift should be deterministic for the same seed
 ---
 ---
 name: get_random_integer should swap reversed bounds when using explicit seed
+
+!random -testcase "get_float should be deterministic with explicit seed"
+---
+---
+name: get_float should be deterministic with explicit seed
+
+!random -testcase "get_float should stay within zero and one inclusive with explicit seed"
+---
+---
+name: get_float should stay within zero and one inclusive with explicit seed

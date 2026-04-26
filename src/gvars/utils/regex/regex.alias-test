@@ -367,3 +367,73 @@ name: full_match with leading empty alternation arm should not try later arm
 ---
 ---
 name: compile_program should err on unsupported question paren
+
+!regex -testcase "full_match should treat brace min equal max as exact count"
+---
+---
+name: full_match should treat brace min equal max as exact count
+
+!regex -testcase "full_match should accept hyphen only class"
+---
+---
+name: full_match should accept hyphen only class
+
+!regex -testcase "full_match should accept hyphen at class edge"
+---
+---
+name: full_match should accept hyphen at class edge
+
+!regex -testcase "full_match should accept negated hyphen class"
+---
+---
+name: full_match should accept negated hyphen class
+
+!regex -testcase "full_match should let dot match newline"
+---
+---
+name: full_match should let dot match newline
+
+!regex -testcase "full_match should repeat noncapturing group"
+---
+---
+name: full_match should repeat noncapturing group
+
+!regex -testcase "full_match should accept trailing empty alternation arm"
+---
+---
+name: full_match should accept trailing empty alternation arm
+
+!regex -testcase "full_match should accept escaped rbracket inside class"
+---
+---
+name: full_match should accept escaped rbracket inside class
+
+!regex -testcase "full_match should accept negated class excluding rbracket"
+---
+---
+name: full_match should accept negated class excluding rbracket
+
+!regex -testcase "full_match should accept negated caret literal in class"
+---
+---
+name: full_match should accept negated caret literal in class
+
+!regex -testcase "search_from should backtrack dot star for suffix"
+---
+---
+name: search_from should backtrack dot star for suffix
+
+!regex -testcase "full_match should handle nested alternation with suffix"
+---
+---
+name: full_match should handle nested alternation with suffix
+
+!regex -testcase "match_from_captures should split greedy plus groups"
+---
+---
+name: match_from_captures should split greedy plus groups
+
+!regex -testcase "search_from_captures should find nested alt capture"
+---
+---
+name: search_from_captures should find nested alt capture

@@ -1,5 +1,4 @@
-# dicts
-# Reuseable dict functions
+"""Dicts — small dict helpers."""
 
 
 def is_dict(maybe_dict) -> bool:

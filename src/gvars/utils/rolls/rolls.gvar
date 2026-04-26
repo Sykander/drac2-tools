@@ -1,6 +1,7 @@
-# Rolls
-# A reusable library for saves, checks, attacks and regular rolls
-# Use get_roll as the main entry point
+"""Rolls — reusable library for saves, checks, attacks, and regular rolls.
+
+Use ``get_roll`` as the main entry point.
+"""
 
 skills_abilities = {
     "strength": "strength",
@@ -158,12 +159,8 @@ def get_d20(adv: bool | None = None, eadv: bool = False, mi: int | None = None, 
     return based20 + mi_text + ma_text + ro_text
 
 
-# Joins a list of roll strings together
-# roll_strings - the list of rolls to join
-# returns a single roll string
-
-
 def join_roll_strings(roll_strings: list[str]):
+    """Join roll fragments with ``+`` when needed; skips empty/None entries."""
     if len(roll_strings) == 0:
         return ""
 
@@ -372,32 +369,41 @@ def _get_save_for_character(character, save_name):
     return save.value, save.adv
 
 
-# get_roll
-# Processes a roll
-#
-# character - OPTIONAL None - explicit sheet; required for check/passive/save/attack, ignored for flat roll
-# roll_name - the name of the check or save, or the type of the attack, or if just a flat roll then the roll string itself (flat rolls accept non-strings; they are coerced with str())
-# args - the ParsedArguments to use for the roll
-# roll_type - either 'check' for Skill Checks and Ability Checks; 'save' for Saving Throws; 'attack' for attack rolls;  or 'roll' for rolls
-# ability_name - OPTIONAL None - string for the ability to use if overriding
-# dc - OPTIONAL None - the dc for the check or the ac if its an attack
-# adv - OPTIONAL None - advantage on the roll
-# bonuses - OPTIONAL [] - any bonuses to add to the roll
-#
-# returns a dict of the roll results
-
-
 def get_roll(
     character,
     roll_name,
     args: ParsedArguments,
-    roll_type: str, # check, save, attack, roll
-    ability_name: str | None = None, # Ability to use for roll
-    dc: int | None = None, # also ac for attack rolls,
+    roll_type: str,
+    ability_name: str | None = None,
+    dc: int | None = None,
     adv: bool | None = None,
     bonuses: list[str] | None = None,
     arg_aliases: dict | None = None,
 ) -> dict:
+    """Build roll metadata and dice strings for Avrae.
+
+    ``character`` — optional sheet; required for ``check``, ``passive``, ``save``, ``attack``; ignored for flat ``roll``.
+
+    ``roll_name`` — skill/save name, attack type, or (for ``roll_type`` ``"roll"``) the roll string itself (non-strings coerced with ``str()``).
+
+    ``args`` — parsed alias arguments.
+
+    ``roll_type`` — ``"check"``, ``"passive"``, ``"save"``, ``"attack"``, or ``"roll"``.
+
+    ``ability_name`` — optional ability override string.
+
+    ``dc`` — optional DC (or AC for attacks).
+
+    ``adv`` — optional advantage flag.
+
+    ``bonuses`` — optional extra roll fragments.
+
+    ``arg_aliases`` — optional renames for argparse keys (e.g. advantage, ``mc``, ``b``, guidance).
+
+    ``args.adv(eadv=True)`` equals ``2`` when elven accuracy applies.
+
+    Returns a dict of roll results for downstream formatting / ``vroll``.
+    """
     if roll_type not in ["roll", "check", "passive", "save", "attack"]:
         err(f'Unknown roll roll_type {roll_type}')
 
@@ -430,7 +436,7 @@ def get_roll(
         argsadv = args.adv(boolwise = True, custom = adv_custom)
     else:
         argsadv = args.adv(boolwise = True)
-    eadv = args.adv(eadv = True) == 2  # returns 2 for elven accuracy
+    eadv = args.adv(eadv = True) == 2
 
     if args.last(g_key) and roll_type in ["check", "passive"]:
         bonuses.append("1d4[Guidance]")

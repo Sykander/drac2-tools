@@ -1,5 +1,8 @@
-# faker — plausibly shaped random data for Drac2 / Avrae tests and fixtures.
-# Uses a small xorshift PRNG (separate from ``random`` gvar) so this module is self-contained.
+"""Faker — plausibly shaped random data for Drac2 / Avrae tests and fixtures.
+
+Uses a small xorshift PRNG (separate from the ``random`` gvar) so this module is self-contained.
+"""
+
 
 _FAKER = {"seed": int(13371337 + int(time())) % 2**31}
 _HEX = "0123456789abcdef"

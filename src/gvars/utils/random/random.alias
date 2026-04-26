@@ -47,4 +47,18 @@ elif testcase == "get_random_integer should swap reversed bounds when using expl
     b = random.get_random_integer(low, high, seed=seed)
 
     expect(a).to.be(b)
+elif testcase == "get_float should be deterministic with explicit seed":
+    seed = 424242
+
+    a = random.get_float(seed=seed)
+    b = random.get_float(seed=seed)
+
+    expect(a).to.be(b)
+elif testcase == "get_float should stay within zero and one inclusive with explicit seed":
+    seed = 333333
+
+    x = random.get_float(seed=seed)
+
+    expect(x >= 0.0).to.be(True)
+    expect(x <= 1.0).to.be(True)
 </drac2>

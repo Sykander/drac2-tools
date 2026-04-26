@@ -3,6 +3,8 @@ using(
     lists = env.gvars.lists,
 )
 
+"""Tools — search the official tool list and read proficiency/expertise from cvars."""
+
 tool_prof_code = "pTools"
 tool_exp_code = "eTools"
 
@@ -82,11 +84,11 @@ def search_for_tool(toolname):
     return lists.search_list(tools_list, toolname)
 
 
-# Returns true if the character has expertise or proficiency in the given tool
 def get_has_proficiency(
     toolname: str,
     char = None,
 ) -> bool:
+    """True if ``char`` has proficiency or expertise in ``toolname`` (official list only)."""
     char = _require_character(char, "tools")
 
     if toolname not in tools_list:

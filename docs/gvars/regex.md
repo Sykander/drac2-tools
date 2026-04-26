@@ -13,7 +13,7 @@ This is **not** a full PCRE engine. **`|`** is **alternation** at the same paren
 - **Literals** — any character not special; use `\\` to escape metacharacters.
 - **`.`** — any single character (dotall-style for one code unit).
 - **Classes** — `\d` `\D` `\w` `\W` `\s` `\S` (ASCII-style: `\w` is letters, digits, `_`; `\s` is space, tab, CR, LF).
-- **Character classes** — `[...]` matches one character from the built set; `[^...]` matches one character **not** in the set. Inside a class you may use literals, `-` ranges that stay within **`a-z`**, **`A-Z`**, or **`0-9`**, and **only** `\d`, `\w`, or `\s` (they expand to small fixed sets). Use `[^0-9]` instead of `\D` inside brackets. An empty body `[]` is invalid; **`[^]`** with nothing after `^` matches any one character (negated empty set).
+- **Character classes** — `[...]` matches one character from the built set; `[^...]` matches one character **not** in the set. Inside a class you may use literals, `-` ranges that stay within **`a-z`**, **`A-Z`**, or **`0-9`**, and **only** `\d`, `\w`, or `\s` (they expand to small fixed sets). Use `[^0-9]` instead of `\D` inside brackets. An empty body `[]` is invalid; **`[^]`** with nothing after `^` matches any one character (negated empty set). A literal **`]`** inside the class must be written **`[\]]`**. ECMAScript’s spelling **`[^]]`** (first `]` closes the class) is **not** accepted here; write **`[^\]]`** instead when you need “any one character except **`]`**”.
 - **Quantifiers** — `?` (0–1), `*` (0+), `+` (1+), `{n}` (exactly `n`), `{n,}` (at least `n`), `{n,m}` (between `n` and `m`, greedy).
 - **Groups** — `(...)` is a **capturing** group (see **`match_from_captures`** / **`search_captures`**). **`(?:...)`** groups without capturing (does not consume a group index). Quantifiers apply to the whole parenthesized unit (e.g. `(ab){2}`).
 - **Alternation** — `|` splits alternatives among concatenations at the same depth; first successful arm wins, then matching continues with the rest of the pattern. Nested parentheses create nested alternation scopes. Inside `[...]`, `|` is a normal class character unless you escape it for clarity.
@@ -21,7 +21,7 @@ This is **not** a full PCRE engine. **`|`** is **alternation** at the same paren
 ## Import
 
 ```drac2
-using(regex = "<workshop-uuid-from-env>")
+using(regex = "1bfe2ba2-6d6e-468e-9555-0e6490ff8d4b")
 ```
 
 ## Public API

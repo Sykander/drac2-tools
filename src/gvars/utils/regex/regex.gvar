@@ -1,16 +1,21 @@
-# regex — small regexp engine for Drac2 (no stdlib re). Syntax, public API, Avrae limits:
-# docs/gvars/regex.md
-#
-# compile() -> dict (pattern string, groups count, fullmatch/match/search, capture helpers,
-# program). compile_program() -> opcode list for match_from, full_match, search_from, etc.
-#
-# Supported: literals, ., \\d..\\S, ? * +, {n}/{n,}/{n,m}, () captures, (?:), [] classes, |.
-# In []: literals, a-z/A-Z/0-9 ranges, only \\d \\w \\s. \\| for literal |.
-# Not: ^ $ anchors, backrefs, (?P<name>), \\D\\W\\S inside classes (use e.g. [^0-9]).
-#
-# Quantifiers backtrack; alternation tries each arm in source order.
+"""regex — small regexp engine for Drac2 (no stdlib ``re``). Syntax, public API, Avrae limits:
+docs/gvars/regex.md
 
-# Last ``_rx_err`` payload for diagnostics (e.g. tests): ``(message, index_or_None)`` before ``err()`` fires.
+``compile()`` → dict (pattern string, groups count, fullmatch/match/search, capture helpers,
+program). ``compile_program()`` → opcode list for ``match_from``, ``full_match``, ``search_from``, etc.
+
+Supported: literals, ``.``, ``\\d``..``\\S``, ``?`` ``*`` ``+``, ``{n}``/``{n,}``/``{n,m}``, ``()`` captures,
+``(?:)``, ``[]`` classes, ``|``.
+
+In ``[]``: literals, ``a-z``/``A-Z``/``0-9`` ranges, only ``\\d`` ``\\w`` ``\\s``. ``\\|`` for literal ``|``.
+
+Not: ``^`` ``$`` anchors, backrefs, ``(?P<name>)``, ``\\D``/``\\W``/``\\S`` inside classes (use e.g. ``[^0-9]``).
+
+Quantifiers backtrack; alternation tries each arm in source order.
+
+Module state: ``_RX_DIAG`` stores the last ``_rx_err`` payload for diagnostics (e.g. tests):
+``(message, index_or_None)`` before ``err()`` fires.
+"""
 _RX_DIAG = {"last": None}
 _RX_COMPILE_CACHE = {"map": {}, "order": [], "max_size": 64}
 
@@ -63,7 +68,7 @@ def _parse_int(pat: str, i: int):
 
 
 def _parse_brace(pat: str, i: int):
-    # i points at '{'
+    """Parse ``{m}``, ``{m,}``, or ``{m,n}``; ``i`` indexes the ``{``."""
     j = i + 1
     if j >= len(pat):
         _rx_err("unclosed {", i)
@@ -90,7 +95,7 @@ def _parse_brace(pat: str, i: int):
 
 
 def _parse_escape(pat: str, i: int):
-    # i points at backslash
+    """Parse a backslash escape; ``i`` indexes ``\\``."""
     if i + 1 >= len(pat):
         _rx_err("dangling \\", i)
     n = pat[i + 1]
@@ -189,7 +194,7 @@ def _range_expand(lo: str, hi: str, at_idx: int) -> str:
 
 
 def _parse_class(pat: str, i: int):
-    # i points at '['
+    """Parse a character class; ``i`` indexes ``[``."""
     j = i + 1
     if j >= len(pat):
         _rx_err("unclosed [", i)
@@ -424,14 +429,16 @@ def diagnostic_compile_program(pat: str):
 
 
 def compile_program(pat: str) -> list:
-    """Parse ``pat`` into an opcode list. Raises ``regex: ...`` on syntax errors."""
+    """Parse ``pat`` into an opcode list. Raises ``regex: ...`` on syntax errors.
+
+    Trailing unconsumed input becomes ``trailing junk`` at the first unused index (see ``_rx_err``).
+    When the pattern has capturing groups, nodes are annotated with subtree ``mc`` counts.
+    """
     _RX_DIAG["last"] = None
     cap_counter = [0]
     nodes, i = _parse_alt(pat, 0, False, cap_counter, None)
     if i != len(pat):
-        # See ``_rx_err`` docstring: defensive for current grammar; index is first unconsumed offset.
         _rx_err("trailing junk", i)
-    # Capture annotations are only needed when the pattern has capturing groups.
     if cap_counter[0] > 0:
         _annotate_capture_mc_nodes(nodes)
     _RX_DIAG["last"] = None
@@ -513,8 +520,10 @@ def _max_capture_id_atom(atom) -> int:
 
 
 def group_count(program: list) -> int:
-    """Return the number of capturing ``(`` groups in ``program`` (highest 1-based index)."""
-    # ``compile_program`` annotates each node with subtree ``mc``; use that fast path.
+    """Return the number of capturing ``(`` groups in ``program`` (highest 1-based index).
+
+    Uses ``compile_program``'s subtree ``mc`` annotations when present.
+    """
     if len(program) == 0 or program[0].get("mc", None) != None:
         return _nodes_capture_mc(program)
     return _max_capture_id(program)
@@ -607,6 +616,11 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps, no
 
     ``caps``: ``None`` skips capture writes; else a list of length ``group_count(program)+1``
     where indices ``1..`` hold capture substrings (or ``None``) when recording.
+
+    Repeat handling: exact-count repeats (``hi == lo``) with no captures skip greedy count
+    probing. A terminal repeat with no captures returns greedy success immediately. Otherwise
+    endpoints and capture snapshots are built once so greedy backoff does not re-match the
+    first ``k`` units from scratch each time.
     """
     has_caps = caps != None
     if has_caps and nodes_mc == None:
@@ -645,8 +659,6 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps, no
             atom = node["a"]
             rep_mc = node.get("mc", 0)
             if (not has_caps) and hi == lo:
-                # Exact-count repeats have a single legal count, so they do not need
-                # greedy probing or backoff over counts.
                 pp = p
                 need = lo
                 took = 0
@@ -664,13 +676,9 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps, no
                 if has_caps:
                     _caps_restore(caps, entry_snap)
                 return -1
-            # If this repeat is terminal and no captures are being recorded, greedy
-            # success is final; no endpoint/snapshot build or backoff is needed.
             if (not has_caps) and i + 1 >= n_nodes:
                 return _p_g
             snap0 = _caps_clone(caps, rep_mc) if has_caps and rep_mc > 0 else None
-            # Build repeat endpoints once (and capture snapshots for each count) so
-            # greedy backoff does not re-run the first k units from scratch each time.
             ends = [p]
             cap_snaps = None
             if snap0 != None:

@@ -1,8 +1,9 @@
-# notes
-# Reuseable functions for the notes alias
-# https://avrae.io/dashboard/workshop/6342ac449fb55be1a501367c
-#
-# If you just want to add a note use the `push` function
+"""Notes — reusable helpers for the notes alias.
+
+https://avrae.io/dashboard/workshop/6342ac449fb55be1a501367c
+
+To append a note, use ``push``.
+"""
 
 cname = "notes"
 
@@ -73,14 +74,8 @@ def create_notebook(notebook, contents = [], char = None):
     set_notebook(notebook, contents, char)
 
 
-# Push
-#
-# notebook - the name of the notebook
-# note - the note to push
-# char - OPTIONAL explicit character; defaults to active character()
-#
-# returns the updated notebook
 def push(notebook: str, note: str, char = None) -> list[str]:
+    """Append ``note`` to ``notebook`` and persist; returns the updated notebook contents."""
     char = _require_character(char, "notes")
 
     contents = get_notebook(notebook, char)

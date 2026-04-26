@@ -1,5 +1,4 @@
-# Lists
-# A place to store reusable list functions
+"""Lists — reusable list helpers."""
 
 using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
 using(
