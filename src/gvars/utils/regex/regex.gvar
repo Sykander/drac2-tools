@@ -10,8 +10,34 @@
 #
 # Quantifiers backtrack; alternation tries each arm in source order.
 
-def _rx_err(msg: str):
-    err(f"regex: {msg}")
+# Last ``_rx_err`` payload for diagnostics (e.g. tests): ``(message, index_or_None)`` before ``err()`` fires.
+_RX_DIAG = {"last": None}
+
+
+def _rx_err(msg: str, idx: int = None):
+    """
+    Raise a parse error; ``idx`` is a 0-based index into the pattern when known.
+
+    **No index** (call with one argument only):
+
+    - ``pattern is None`` — not a string, so there is no code-unit offset in a pattern.
+    - ``internal: expected plain atom`` — matcher invariant / bug; not tied to a user pattern
+      character (the bad ``node`` comes from an already-compiled program).
+    - ``trailing junk`` — post-parse guard: ``compile_program`` requires the whole ``pat`` to be
+      consumed. If ``i != len(pat)`` after ``_parse_alt``, this reports the first unconsumed index.
+      For the supported grammar today, other branches already reject leftovers, so this path is
+      defensive (kept with an index for consistency if a future change makes it reachable).
+    - ``range endpoints must be single chars`` inside ``_range_expand`` — ``compile_program`` only
+      passes single-character endpoints from ``_parse_class``; the index is still passed for
+      consistency if that invariant ever breaks.
+    - ``bad escape in class`` inside ``_expand_set_escape`` — current ``_parse_escape`` output is
+      always ``lit`` or ``cls``; this branch is defensive for non-``lit`` / non-``cls`` escape dicts.
+    """
+    _RX_DIAG["last"] = (msg, idx)
+    if idx == None:
+        err(f"regex: {msg}")
+    else:
+        err(f"regex: {msg} (at index {idx})")
 
 
 def _digit_val(ch: str) -> int:
@@ -38,14 +64,14 @@ def _parse_brace(pat: str, i: int):
     # i points at '{'
     j = i + 1
     if j >= len(pat):
-        _rx_err("unclosed {")
+        _rx_err("unclosed {", i)
     min_n, j = _parse_int(pat, j)
     if min_n == None:
-        _rx_err("{ needs a number")
+        _rx_err("{ needs a number", j)
     if j < len(pat) and pat[j] == "}":
         return min_n, min_n, j + 1
     if j >= len(pat) or pat[j] != ",":
-        _rx_err("{ expected , or }")
+        _rx_err("{ expected , or }", j)
     j = j + 1
     max_n = None
     if j < len(pat) and pat[j] == "}":
@@ -54,9 +80,9 @@ def _parse_brace(pat: str, i: int):
     else:
         max_n, j = _parse_int(pat, j)
         if max_n == None:
-            _rx_err("{ expected number after ,")
+            _rx_err("{ expected number after ,", j)
         if j >= len(pat) or pat[j] != "}":
-            _rx_err("unclosed {")
+            _rx_err("unclosed {", i)
         j = j + 1
     return min_n, max_n, j
 
@@ -64,7 +90,7 @@ def _parse_brace(pat: str, i: int):
 def _parse_escape(pat: str, i: int):
     # i points at backslash
     if i + 1 >= len(pat):
-        _rx_err("dangling \\")
+        _rx_err("dangling \\", i)
     n = pat[i + 1]
     if n == "d":
         return {"k": "cls", "c": "d"}, i + 2
@@ -111,11 +137,11 @@ def _cls_ok(c: str, kind: str) -> bool:
     return False
 
 
-def _expand_set_escape(e):
+def _expand_set_escape(e, at_idx: int):
     if e["k"] == "lit":
         return e["v"]
     if e["k"] != "cls":
-        _rx_err("bad escape in class")
+        _rx_err("bad escape in class", at_idx)
     c = e["c"]
     if c == "d":
         return "0123456789"
@@ -123,12 +149,12 @@ def _expand_set_escape(e):
         return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
     if c == "s":
         return " \t\n\r"
-    _rx_err("only \\d \\w \\s allowed inside []")
+    _rx_err("only \\d \\w \\s allowed inside []", at_idx)
 
 
-def _range_expand(lo: str, hi: str) -> str:
+def _range_expand(lo: str, hi: str, at_idx: int) -> str:
     if len(lo) != 1 or len(hi) != 1:
-        _rx_err("range endpoints must be single chars")
+        _rx_err("range endpoints must be single chars", at_idx)
     lows = "abcdefghijklmnopqrstuvwxyz"
     ups = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     digs = "0123456789"
@@ -144,7 +170,7 @@ def _range_expand(lo: str, hi: str) -> str:
                 ei = k
             k = k + 1
         if si == None or ei == None or si > ei:
-            _rx_err("bad range")
+            _rx_err("bad range", at_idx)
         out = ""
         while si <= ei:
             out += pool[si]
@@ -157,14 +183,14 @@ def _range_expand(lo: str, hi: str) -> str:
         return _span(ups, lo, hi)
     if lo >= "0" and hi <= "9" and lo <= hi:
         return _span(digs, lo, hi)
-    _rx_err("range must stay in a-z, A-Z, or 0-9")
+    _rx_err("range must stay in a-z, A-Z, or 0-9", at_idx)
 
 
 def _parse_class(pat: str, i: int):
     # i points at '['
     j = i + 1
     if j >= len(pat):
-        _rx_err("unclosed [")
+        _rx_err("unclosed [", i)
     neg = False
     if pat[j] == "^":
         neg = True
@@ -175,7 +201,7 @@ def _parse_class(pat: str, i: int):
         c = pat[j]
         if c == "\\":
             e, j2 = _parse_escape(pat, j)
-            ex = _expand_set_escape(e)
+            ex = _expand_set_escape(e, j)
             if pending != None:
                 acc += pending
                 pending = None
@@ -185,8 +211,8 @@ def _parse_class(pat: str, i: int):
         if c == "-" and pending != None and j + 1 < len(pat) and pat[j + 1] != "]":
             hi = pat[j + 1]
             if hi == "\\":
-                _rx_err("range end must be literal")
-            acc += _range_expand(pending, hi)
+                _rx_err("range end must be literal", j + 1)
+            acc += _range_expand(pending, hi, j)
             pending = None
             j = j + 2
             continue
@@ -202,11 +228,11 @@ def _parse_class(pat: str, i: int):
         pending = c
         j = j + 1
     if j >= len(pat):
-        _rx_err("unclosed [")
+        _rx_err("unclosed [", i)
     if pending != None:
         acc += pending
     if len(acc) == 0 and not neg:
-        _rx_err("empty []")
+        _rx_err("empty []", j)
     return {"k": "set", "n": neg, "s": acc}, j + 1
 
 
@@ -239,7 +265,7 @@ def _parse_quant(pat: str, i: int, atom):
     return atom, i
 
 
-def _parse_seq_concat(pat: str, i: int, in_group: bool, cap_counter: list):
+def _parse_seq_concat(pat: str, i: int, in_group: bool, cap_counter: list, group_start: int = None):
     """Parse one concatenation arm; stops before `|`, `)`, or end (if not in a group)."""
     nodes = []
     while i < len(pat):
@@ -248,23 +274,23 @@ def _parse_seq_concat(pat: str, i: int, in_group: bool, cap_counter: list):
         if pat[i] == "|":
             return nodes, i
         if not in_group and pat[i] == ")":
-            _rx_err("unexpected )")
+            _rx_err("unexpected )", i)
         atom = None
         c = pat[i]
         if c == "(":
             if i + 2 < len(pat) and pat[i + 1] == "?":
                 if i + 3 < len(pat) and pat[i + 2] == ":":
-                    inner, j = _parse_alt(pat, i + 3, True, cap_counter)
+                    inner, j = _parse_alt(pat, i + 3, True, cap_counter, i)
                     if j >= len(pat) or pat[j] != ")":
-                        _rx_err("unclosed (")
+                        _rx_err("unclosed (", i)
                     atom = {"k": "grp", "g": inner}
                     i = j + 1
                 else:
-                    _rx_err("unsupported (?...) only (?:...) is allowed")
+                    _rx_err("unsupported (?...) only (?:...) is allowed", i)
             else:
-                inner, j = _parse_alt(pat, i + 1, True, cap_counter)
+                inner, j = _parse_alt(pat, i + 1, True, cap_counter, i)
                 if j >= len(pat) or pat[j] != ")":
-                    _rx_err("unclosed (")
+                    _rx_err("unclosed (", i)
                 cap_counter[0] = cap_counter[0] + 1
                 atom = {"k": "grp", "g": inner, "cap": cap_counter[0]}
                 i = j + 1
@@ -276,23 +302,23 @@ def _parse_seq_concat(pat: str, i: int, in_group: bool, cap_counter: list):
         elif c == "\\":
             atom, i = _parse_escape(pat, i)
         elif c == "{" or c == "}" or c == "*" or c == "+" or c == "?" or c == "]":
-            _rx_err(f"unexpected {c}")
+            _rx_err(f"unexpected {c}", i)
         else:
             atom = {"k": "lit", "v": c}
             i = i + 1
         atom, i = _parse_quant(pat, i, atom)
         nodes.append(atom)
     if in_group:
-        _rx_err("unclosed (")
+        _rx_err("unclosed (", group_start if group_start != None else 0)
     return nodes, i
 
 
-def _parse_alt(pat: str, i: int, in_group: bool, cap_counter: list):
+def _parse_alt(pat: str, i: int, in_group: bool, cap_counter: list, group_start: int = None):
     """Parse ``|`` at this depth (or top level). Returns ``(nodes, end_index)``."""
     arms = []
     cur = i
     while True:
-        arm, j = _parse_seq_concat(pat, cur, in_group, cap_counter)
+        arm, j = _parse_seq_concat(pat, cur, in_group, cap_counter, group_start)
         arms.append(arm)
         if j < len(pat) and pat[j] == "|":
             cur = j + 1
@@ -303,12 +329,43 @@ def _parse_alt(pat: str, i: int, in_group: bool, cap_counter: list):
     return [{"k": "alt", "arms": arms}], j
 
 
+def last_parse_error():
+    """
+    After ``compile_program`` / ``compile`` fail with a ``regex: ...`` parse error, returns
+    ``(short_message, index_or_None)`` matching the arguments passed to the internal reporter
+    (``index`` is ``None`` when the error is not tied to a pattern offset). Resets to ``None`` on
+    successful ``compile_program``. Useful when the host cannot bind ``except ... as``.
+
+    Note: in some hosts each cross-module call may reload library state; prefer
+    ``diagnostic_compile_program`` when you need a reliable ``(error_tuple, program_or_none)``
+    pair from tests.
+    """
+    return _RX_DIAG["last"]
+
+
+def diagnostic_compile_program(pat: str):
+    """
+    Like ``compile_program``, but returns ``(None, program)`` on success or ``(last_parse_error(), None)``
+    on parse failure, without re-raising—so callers (and tests) can read the tuple in the same
+    interpreter instance that ran the parser.
+    """
+    _RX_DIAG["last"] = None
+    try:
+        p = compile_program(pat)
+        return (None, p)
+    except:
+        return (last_parse_error(), None)
+
+
 def compile_program(pat: str) -> list:
     """Parse ``pat`` into an opcode list. Raises ``regex: ...`` on syntax errors."""
+    _RX_DIAG["last"] = None
     cap_counter = [0]
-    nodes, i = _parse_alt(pat, 0, False, cap_counter)
+    nodes, i = _parse_alt(pat, 0, False, cap_counter, None)
     if i != len(pat):
-        _rx_err("trailing junk")
+        # See ``_rx_err`` docstring: defensive for current grammar; index is first unconsumed offset.
+        _rx_err("trailing junk", i)
+    _RX_DIAG["last"] = None
     return nodes
 
 
@@ -621,3 +678,15 @@ def compile(pat: str):
         "search_captures": lambda t, pos = 0, endpos = None: search_from_captures(prog, t, pos),
         "program": prog,
     }
+
+
+def diagnostic_compile(pat: str):
+    """
+    Like ``compile``, but returns ``(None, pattern_dict)`` on success or ``(last_parse_error(), None)``
+    on failure (including ``_normalize_pattern_string`` failures), without re-raising.
+    """
+    _RX_DIAG["last"] = None
+    try:
+        return (None, compile(pat))
+    except:
+        return (last_parse_error(), None)

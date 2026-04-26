@@ -173,6 +173,16 @@ name: compile_program should err on leading quantifier
 ---
 name: compile_program should err on empty positive class
 
+!regex -testcase "compile should err on invalid patterns like compile_program"
+---
+---
+name: compile should err on invalid patterns like compile_program
+
+!regex -testcase "compile_program parse errors report correct pattern indices"
+---
+---
+name: compile_program parse errors report correct pattern indices
+
 !regex -testcase "full_match should handle word class run"
 ---
 ---

@@ -197,6 +197,49 @@ elif testcase == "compile_program should err on leading quantifier":
     expect(lambda: regex.compile_program("*a")).to.raise_exception()
 elif testcase == "compile_program should err on empty positive class":
     expect(lambda: regex.compile_program("[]")).to.raise_exception()
+elif testcase == "compile should err on invalid patterns like compile_program":
+    expect(lambda: regex.compile("(a")).to.raise_exception()
+    expect(lambda: regex.compile("[]")).to.raise_exception()
+    expect(lambda: regex.compile("/[]/")).to.raise_exception()
+elif testcase == "compile_program parse errors report correct pattern indices":
+    def expect_idx(pat, want_idx):
+        errt, prog = regex.diagnostic_compile_program(pat)
+        expect(prog == None).to.be(True)
+        expect(errt != None).to.be(True)
+        expect(errt[1]).to.be(want_idx)
+
+    expect_idx("a{", 1)
+    expect_idx("a{,", 2)
+    expect_idx("a{1x", 3)
+    expect_idx("a{1,a", 4)
+    expect_idx("a{1,2", 1)
+    expect_idx("\\", 0)
+    expect_idx("[\\D]", 1)
+    expect_idx("[z-a]", 2)
+    expect_idx("[a-9]", 2)
+    expect_idx("[", 0)
+    expect_idx("[a-\\]", 3)
+    expect_idx("[ab", 0)
+    expect_idx("[]", 1)
+    expect_idx(")", 0)
+    expect_idx("(ab", 0)
+    expect_idx("(?P<x>)", 0)
+    expect_idx("(?:ab", 0)
+    expect_idx("*", 0)
+    expect_idx("(", 0)
+
+    en, pc = regex.diagnostic_compile("/[]/")
+    expect(pc == None).to.be(True)
+    expect(en[1]).to.be(1)
+
+    ok_t, ok_p = regex.diagnostic_compile_program("a")
+    expect(ok_t == None).to.be(True)
+    expect(ok_p != None).to.be(True)
+
+    none_err, none_prog = regex.diagnostic_compile(None)
+    expect(none_prog == None).to.be(True)
+    expect(none_err[0]).to.be("pattern is None")
+    expect(none_err[1] == None).to.be(True)
 elif testcase == "full_match should handle word class run":
     rx = regex.compile_program("\\w\\w\\w")
 

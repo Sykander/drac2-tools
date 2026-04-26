@@ -28,7 +28,7 @@ using(regex = "<workshop-uuid-from-env>")
 
 ### `compile(pat: str) -> dict`
 
-Normalizes the pattern string (same rules as **`compile_program`**), parses it, and returns a **dict** modeled on **`re.Pattern`**: keys **`pattern`** and **`groups`**, and methods **`fullmatch`**, **`match`**, and **`search`** (plus helpers below). Drac2 has no real **`Match`** objects, so callables return **`bool`**, **`int \| None`**, or **`dict \| None`** instead of CPython’s rich types.
+Normalizes the pattern string (same rules as **`compile_program`**), parses it, and returns a **dict** modeled on **`re.Pattern`**: keys **`pattern`** and **`groups`**, and methods **`fullmatch`**, **`match`**, and **`search`** (plus helpers below). Drac2 has no real **`Match`** objects, so callables return **`bool`**, **`int \| None`**, or **`dict \| None`** instead of CPython’s rich types. On parse failure, errors are the same as **`compile_program`** on the **normalized** pattern string (see indices note below).
 
 - Optional prefix **`re:`** is stripped (handy when copying patterns from file-based fixtures that mimic that convention).
 - If the string **starts and ends with `/`**, those slashes are stripped (body only; no flags suffix).
@@ -50,7 +50,7 @@ Example:
 
 ```drac2
 rx = regex.compile("/\\d{3}-\\d{4}/")
-rx.fullmatch("555-1212")
+rx.full_match("555-1212")
 hit = rx.search("call 555-1212 today")
 # hit.start, hit.end
 ```
@@ -63,7 +63,19 @@ Capturing groups are numbered **`1 … group_count(program)`** in source order (
 
 ### `compile_program(pat: str) -> list`
 
-Parse `pat` into a program. Raises with `regex: ...` on syntax errors.
+Parse `pat` into a program. Raises with `regex: ...` on syntax errors. Parse failures append **`(at index n)`** to the message, where **`n`** is a **0-based** offset into **`pat`**. For **`compile(raw)`**, indices refer to the **normalized** pattern (after optional **`re:`** and **`/.../`** stripping), not the original **`raw`** string.
+
+Some failures omit **`(at index …)`** because there is no meaningful pattern offset (e.g. **`pattern is None`**), or the condition is a defensive / internal invariant (see the **`_rx_err`** docstring in **`regex.gvar`** for the full list).
+
+### Diagnostics (parse errors without `except … as`)
+
+Drac2 does not support binding a caught exception (**`except … as`**), so reading **`regex: … (at index n)`** from a raised error is awkward from aliases. The module keeps a short tuple **`(message, index_or_None)`** updated whenever **`_rx_err`** runs, and exposes helpers:
+
+| Symbol | Role |
+|--------|------|
+| **`last_parse_error()`** | Returns **`None`**, or **`(short_message, index_or_None)`** after the last **`_rx_err`** payload. Cleared when **`compile_program`** completes successfully. May be unreliable across **separate** gvar entry calls in some hosts. |
+| **`diagnostic_compile_program(pat)`** | Returns **`(None, program)`** on success, or **`(last_parse_error(), None)`** on failure, catching inside the gvar so the tuple is trustworthy in tests. |
+| **`diagnostic_compile(pat)`** | Same idea for **`compile(pat)`** (covers **`_normalize_pattern_string`** failures such as **`None`**). |
 
 ### `match_from(program, text: str, start: int = 0) -> int | None`
 
