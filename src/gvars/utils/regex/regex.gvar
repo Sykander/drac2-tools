@@ -430,7 +430,9 @@ def compile_program(pat: str) -> list:
     if i != len(pat):
         # See ``_rx_err`` docstring: defensive for current grammar; index is first unconsumed offset.
         _rx_err("trailing junk", i)
-    _annotate_capture_mc_nodes(nodes)
+    # Capture annotations are only needed when the pattern has capturing groups.
+    if cap_counter[0] > 0:
+        _annotate_capture_mc_nodes(nodes)
     _RX_DIAG["last"] = None
     return nodes
 
@@ -511,6 +513,9 @@ def _max_capture_id_atom(atom) -> int:
 
 def group_count(program: list) -> int:
     """Return the number of capturing ``(`` groups in ``program`` (highest 1-based index)."""
+    # ``compile_program`` annotates each node with subtree ``mc``; use that fast path.
+    if len(program) == 0 or program[0].get("mc", None) != None:
+        return _nodes_capture_mc(program)
     return _max_capture_id(program)
 
 
@@ -617,8 +622,8 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps, no
             alt_mc = node.get("mc", 0)
             ai = 0
             matched = -1
+            snap_a = _caps_clone(caps, alt_mc) if has_caps and alt_mc > 0 else None
             while ai < len(arms):
-                snap_a = _caps_clone(caps, alt_mc) if has_caps and alt_mc > 0 else None
                 r = _match_seq_bt(arms[ai], text, p, lim, 0, caps, alt_mc)
                 if r >= 0:
                     p = r
@@ -689,8 +694,8 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps, no
     return p
 
 
-def _match_all(nodes: list, text: str, pos: int, lim: int, caps):
-    return _match_seq_bt(nodes, text, pos, lim, 0, caps)
+def _match_all(nodes: list, text: str, pos: int, lim: int, caps, nodes_mc: int = None):
+    return _match_seq_bt(nodes, text, pos, lim, 0, caps, nodes_mc)
 
 
 def _search_prefilter_node(program: list):
@@ -723,7 +728,7 @@ def match_from(program: list, text: str, start: int = 0):
     return end
 
 
-def match_from_captures(program: list, text: str, start: int = 0):
+def match_from_captures(program: list, text: str, start: int = 0, group_total: int = None, program_mc: int = None):
     """
     Like ``match_from``, but on success also fills capture strings.
 
@@ -731,10 +736,14 @@ def match_from_captures(program: list, text: str, start: int = 0):
     is ``text[start:end]``; ``groups[i]`` for ``i >= 1`` is capture ``i`` or ``None`` if that
     group did not participate (e.g. an unused optional branch).
     """
-    ng = group_count(program)
+    if group_total == None:
+        group_total = _nodes_capture_mc(program)
+    if program_mc == None:
+        program_mc = group_total
+    ng = group_total
     caps = [None] * (ng + 1)
     lim = len(text)
-    end = _match_all(program, text, start, lim, caps)
+    end = _match_all(program, text, start, lim, caps, program_mc)
     if end < 0:
         return None
     caps[0] = text[start:end]
@@ -743,8 +752,9 @@ def match_from_captures(program: list, text: str, start: int = 0):
 
 def full_match(program: list, text: str, pos: int = 0) -> bool:
     """True iff ``text[pos:]`` is matched in full (match ends at ``len(text)``)."""
-    e = match_from(program, text, pos)
-    return e != None and e == len(text)
+    lim = len(text)
+    e = _match_all(program, text, pos, lim, None)
+    return e >= 0 and e == lim
 
 
 def search_from(program: list, text: str, pos: int = 0):
@@ -768,9 +778,13 @@ def search_from(program: list, text: str, pos: int = 0):
     return None
 
 
-def search_from_captures(program: list, text: str, pos: int = 0):
+def search_from_captures(program: list, text: str, pos: int = 0, group_total: int = None, program_mc: int = None):
     """Like ``search_from``, plus a ``groups`` list (same layout as ``match_from_captures``)."""
-    ng = group_count(program)
+    if group_total == None:
+        group_total = _nodes_capture_mc(program)
+    if program_mc == None:
+        program_mc = group_total
+    ng = group_total
     lim = len(text)
     lead = _search_prefilter_node(program)
     s = pos
@@ -784,7 +798,7 @@ def search_from_captures(program: list, text: str, pos: int = 0):
                 s = s + 1
                 continue
         caps = [None] * (ng + 1)
-        end = _match_all(program, text, s, lim, caps)
+        end = _match_all(program, text, s, lim, caps, program_mc)
         if end >= 0:
             caps[0] = text[s:end]
             return {"start": s, "end": end, "groups": caps}
@@ -817,7 +831,7 @@ def compile(pat: str):
     """
     pat_norm = _normalize_pattern_string(pat)
     prog = compile_program(pat_norm)
-    ng = group_count(prog)
+    ng = _nodes_capture_mc(prog)
     if ng == 0:
         def _mfc0(t, start = 0):
             end = match_from(prog, t, start)
@@ -833,8 +847,8 @@ def compile(pat: str):
             e = hit["end"]
             return {"start": s, "end": e, "groups": [t[s:e]]}
     else:
-        _mfc0 = lambda t, start = 0: match_from_captures(prog, t, start)
-        _sfc0 = lambda t, pos = 0, endpos = None: search_from_captures(prog, t, pos)
+        _mfc0 = lambda t, start = 0: match_from_captures(prog, t, start, ng, ng)
+        _sfc0 = lambda t, pos = 0, endpos = None: search_from_captures(prog, t, pos, ng, ng)
     return {
         "pattern": pat_norm,
         "groups": ng,

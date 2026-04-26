@@ -13,20 +13,20 @@ name: benchmark class boundary loops 1
 ---
 name: benchmark quantified alternation boundary loops 1
 
-!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "46"
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "51"
 ---
 ---
-name: benchmark compile boundary compiles 46
+name: benchmark compile boundary compiles 51
 
-!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "300"
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "315"
 ---
 ---
-name: benchmark compiled full_match boundary loops 300
+name: benchmark compiled full_match boundary loops 315
 
-!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "300"
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "315"
 ---
 ---
-name: benchmark compiled fullmatch alias boundary loops 300
+name: benchmark compiled fullmatch alias boundary loops 315
 
 !regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "310"
 ---
@@ -38,17 +38,17 @@ name: benchmark compiled match boundary loops 310
 ---
 name: benchmark compiled search boundary loops 189
 
-!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "311"
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "310"
 ---
 ---
-name: benchmark compiled match_from boundary loops 311
+name: benchmark compiled match_from boundary loops 310
 
-!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "94"
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "137"
 ---
 ---
-name: benchmark compiled match_from_captures boundary loops 94
+name: benchmark compiled match_from_captures boundary loops 137
 
-!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "47"
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "61"
 ---
 ---
-name: benchmark compiled search_captures boundary loops 47
+name: benchmark compiled search_captures boundary loops 61
