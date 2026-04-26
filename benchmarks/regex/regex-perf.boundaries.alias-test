@@ -1,27 +1,27 @@
-!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "4"
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "1292"
 ---
 ---
-name: benchmark search boundary loops 4
+name: benchmark search boundary loops 1292
 
-!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "1"
+!regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "3"
 ---
 ---
-name: benchmark class boundary loops 1
+name: benchmark class boundary loops 3
 
-!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "1"
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "4"
 ---
 ---
-name: benchmark quantified alternation boundary loops 1
+name: benchmark quantified alternation boundary loops 4
 
-!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "92"
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "116"
 ---
 ---
-name: benchmark compile boundary compiles 92
+name: benchmark compile boundary compiles 116
 
-!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "710"
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "777"
 ---
 ---
-name: benchmark compile cache hit boundary compiles 710
+name: benchmark compile cache hit boundary compiles 777
 
 !regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "62"
 ---
