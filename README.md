@@ -14,9 +14,11 @@ The following libraries are available freely for other developers to use in thei
 ### Libraries for interacting with base data types in drac2
 * Dicts
 * Lists
+* Regex
 * Strings
-### Miscelaneos useful libraries
+### Miscellaneous useful libraries
 * Expect
+* Faker
 * Random
 * Rolls
 * Time
