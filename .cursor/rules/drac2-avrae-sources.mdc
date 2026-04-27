@@ -66,6 +66,10 @@ The **[avrae-ls](https://github.com/1drturtle/avrae-ls)** language server and **
 
 When editing an **`.alias`**, decide which role it plays before copying structure from another file.
 
+## Live Avrae **`<drac2>`** blocks (Discord bot)
+
+Per **`.cursor/avrae-reference/aliasing-api.rst.txt`** (*Draconic Blocks*): a **`<drac2>…</drac2>`** segment is replaced by a **non-`None` value returned with the `return` keyword**, stringified. A **bare trailing expression** (no **`return`**) is **not** documented as the block’s output there—side-effect code can run, but for **standalone** blocks (e.g. copy-paste Discord tests), **always `return ...`** if you need visible substitution. **`{{ … }}`** *expressions* are a different mechanism (evaluated value replaces the braces). **`avrae-ls`** runs **`.alias`** bodies in a harness; do not assume its implicit “last value” behavior matches the **Discord bot** if a snippet fails to print until you add **`return`**.
+
 ## Conventions in this repo (Drac2 code)
 
 - **Raw strings** — **`r"..."`** and **`r'...'`** are valid in Drac2 (Python-style: backslashes stay literal except before the closing quote). Prefer them for **backslash-heavy** literals (e.g. regex patterns: **`r"\d+"`** vs **`"\\d+"`**) so source stays readable. Covered by **`avrae-ls --run-tests`** in **`regex.alias`** (“compile should accept raw string pattern with backslashes”).
