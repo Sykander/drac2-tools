@@ -1,6 +1,6 @@
 # regex gvar
 
-Drac2 can’t use Python’s `re`, so this gvar replaces it: use `regex.compile(pattern)` to make a matcher, then reuse it like Python’s re.
+Drac2 can’t use Python’s `re`. For most use cases this gvar can fill that role: import it as **`re`**, **`re.compile(pattern)`** to make a matcher, then reuse it like Python’s **`re`**.
 
 ## Supported Patterns
 
@@ -16,23 +16,23 @@ Drac2 can’t use Python’s `re`, so this gvar replaces it: use `regex.compile(
 
 ### Example
 
-```drac2
-using(regex = "1bfe2ba2-6d6e-468e-9555-0e6490ff8d4b")
-rx = regex.compile(r"\d{3}-\d{4}")
+```py
+using(re = "1bfe2ba2-6d6e-468e-9555-0e6490ff8d4b")
+rx = re.compile(r"\d{3}-\d{4}")
 rx.full_match("555-1212")
 hit = rx.search("call 555-1212")
-rx2 = regex.compile(r"(\d+)-(\d+)")
+rx2 = re.compile(r"(\d+)-(\d+)")
 m = rx2.match_from_captures("12-34", 0)
 ```
 
 ## Top-level
 
-- **`compile(pat)`** — matcher dict on success; bad pattern raises (`regex:` errors).
-- **`diagnostic_compile(pat)`** — **`(None, matcher)`** or on an error **`((msg, idx), None)`**.
+- **`re.compile(pat)`** → **matcher** dict on success; bad pattern raises `regex:` errors.
+- **`re.diagnostic_compile(pat)`** → **`(None, matcher)`** or on an error **`((msg, idx), None)`**.
 
 ## On the matcher
 
-- **`pattern`** **`str`** — normalized regex pattern.
+- **`pattern`** **`str`** — normalized pattern string.
 
 - **`groups`** **`int`** — capturing **`(`** count (**`(?:…)`** excluded).
 

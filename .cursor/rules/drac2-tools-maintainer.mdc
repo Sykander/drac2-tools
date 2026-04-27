@@ -24,6 +24,7 @@ Treat **`README.md`** and **`DEVELOPMENT.md`** as first-class documentation alon
 - **Forward-looking only:** describe what exists and how to use it. **Do not** document removed APIs, old names, or “we used to …” history—noise for readers.
 - **Clarity first:** short top-level explanation; push edge cases and detail into later subsections.
 - **Examples:** prefer **working Drac2 snippets** in fenced blocks (see **`drac2-avrae-sources.mdc`** → Docs for attribute vs bracket style on dicts, and **raw strings** **`r"..."`** for backslash-heavy literals such as regex patterns).
+- **Code fence language:** in **`docs/`** and other **product markdown** (**`README.md`**, **`DEVELOPMENT.md`**, **`public/articles/`**), tag Drac2 blocks as **` ```py `**, not **` ```drac2 `**—see **`drac2-avrae-sources.mdc`** → Docs (**Fenced Drac2 in markdown**).
 
 ---
 
@@ -31,7 +32,7 @@ When you change **behavior or public API** (not typo-only or formatting):
 
 1. **Documentation** — Update any **markdown under `docs/`** that documents the changed surface (signatures, parameters, return shapes, edge cases, workshop or deploy notes). If you add a new public surface, add or extend the right doc path and link it from **`docs/README.md`** when appropriate (not only under `docs/gvars/`). Update **`README.md`** / **`DEVELOPMENT.md`** when the change affects onboarding, workflows, or how people discover or run the project.
 
-   In Drac2 fenced code blocks under **`docs/`**, prefer attribute access (e.g. **`rx.fullmatch(...)`**, **`hit.start`**) over **`rx["fullmatch"]`** when the key is a valid identifier (see **`drac2-avrae-sources.mdc`** → Docs). For regex **pattern** literals with many backslashes, prefer **`r"..."`** over doubled escapes when it keeps the snippet readable (same **`drac2-avrae-sources.mdc`** → Conventions / Docs).
+   In Drac2 snippets under product markdown (**`docs/`**, **`README.md`**, **`DEVELOPMENT.md`**, **`public/articles/`**), use **` ```py `** fences (see **`drac2-avrae-sources.mdc`** → Docs). Prefer attribute access (e.g. **`rx.fullmatch(...)`**, **`hit.start`**) over **`rx["fullmatch"]`** when the key is a valid identifier. For regex **pattern** literals with many backslashes, prefer **`r"..."`** over doubled escapes when it keeps the snippet readable (same **`drac2-avrae-sources.mdc`** → Conventions / Docs).
 
    **Audience — `docs/` is for people using the artifacts** (imports, public API, runtime behavior, deploy/workshop notes that affect consumers). **Do not** put maintainer-only material in `docs/`, especially under **`docs/gvars/`**: how to run tests, **`avrae-ls`** / **`.alias-test`** mechanics, CI, mock profiles, coverage, or “where tests live.” Keep that in **`AGENTS.md`**, **`DEVELOPMENT.md`**, workflow files, or next to the tests themselves.
 2. **Tests** — For each `src/gvars/utils/<name>/` util, keep the trio aligned: `<name>.gvar` (logic), `<name>.alias` (testcase branches + `expect` assertions), `<name>.alias-test` (one `!name -testcase "..."` block per case). Add or adjust cases when behavior changes.
