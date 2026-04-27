@@ -3,6 +3,11 @@
 ---
 name: regex gvar loads
 
+!regex -testcase "compile should accept raw string pattern with backslashes"
+---
+---
+name: compile should accept raw string pattern with backslashes
+
 !regex -testcase "full_match should accept digit class"
 ---
 ---

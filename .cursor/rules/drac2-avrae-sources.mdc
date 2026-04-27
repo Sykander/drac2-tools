@@ -66,8 +66,13 @@ The **[avrae-ls](https://github.com/1drturtle/avrae-ls)** language server and **
 
 When editing an **`.alias`**, decide which role it plays before copying structure from another file.
 
+## Live Avrae **`<drac2>`** blocks (Discord bot)
+
+Per **`.cursor/avrae-reference/aliasing-api.rst.txt`** (*Draconic Blocks*): a **`<drac2>…</drac2>`** segment is replaced by a **non-`None` value returned with the `return` keyword**, stringified. A **bare trailing expression** (no **`return`**) is **not** documented as the block’s output there—side-effect code can run, but for **standalone** blocks (e.g. copy-paste Discord tests), **always `return ...`** if you need visible substitution. **`{{ … }}`** *expressions* are a different mechanism (evaluated value replaces the braces). **`avrae-ls`** runs **`.alias`** bodies in a harness; do not assume its implicit “last value” behavior matches the **Discord bot** if a snippet fails to print until you add **`return`**.
+
 ## Conventions in this repo (Drac2 code)
 
+- **Raw strings** — **`r"..."`** and **`r'...'`** are valid in Drac2 (Python-style: backslashes stay literal except before the closing quote). Prefer them for **backslash-heavy** literals (e.g. regex patterns: **`r"\d+"`** vs **`"\\d+"`**) so source stays readable. Covered by **`avrae-ls --run-tests`** in **`regex.alias`** (“compile should accept raw string pattern with backslashes”).
 - **`None`**, not `null`. **`err(...)`** for intentional hard failures.
 - **Types** — Mirror the surrounding file (hints vs untyped).
 - **Naming** — `snake_case`; Avrae string keys (`"melee"`, `"sleightOfHand"`, …) stay consistent with domain maps.
@@ -82,4 +87,5 @@ When editing an **`.alias`**, decide which role it plays before copying structur
 ## Docs
 
 - Keep **`docs/**/*.md`** consistent with the artifacts it describes (API, parameters, return shapes, deployment). Today most module pages are under **`docs/gvars/`**; add other paths under `docs/` when you document aliases, snippets, or workshops. **`docs/gvars/`** pages are for **library consumers**—do not add test-runner, CI, or **`avrae-ls`** how-to there (see **`drac2-tools-maintainer.mdc`** and **`AGENTS.md`**).
-- **Drac2 snippets in markdown** — Prefer **attribute access** (`obj.field`, `obj.fullmatch(...)`) over **bracket dict keys** (`obj["field"]`) when the key is a valid identifier and the snippet is meant to run in Drac2 (Avrae allows attribute-style access on dicts). Keep brackets for list/tuple indexing, non-identifier keys, or when documenting literal JSON shapes.
+- **Fenced Drac2 in markdown** — Snippets are **Drac2**, but in **`docs/`**, **`README.md`**, **`DEVELOPMENT.md`**, and **`public/articles/`** use a **triple-backtick fence tagged `py`** (i.e. **` ```py `** … **` ``` `**), **not** **` ```drac2 `**. Most Markdown renderers (GitHub, VS Code, Discord, etc.) do not highlight **`drac2`**; **`py`** is close enough for readability. **`.gvar`**, **`.alias`**, and **`.alias-test`** stay real Drac2 / harness sources—this rule is only for prose markdown.
+- **Drac2 snippets in markdown** — Prefer **attribute access** (`obj.field`, `obj.fullmatch(...)`) over **bracket dict keys** (`obj["field"]`) when the key is a valid identifier and the snippet is meant to run in Drac2 (Avrae allows attribute-style access on dicts). Keep brackets for list/tuple indexing, non-identifier keys, or when documenting literal JSON shapes. For **pattern strings** or other literals with many backslashes, prefer **raw strings** **`r"..."`** / **`r'...'`** in examples when that keeps the snippet clearer than doubled **`\\`** (see **Conventions** above).

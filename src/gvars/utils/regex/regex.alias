@@ -15,6 +15,11 @@ if testcase == "regex gvar loads":
     expect(rx.pattern).to.be("a")
     expect(rx.groups).to.be(0)
     expect(rx.full_match("a")).to.be(True)
+elif testcase == "compile should accept raw string pattern with backslashes":
+    rx = regex.compile(r"\d+")
+
+    expect(rx.full_match("42")).to.be(True)
+    expect(rx.full_match("x")).to.be(False)
 elif testcase == "full_match should accept digit class":
     rx = regex.compile("\\d")
 

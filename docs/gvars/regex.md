@@ -16,6 +16,8 @@ using(regex = "1bfe2ba2-6d6e-468e-9555-0e6490ff8d4b")
 
 `compile` returns a dict-shaped matcher (like a stripped-down `re.Pattern`): **`pattern`**, **`groups`**, and callables such as **`full_match`** and **`search`**. Compile **once** (e.g. at load), then reuse.
 
+You can pass the pattern as a **raw string** **`r"…"`** or **`r'…'`** (Python-style) so backslashes are mostly literal—e.g. **`r"\d+"`** is equivalent to **`"\\d+"`** and is often easier to read.
+
 **Whole string:**
 
 ```drac2

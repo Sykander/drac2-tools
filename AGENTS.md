@@ -7,7 +7,7 @@ This repository holds **Avrae Drac2** artifacts: **`*.gvar`**, **`*.alias`**, **
 ## What to do when changing behavior
 
 1. Update the implementation (`.gvar`, `.alias`, `.snippet`, etc.).
-2. Update **any `docs/` markdown** that describes that surface (and **`docs/README.md`** when you add something new that should be indexed). Update **`README.md`** / **`DEVELOPMENT.md`** when onboarding, discovery, or workflow text should change. **`docs/`** is for **consumers** (API and behavior): keep it current and forward-looking—no changelog-style “removed X” prose. Put **testing / CI / avrae-ls** notes in **`AGENTS.md`** or **`DEVELOPMENT.md`**, not in **`docs/gvars/`** module pages.
+2. Update **any `docs/` markdown** that describes that surface (and **`docs/README.md`** when you add something new that should be indexed). Update **`README.md`** / **`DEVELOPMENT.md`** when onboarding, discovery, or workflow text should change. **`docs/`** is for **consumers** (API and behavior): keep it current and forward-looking—no changelog-style “removed X” prose. Put **testing / CI / avrae-ls** notes in **`AGENTS.md`** or **`DEVELOPMENT.md`**, not in **`docs/gvars/`** module pages. For **Drac2** examples in that prose, use **` ```py `** fenced blocks (not **` ```drac2 `**) so common Markdown highlighters work—see **`.cursor/rules/drac2-avrae-sources.mdc`** → Docs.
 3. Update **`.alias` / `.alias-test`** when CI exercises behavior via **`avrae-ls --run-tests src`**.
 
 Project rules in **`.cursor/rules/`** spell this out: **`drac2-tools-maintainer.mdc`** (always on: docs, tests, **`unused_gvars.md`** / workshop UUID hygiene), **`drac2-avrae-sources.mdc`** (Drac2 file roles, test vs production aliases, cached Avrae RST under **`.cursor/avrae-reference/`**), and **`gvar-perf-boundaries.mdc`** when tuning **`*-perf`** stress tests or **`.cursor/scripts/probe_perf_boundaries.py`**.
@@ -23,3 +23,5 @@ Project rules in **`.cursor/rules/`** spell this out: **`drac2-tools-maintainer.
 ## Drac2 / Avrae semantics
 
 Use **`.cursor/rules/drac2-avrae-sources.mdc`** and the **cached RST** under **`.cursor/avrae-reference/`** (see **`README.md`** there for live URLs and **`refresh-avrae-docs.sh`**). That material is Cursor-adjacent, not under `docs/`. Do not invent engine behavior—confirm against those files, then refresh if they lag Read the Docs.
+
+**Discord `<drac2>` blocks:** On the live bot, block substitution follows the **return**-based rules in **`aliasing-api.rst.txt`**—see **`.cursor/rules/drac2-avrae-sources.mdc`** → **Live Avrae `<drac2>` blocks**. One-liner tests should **`return "…"`**, not rely on a trailing expression alone.
