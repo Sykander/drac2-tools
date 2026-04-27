@@ -10,90 +10,92 @@ args = argparse(&ARGS&)
 testcase = args.last("testcase", None)
 
 if testcase == "regex gvar loads":
-    p = regex.compile_program("a")
+    rx = regex.compile("a")
 
-    expect(p).to.have.length(1)
+    expect(rx.pattern).to.be("a")
+    expect(rx.groups).to.be(0)
+    expect(rx.full_match("a")).to.be(True)
 elif testcase == "full_match should accept digit class":
-    p = regex.compile_program("\\d")
+    rx = regex.compile("\\d")
 
-    expect(regex.full_match(p, "7")).to.be(True)
-    expect(regex.full_match(p, "x")).to.be(False)
+    expect(rx.full_match("7")).to.be(True)
+    expect(rx.full_match("x")).to.be(False)
 elif testcase == "full_match should handle optional quantifier":
-    p = regex.compile_program("a?")
+    rx = regex.compile("a?")
 
-    expect(regex.full_match(p, "")).to.be(True)
-    expect(regex.full_match(p, "a")).to.be(True)
-    expect(regex.full_match(p, "aa")).to.be(False)
+    expect(rx.full_match("")).to.be(True)
+    expect(rx.full_match("a")).to.be(True)
+    expect(rx.full_match("aa")).to.be(False)
 elif testcase == "full_match should handle star quantifier":
-    p = regex.compile_program("a*")
+    rx = regex.compile("a*")
 
-    expect(regex.full_match(p, "")).to.be(True)
-    expect(regex.full_match(p, "aaa")).to.be(True)
+    expect(rx.full_match("")).to.be(True)
+    expect(rx.full_match("aaa")).to.be(True)
 elif testcase == "full_match should handle plus quantifier":
-    p = regex.compile_program("a+")
+    rx = regex.compile("a+")
 
-    expect(regex.full_match(p, "a")).to.be(True)
-    expect(regex.full_match(p, "aaa")).to.be(True)
-    expect(regex.full_match(p, "")).to.be(False)
+    expect(rx.full_match("a")).to.be(True)
+    expect(rx.full_match("aaa")).to.be(True)
+    expect(rx.full_match("")).to.be(False)
 elif testcase == "full_match should handle exact brace count":
-    p = regex.compile_program("a{2}")
+    rx = regex.compile("a{2}")
 
-    expect(regex.full_match(p, "aa")).to.be(True)
-    expect(regex.full_match(p, "a")).to.be(False)
+    expect(rx.full_match("aa")).to.be(True)
+    expect(rx.full_match("a")).to.be(False)
 elif testcase == "full_match should handle brace min max":
-    p = regex.compile_program("a{1,2}")
+    rx = regex.compile("a{1,2}")
 
-    expect(regex.full_match(p, "a")).to.be(True)
-    expect(regex.full_match(p, "aa")).to.be(True)
-    expect(regex.full_match(p, "aaa")).to.be(False)
+    expect(rx.full_match("a")).to.be(True)
+    expect(rx.full_match("aa")).to.be(True)
+    expect(rx.full_match("aaa")).to.be(False)
 elif testcase == "full_match should handle grouped repeat":
-    p = regex.compile_program("(ab){2}")
+    rx = regex.compile("(ab){2}")
 
-    expect(regex.full_match(p, "abab")).to.be(True)
-    expect(regex.full_match(p, "ab")).to.be(False)
+    expect(rx.full_match("abab")).to.be(True)
+    expect(rx.full_match("ab")).to.be(False)
 elif testcase == "search_from should find substring":
-    p = regex.compile_program("hello")
-    hit = regex.search_from(p, "xhelloy")
+    rx = regex.compile("hello")
+    hit = rx.search("xhelloy")
 
     expect(hit).to.have.property("start", 1)
     expect(hit).to.have.property("end", 6)
 elif testcase == "match_from should return end index":
-    p = regex.compile_program("bc")
-    end = regex.match_from(p, "abcd", 1)
+    rx = regex.compile("bc")
+    end = rx.match_from("abcd", 1)
 
     expect(end).to.be(3)
 elif testcase == "full_match should accept positive character class":
-    p = regex.compile_program("[abc]")
+    rx = regex.compile("[abc]")
 
-    expect(regex.full_match(p, "b")).to.be(True)
-    expect(regex.full_match(p, "x")).to.be(False)
+    expect(rx.full_match("b")).to.be(True)
+    expect(rx.full_match("x")).to.be(False)
 elif testcase == "full_match should accept negated character class":
-    p = regex.compile_program("[^xyz]")
+    rx = regex.compile("[^xyz]")
 
-    expect(regex.full_match(p, "a")).to.be(True)
-    expect(regex.full_match(p, "x")).to.be(False)
+    expect(rx.full_match("a")).to.be(True)
+    expect(rx.full_match("x")).to.be(False)
 elif testcase == "full_match should accept range inside class":
-    p = regex.compile_program("[a-c]")
+    rx = regex.compile("[a-c]")
 
-    expect(regex.full_match(p, "b")).to.be(True)
-    expect(regex.full_match(p, "d")).to.be(False)
+    expect(rx.full_match("b")).to.be(True)
+    expect(rx.full_match("d")).to.be(False)
 elif testcase == "full_match should combine class escape and quantifier":
-    p = regex.compile_program("[\\d]{2}")
+    rx = regex.compile("[\\d]{2}")
 
-    expect(regex.full_match(p, "37")).to.be(True)
-    expect(regex.full_match(p, "3")).to.be(False)
+    expect(rx.full_match("37")).to.be(True)
+    expect(rx.full_match("3")).to.be(False)
 elif testcase == "full_match should accept negated range":
-    p = regex.compile_program("[^0-2]")
+    rx = regex.compile("[^0-2]")
 
-    expect(regex.full_match(p, "5")).to.be(True)
-    expect(regex.full_match(p, "1")).to.be(False)
+    expect(rx.full_match("5")).to.be(True)
+    expect(rx.full_match("1")).to.be(False)
 elif testcase == "full_match should accept mixed literals escapes and optional":
-    p = regex.compile_program("Hello World!?\\d\\d\\s")
+    rx = regex.compile("Hello World!?\\d\\d\\s")
 
-    expect(regex.full_match(p, "Hello World!37 ")).to.be(True)
-    expect(regex.full_match(p, "Hello World08\t")).to.be(True)
-    expect(regex.full_match(p, "Hello World!9 ")).to.be(False)
-    expect(regex.full_match(p, "Hello World!37")).to.be(False)
+    expect(rx.full_match("Hello World!37 ")).to.be(True)
+    expect(rx.full_match("Hello World08\t")).to.be(True)
+    expect(rx.full_match("Hello World!9 ")).to.be(False)
+    expect(rx.full_match("Hello World!37")).to.be(False)
 elif testcase == "compile wrapper should expose python style pattern api":
     rx = regex.compile("ab+")
 
@@ -111,7 +113,6 @@ elif testcase == "compile wrapper should expose python style pattern api":
     expect(hit_pos.start).to.be(1)
     expect(hit_pos.end).to.be(3)
     expect(rx.match_from("zabc", 1)).to.be(3)
-    expect(rx.program).to.have.length(2)
     expect(rx).to.have.property("match_from_captures")
     expect(rx).to.have.property("search_captures")
 elif testcase == "compile should be deterministic for same pattern string":
@@ -147,64 +148,64 @@ elif testcase == "compile should full_match long fixed pattern":
 
     expect(rx.full_match(body)).to.be(True)
 elif testcase == "full_match should accept dot star across long string":
-    rx = regex.compile_program(".*")
+    rx = regex.compile(".*")
 
     s = "a" * 120 + "!" * 60
-    expect(regex.full_match(rx, s)).to.be(True)
+    expect(rx.full_match(s)).to.be(True)
 elif testcase == "full_match should accept negated empty class any char":
-    rx = regex.compile_program("[^]")
+    rx = regex.compile("[^]")
 
-    expect(regex.full_match(rx, "Z")).to.be(True)
-    expect(regex.full_match(rx, "\n")).to.be(True)
+    expect(rx.full_match("Z")).to.be(True)
+    expect(rx.full_match("\n")).to.be(True)
 elif testcase == "full_match should handle zero lower bound brace":
-    rx = regex.compile_program("a{0}b")
+    rx = regex.compile("a{0}b")
 
-    expect(regex.full_match(rx, "b")).to.be(True)
-    expect(regex.full_match(rx, "ab")).to.be(False)
+    expect(rx.full_match("b")).to.be(True)
+    expect(rx.full_match("ab")).to.be(False)
 elif testcase == "full_match should handle brace unbounded max":
-    rx = regex.compile_program("a{2,}b")
+    rx = regex.compile("a{2,}b")
 
-    expect(regex.full_match(rx, "aab")).to.be(True)
-    expect(regex.full_match(rx, "aaaaab")).to.be(True)
-    expect(regex.full_match(rx, "ab")).to.be(False)
+    expect(rx.full_match("aab")).to.be(True)
+    expect(rx.full_match("aaaaab")).to.be(True)
+    expect(rx.full_match("ab")).to.be(False)
 elif testcase == "full_match should handle nested quantified group":
-    rx = regex.compile_program("(a{1,2}){2}")
+    rx = regex.compile("(a{1,2}){2}")
 
-    expect(regex.full_match(rx, "aaaa")).to.be(True)
-    expect(regex.full_match(rx, "aaa")).to.be(True)
-    expect(regex.full_match(rx, "aa")).to.be(False)
+    expect(rx.full_match("aaaa")).to.be(True)
+    expect(rx.full_match("aaa")).to.be(True)
+    expect(rx.full_match("aa")).to.be(False)
 elif testcase == "full_match should handle class with literal dot":
-    rx = regex.compile_program("[.a]")
+    rx = regex.compile("[.a]")
 
-    expect(regex.full_match(rx, ".")).to.be(True)
-    expect(regex.full_match(rx, "a")).to.be(True)
+    expect(rx.full_match(".")).to.be(True)
+    expect(rx.full_match("a")).to.be(True)
 elif testcase == "full_match should handle escaped metachar as literal":
-    rx = regex.compile_program("\\$\\d+")
+    rx = regex.compile("\\$\\d+")
 
-    expect(regex.full_match(rx, "$12")).to.be(True)
-    expect(regex.full_match(rx, "12")).to.be(False)
+    expect(rx.full_match("$12")).to.be(True)
+    expect(rx.full_match("12")).to.be(False)
 elif testcase == "search_from should return none when no match":
-    rx = regex.compile_program("zzz")
+    rx = regex.compile("zzz")
 
-    expect(regex.search_from(rx, "abcdef")).to.be(None)
+    expect(rx.search("abcdef")).to.be(None)
 elif testcase == "match_from should return none on failure":
-    rx = regex.compile_program("abc")
+    rx = regex.compile("abc")
 
-    expect(regex.match_from(rx, "abx", 0)).to.be(None)
+    expect(rx.match_from("abx", 0)).to.be(None)
 elif testcase == "compile_program should err on unclosed group":
-    expect(lambda: regex.compile_program("(a")).to.raise_exception()
+    expect(lambda: regex.compile("(a")).to.raise_exception()
 elif testcase == "compile_program should err on leading quantifier":
-    expect(lambda: regex.compile_program("*a")).to.raise_exception()
+    expect(lambda: regex.compile("*a")).to.raise_exception()
 elif testcase == "compile_program should err on empty positive class":
-    expect(lambda: regex.compile_program("[]")).to.raise_exception()
+    expect(lambda: regex.compile("[]")).to.raise_exception()
 elif testcase == "compile should err on invalid patterns like compile_program":
     expect(lambda: regex.compile("(a")).to.raise_exception()
     expect(lambda: regex.compile("[]")).to.raise_exception()
     expect(lambda: regex.compile("/[]/")).to.raise_exception()
 elif testcase == "compile_program parse errors report correct pattern indices":
     def expect_idx(pat, want_idx):
-        errt, prog = regex.diagnostic_compile_program(pat)
-        expect(prog == None).to.be(True)
+        errt, res = regex.diagnostic_compile(pat)
+        expect(res == None).to.be(True)
         expect(errt != None).to.be(True)
         expect(errt[1]).to.be(want_idx)
 
@@ -232,117 +233,118 @@ elif testcase == "compile_program parse errors report correct pattern indices":
     expect(pc == None).to.be(True)
     expect(en[1]).to.be(1)
 
-    ok_t, ok_p = regex.diagnostic_compile_program("a")
+    ok_t, ok_rx = regex.diagnostic_compile("a")
     expect(ok_t == None).to.be(True)
-    expect(ok_p != None).to.be(True)
+    expect(ok_rx != None).to.be(True)
+    expect(ok_rx.pattern).to.be("a")
 
     none_err, none_prog = regex.diagnostic_compile(None)
     expect(none_prog == None).to.be(True)
     expect(none_err[0]).to.be("pattern is None")
     expect(none_err[1] == None).to.be(True)
 elif testcase == "full_match should handle word class run":
-    rx = regex.compile_program("\\w\\w\\w")
+    rx = regex.compile("\\w\\w\\w")
 
-    expect(regex.full_match(rx, "Ab_")).to.be(True)
-    expect(regex.full_match(rx, "A-9")).to.be(False)
+    expect(rx.full_match("Ab_")).to.be(True)
+    expect(rx.full_match("A-9")).to.be(False)
 elif testcase == "full_match should handle non digit class":
-    rx = regex.compile_program("\\D+")
+    rx = regex.compile("\\D+")
 
-    expect(regex.full_match(rx, "abc-")).to.be(True)
-    expect(regex.full_match(rx, "a1")).to.be(False)
+    expect(rx.full_match("abc-")).to.be(True)
+    expect(rx.full_match("a1")).to.be(False)
 elif testcase == "full_match should handle non space class":
-    rx = regex.compile_program("\\S{3}")
+    rx = regex.compile("\\S{3}")
 
-    expect(regex.full_match(rx, "aB!")).to.be(True)
-    expect(regex.full_match(rx, "a B")).to.be(False)
+    expect(rx.full_match("aB!")).to.be(True)
+    expect(rx.full_match("a B")).to.be(False)
 elif testcase == "full_match should handle non word class":
-    rx = regex.compile_program("\\W+")
+    rx = regex.compile("\\W+")
 
-    expect(regex.full_match(rx, "?! ")).to.be(True)
-    expect(regex.full_match(rx, "a")).to.be(False)
+    expect(rx.full_match("?! ")).to.be(True)
+    expect(rx.full_match("a")).to.be(False)
 elif testcase == "full_match should combine multiple groups and literals":
-    rx = regex.compile_program("(ID)-(\\d{4})")
+    rx = regex.compile("(ID)-(\\d{4})")
 
-    expect(regex.full_match(rx, "ID-0007")).to.be(True)
-    expect(regex.full_match(rx, "ID-7")).to.be(False)
+    expect(rx.full_match("ID-0007")).to.be(True)
+    expect(rx.full_match("ID-7")).to.be(False)
 elif testcase == "search_from should find earliest double a":
-    prog = regex.compile_program("aa")
-    hit = regex.search_from(prog, "baaac")
+    rx = regex.compile("aa")
+    hit = rx.search("baaac")
 
     expect(hit.start).to.be(1)
     expect(hit.end).to.be(3)
 elif testcase == "match_from should respect start offset at end":
-    rx = regex.compile_program("c")
+    rx = regex.compile("c")
 
-    expect(regex.match_from(rx, "abc", 2)).to.be(3)
-    expect(regex.match_from(rx, "abc", 3)).to.be(None)
+    expect(rx.match_from("abc", 2)).to.be(3)
+    expect(rx.match_from("abc", 3)).to.be(None)
 elif testcase == "full_match should handle digit range in class":
-    rx = regex.compile_program("[3-6]")
+    rx = regex.compile("[3-6]")
 
-    expect(regex.full_match(rx, "5")).to.be(True)
-    expect(regex.full_match(rx, "2")).to.be(False)
+    expect(rx.full_match("5")).to.be(True)
+    expect(rx.full_match("2")).to.be(False)
 elif testcase == "full_match should handle uppercase range in class":
-    rx = regex.compile_program("[M-O]")
+    rx = regex.compile("[M-O]")
 
-    expect(regex.full_match(rx, "N")).to.be(True)
-    expect(regex.full_match(rx, "P")).to.be(False)
+    expect(rx.full_match("N")).to.be(True)
+    expect(rx.full_match("P")).to.be(False)
 elif testcase == "full_match should handle optional group":
-    rx = regex.compile_program("x(abc)?y")
+    rx = regex.compile("x(abc)?y")
 
-    expect(regex.full_match(rx, "xy")).to.be(True)
-    expect(regex.full_match(rx, "xabcy")).to.be(True)
-    expect(regex.full_match(rx, "xab")).to.be(False)
+    expect(rx.full_match("xy")).to.be(True)
+    expect(rx.full_match("xabcy")).to.be(True)
+    expect(rx.full_match("xab")).to.be(False)
 elif testcase == "full_match should backtrack optional prefix for whole match":
-    rx = regex.compile_program("(ha)?ha")
+    rx = regex.compile("(ha)?ha")
 
-    expect(regex.full_match(rx, "haha")).to.be(True)
-    expect(regex.full_match(rx, "ha")).to.be(True)
+    expect(rx.full_match("haha")).to.be(True)
+    expect(rx.full_match("ha")).to.be(True)
 elif testcase == "full_match should backtrack star to satisfy suffix":
-    rx = regex.compile_program("a*b")
+    rx = regex.compile("a*b")
 
-    expect(regex.full_match(rx, "aaab")).to.be(True)
-    expect(regex.full_match(rx, "b")).to.be(True)
+    expect(rx.full_match("aaab")).to.be(True)
+    expect(rx.full_match("b")).to.be(True)
 elif testcase == "full_match should treat pipe as alternation":
-    rx = regex.compile_program("a|b")
+    rx = regex.compile("a|b")
 
-    expect(regex.full_match(rx, "a")).to.be(True)
-    expect(regex.full_match(rx, "b")).to.be(True)
-    expect(regex.full_match(rx, "c")).to.be(False)
+    expect(rx.full_match("a")).to.be(True)
+    expect(rx.full_match("b")).to.be(True)
+    expect(rx.full_match("c")).to.be(False)
 elif testcase == "full_match should treat escaped pipe as literal":
-    rx = regex.compile_program("a\\|b")
+    rx = regex.compile("a\\|b")
 
-    expect(regex.full_match(rx, "a|b")).to.be(True)
-    expect(regex.full_match(rx, "a")).to.be(False)
+    expect(rx.full_match("a|b")).to.be(True)
+    expect(rx.full_match("a")).to.be(False)
 elif testcase == "full_match should alternate grouped branches":
-    rx = regex.compile_program("(cat|dog)")
+    rx = regex.compile("(cat|dog)")
 
-    expect(regex.full_match(rx, "cat")).to.be(True)
-    expect(regex.full_match(rx, "dog")).to.be(True)
-    expect(regex.full_match(rx, "cow")).to.be(False)
+    expect(rx.full_match("cat")).to.be(True)
+    expect(rx.full_match("dog")).to.be(True)
+    expect(rx.full_match("cow")).to.be(False)
 elif testcase == "search_from should find first alternation branch":
-    rx = regex.compile_program("foo|bar")
-    hit = regex.search_from(rx, "xbarz")
+    rx = regex.compile("foo|bar")
+    hit = rx.search("xbarz")
 
     expect(hit.start).to.be(1)
     expect(hit.end).to.be(4)
 elif testcase == "full_match should alternate three arms":
-    rx = regex.compile_program("1|22|333")
+    rx = regex.compile("1|22|333")
 
-    expect(regex.full_match(rx, "1")).to.be(True)
-    expect(regex.full_match(rx, "22")).to.be(True)
-    expect(regex.full_match(rx, "333")).to.be(True)
-    expect(regex.full_match(rx, "2")).to.be(False)
+    expect(rx.full_match("1")).to.be(True)
+    expect(rx.full_match("22")).to.be(True)
+    expect(rx.full_match("333")).to.be(True)
+    expect(rx.full_match("2")).to.be(False)
 elif testcase == "full_match should use first matching alternation arm":
-    rx = regex.compile_program("aa|a")
+    rx = regex.compile("aa|a")
 
-    expect(regex.full_match(rx, "aa")).to.be(True)
-    expect(regex.full_match(rx, "a")).to.be(True)
+    expect(rx.full_match("aa")).to.be(True)
+    expect(rx.full_match("a")).to.be(True)
 elif testcase == "full_match should combine alternation with suffix":
-    rx = regex.compile_program("(red|blue)fish")
+    rx = regex.compile("(red|blue)fish")
 
-    expect(regex.full_match(rx, "redfish")).to.be(True)
-    expect(regex.full_match(rx, "bluefish")).to.be(True)
-    expect(regex.full_match(rx, "greenfish")).to.be(False)
+    expect(rx.full_match("redfish")).to.be(True)
+    expect(rx.full_match("bluefish")).to.be(True)
+    expect(rx.full_match("greenfish")).to.be(False)
 elif testcase == "compile wrapper should reuse program for repeated checks":
     rx = regex.compile("a")
 
@@ -368,13 +370,13 @@ elif testcase == "compile wrapper captures helpers should work with zero groups"
     expect(hit.groups[0]).to.be("abc")
     expect(rx.search_captures("zzz")).to.be(None)
 elif testcase == "full_match should handle complex email like token":
-    rx = regex.compile_program("[\\w.]+@[\\w]+")
+    rx = regex.compile("[\\w.]+@[\\w]+")
 
-    expect(regex.full_match(rx, "a.b@c")).to.be(True)
-    expect(regex.full_match(rx, "@nope")).to.be(False)
+    expect(rx.full_match("a.b@c")).to.be(True)
+    expect(rx.full_match("@nope")).to.be(False)
 elif testcase == "search should scan empty string for empty pattern":
-    prog = regex.compile_program("")
-    hit = regex.search_from(prog, "")
+    rx = regex.compile("")
+    hit = rx.search("")
 
     expect(hit.start).to.be(0)
     expect(hit.end).to.be(0)
@@ -388,26 +390,26 @@ elif testcase == "stress search needle after four hundred char pad":
     expect(hit.end).to.be(406)
 elif testcase == "stress full_match digit brace two hundred":
     text = "7" * 200
-    p = regex.compile_program("\\d{200}")
+    rx = regex.compile("\\d{200}")
 
-    expect(regex.full_match(p, text)).to.be(True)
-    expect(regex.full_match(p, text + "7")).to.be(False)
+    expect(rx.full_match(text)).to.be(True)
+    expect(rx.full_match(text + "7")).to.be(False)
 elif testcase == "stress nested groups depth twelve":
     d = 12
     pat = "(" * d + "@" + ")" * d
-    p = regex.compile_program(pat)
+    rx = regex.compile(pat)
 
-    expect(regex.full_match(p, "@")).to.be(True)
+    expect(rx.full_match("@")).to.be(True)
 elif testcase == "stress quantified pair eighty repeats":
-    p = regex.compile_program("(ab){80}")
+    rx = regex.compile("(ab){80}")
     body = "ab" * 80
 
-    expect(regex.full_match(p, body)).to.be(True)
+    expect(rx.full_match(body)).to.be(True)
 elif testcase == "stress dot star five hundred char string":
-    p = regex.compile_program(".*")
+    rx = regex.compile(".*")
     s = "m" * 300 + "n" * 200
 
-    expect(regex.full_match(p, s)).to.be(True)
+    expect(rx.full_match(s)).to.be(True)
 elif testcase == "stress alternation forty eight fixed width arms":
     parts = []
     for i in range(48):
@@ -416,24 +418,24 @@ elif testcase == "stress alternation forty eight fixed width arms":
             si = "0" + si
         parts.append("a" + si)
     pat = "|".join(parts)
-    p = regex.compile_program(pat)
+    rx = regex.compile(pat)
 
-    expect(regex.full_match(p, "a47")).to.be(True)
-    expect(regex.full_match(p, "a00")).to.be(True)
-    expect(regex.full_match(p, "a48")).to.be(False)
+    expect(rx.full_match("a47")).to.be(True)
+    expect(rx.full_match("a00")).to.be(True)
+    expect(rx.full_match("a48")).to.be(False)
 elif testcase == "stress word class brace two fifty":
-    p = regex.compile_program("\\w{250}")
+    rx = regex.compile("\\w{250}")
     text = "a" * 250
 
-    expect(regex.full_match(p, text)).to.be(True)
+    expect(rx.full_match(text)).to.be(True)
 elif testcase == "stress mixed alts quantifiers and classes":
-    p = regex.compile_program("([01]{2}|aa){50}(z|ww)")
+    rx = regex.compile("([01]{2}|aa){50}(z|ww)")
     body = "01" * 50 + "ww"
 
-    expect(regex.full_match(p, body)).to.be(True)
+    expect(rx.full_match(body)).to.be(True)
 elif testcase == "match_from_captures should return two groups":
-    p = regex.compile_program("(ID)-(\\d{4})")
-    m = regex.match_from_captures(p, "ID-0007", 0)
+    rx = regex.compile("(ID)-(\\d{4})")
+    m = rx.match_from_captures("ID-0007", 0)
 
     expect(m != None).to.be(True)
     expect(m.end).to.be(7)
@@ -441,8 +443,8 @@ elif testcase == "match_from_captures should return two groups":
     expect(m.groups[1]).to.be("ID")
     expect(m.groups[2]).to.be("0007")
 elif testcase == "match_from_captures should leave optional group none":
-    p = regex.compile_program("x(a)?y")
-    m = regex.match_from_captures(p, "xy", 0)
+    rx = regex.compile("x(a)?y")
+    m = rx.match_from_captures("xy", 0)
 
     expect(m != None).to.be(True)
     expect(m.groups[1]).to.be(None)
@@ -467,167 +469,167 @@ elif testcase == "compiled dict groups key should skip noncapturing group":
     expect(m2 != None).to.be(True)
     expect(m2.groups[1]).to.be("c")
 elif testcase == "full_match with leading empty alternation arm should not try later arm":
-    p = regex.compile_program("|ab")
+    rx = regex.compile("|ab")
 
-    expect(regex.full_match(p, "")).to.be(True)
-    expect(regex.full_match(p, "ab")).to.be(False)
+    expect(rx.full_match("")).to.be(True)
+    expect(rx.full_match("ab")).to.be(False)
 elif testcase == "compile_program should err on unsupported question paren":
-    expect(lambda: regex.compile_program("(?P<x>a)")).to.raise_exception()
+    expect(lambda: regex.compile("(?P<x>a)")).to.raise_exception()
 elif testcase == "full_match should treat brace min equal max as exact count":
-    p = regex.compile_program("a{1,1}")
+    rx = regex.compile("a{1,1}")
 
-    expect(regex.full_match(p, "a")).to.be(True)
-    expect(regex.full_match(p, "")).to.be(False)
-    p2 = regex.compile_program("a{3,3}")
+    expect(rx.full_match("a")).to.be(True)
+    expect(rx.full_match("")).to.be(False)
+    rx2 = regex.compile("a{3,3}")
 
-    expect(regex.full_match(p2, "aaa")).to.be(True)
-    expect(regex.full_match(p2, "aa")).to.be(False)
+    expect(rx2.full_match("aaa")).to.be(True)
+    expect(rx2.full_match("aa")).to.be(False)
 elif testcase == "full_match should accept hyphen only class":
-    p = regex.compile_program("[-]")
+    rx = regex.compile("[-]")
 
-    expect(regex.full_match(p, "-")).to.be(True)
-    expect(regex.full_match(p, "a")).to.be(False)
+    expect(rx.full_match("-")).to.be(True)
+    expect(rx.full_match("a")).to.be(False)
 elif testcase == "full_match should accept hyphen at class edge":
-    p = regex.compile_program("[-a]")
+    rx = regex.compile("[-a]")
 
-    expect(regex.full_match(p, "-")).to.be(True)
-    expect(regex.full_match(p, "a")).to.be(True)
-    p2 = regex.compile_program("[a-]")
+    expect(rx.full_match("-")).to.be(True)
+    expect(rx.full_match("a")).to.be(True)
+    rx2 = regex.compile("[a-]")
 
-    expect(regex.full_match(p2, "-")).to.be(True)
-    expect(regex.full_match(p2, "b")).to.be(False)
+    expect(rx2.full_match("-")).to.be(True)
+    expect(rx2.full_match("b")).to.be(False)
 elif testcase == "full_match should accept negated hyphen class":
-    p = regex.compile_program("[^-]")
+    rx = regex.compile("[^-]")
 
-    expect(regex.full_match(p, "z")).to.be(True)
-    expect(regex.full_match(p, "-")).to.be(False)
+    expect(rx.full_match("z")).to.be(True)
+    expect(rx.full_match("-")).to.be(False)
 elif testcase == "full_match should let dot match newline":
-    p = regex.compile_program(".")
+    rx = regex.compile(".")
 
-    expect(regex.full_match(p, "\n")).to.be(True)
+    expect(rx.full_match("\n")).to.be(True)
 elif testcase == "full_match should repeat noncapturing group":
-    p = regex.compile_program("(?:ab){2}")
+    rx = regex.compile("(?:ab){2}")
 
-    expect(regex.full_match(p, "abab")).to.be(True)
-    expect(regex.full_match(p, "ab")).to.be(False)
+    expect(rx.full_match("abab")).to.be(True)
+    expect(rx.full_match("ab")).to.be(False)
 elif testcase == "full_match should accept trailing empty alternation arm":
-    p = regex.compile_program("a|")
+    rx = regex.compile("a|")
 
-    expect(regex.full_match(p, "a")).to.be(True)
-    expect(regex.full_match(p, "")).to.be(True)
-    expect(regex.full_match(p, "b")).to.be(False)
+    expect(rx.full_match("a")).to.be(True)
+    expect(rx.full_match("")).to.be(True)
+    expect(rx.full_match("b")).to.be(False)
 elif testcase == "full_match should accept escaped rbracket inside class":
-    p = regex.compile_program("[\\]]")
+    rx = regex.compile("[\\]]")
 
-    expect(regex.full_match(p, "]")).to.be(True)
-    expect(regex.full_match(p, "a")).to.be(False)
+    expect(rx.full_match("]")).to.be(True)
+    expect(rx.full_match("a")).to.be(False)
 elif testcase == "full_match should accept negated class excluding rbracket":
-    p = regex.compile_program("[^\\]]")
+    rx = regex.compile("[^\\]]")
 
-    expect(regex.full_match(p, "a")).to.be(True)
-    expect(regex.full_match(p, "]")).to.be(False)
+    expect(rx.full_match("a")).to.be(True)
+    expect(rx.full_match("]")).to.be(False)
 elif testcase == "full_match should accept negated caret literal in class":
-    p = regex.compile_program("[^^]")
+    rx = regex.compile("[^^]")
 
-    expect(regex.full_match(p, "a")).to.be(True)
-    expect(regex.full_match(p, "^")).to.be(False)
+    expect(rx.full_match("a")).to.be(True)
+    expect(rx.full_match("^")).to.be(False)
 elif testcase == "search_from should backtrack dot star for suffix":
-    p = regex.compile_program(".*c")
-    hit = regex.search_from(p, "xxxc")
+    rx = regex.compile(".*c")
+    hit = rx.search("xxxc")
 
     expect(hit.start).to.be(0)
     expect(hit.end).to.be(4)
 elif testcase == "full_match should handle nested alternation with suffix":
-    p = regex.compile_program("((a|b)c|d)e")
+    rx = regex.compile("((a|b)c|d)e")
 
-    expect(regex.full_match(p, "ace")).to.be(True)
-    expect(regex.full_match(p, "bce")).to.be(True)
-    expect(regex.full_match(p, "de")).to.be(True)
-    expect(regex.full_match(p, "ae")).to.be(False)
+    expect(rx.full_match("ace")).to.be(True)
+    expect(rx.full_match("bce")).to.be(True)
+    expect(rx.full_match("de")).to.be(True)
+    expect(rx.full_match("ae")).to.be(False)
 elif testcase == "match_from_captures should split greedy plus groups":
-    p = regex.compile_program("(a+)(b+)")
-    m = regex.match_from_captures(p, "aabbb", 0)
+    rx = regex.compile("(a+)(b+)")
+    m = rx.match_from_captures("aabbb", 0)
 
     expect(m != None).to.be(True)
     expect(m.groups[0]).to.be("aabbb")
     expect(m.groups[1]).to.be("aa")
     expect(m.groups[2]).to.be("bbb")
 elif testcase == "search_from_captures should find nested alt capture":
-    p = regex.compile_program("(x|(yz))")
-    hit = regex.search_from_captures(p, "qqyzz", 0)
+    rx = regex.compile("(x|(yz))")
+    hit = rx.search_captures("qqyzz", 0)
 
     expect(hit != None).to.be(True)
     expect(hit.groups[0]).to.be("yz")
     expect(hit.groups[1]).to.be("yz")
     expect(hit.groups[2]).to.be("yz")
 elif testcase == "full_match should accept string anchors ^ and $":
-    p = regex.compile_program("^a$")
+    rx = regex.compile("^a$")
 
-    expect(regex.full_match(p, "a")).to.be(True)
-    expect(regex.full_match(p, "ab")).to.be(False)
-    expect(regex.full_match(p, "ba")).to.be(False)
+    expect(rx.full_match("a")).to.be(True)
+    expect(rx.full_match("ab")).to.be(False)
+    expect(rx.full_match("ba")).to.be(False)
 elif testcase == "search_from should respect ^ only at string index zero":
-    p = regex.compile_program("^foo")
-    hit = regex.search_from(p, "foo", 0)
+    rx = regex.compile("^foo")
+    hit = rx.search("foo", 0)
 
     expect(hit != None).to.be(True)
     expect(hit.start).to.be(0)
     expect(hit.end).to.be(3)
-    expect(regex.search_from(p, "xfoo", 0)).to.be(None)
+    expect(rx.search("xfoo", 0)).to.be(None)
 elif testcase == "search_from should return None for leading ^ when pos gt zero":
-    p = regex.compile_program("^foo")
+    rx = regex.compile("^foo")
 
-    expect(regex.search_from(p, "foo", 1)).to.be(None)
+    expect(rx.search("foo", 1)).to.be(None)
 elif testcase == "search_from should find arm without ^ across offsets":
-    p = regex.compile_program("^a|b")
-    hit = regex.search_from(p, "xb", 0)
+    rx = regex.compile("^a|b")
+    hit = rx.search("xb", 0)
 
     expect(hit != None).to.be(True)
     expect(hit.start).to.be(1)
     expect(hit.end).to.be(2)
 elif testcase == "full_match should accept escaped caret as literal":
-    p = regex.compile_program("\\^x")
+    rx = regex.compile("\\^x")
 
-    expect(regex.full_match(p, "^x")).to.be(True)
-    expect(regex.full_match(p, "x")).to.be(False)
+    expect(rx.full_match("^x")).to.be(True)
+    expect(rx.full_match("x")).to.be(False)
 elif testcase == "full_match should accept empty string for ^$":
-    p = regex.compile_program("^$")
+    rx = regex.compile("^$")
 
-    expect(regex.full_match(p, "")).to.be(True)
-    expect(regex.full_match(p, "x")).to.be(False)
+    expect(rx.full_match("")).to.be(True)
+    expect(rx.full_match("x")).to.be(False)
 elif testcase == "compile_program should err on quantified ^":
-    errt, prog = regex.diagnostic_compile_program("^?")
+    errt, res = regex.diagnostic_compile("^?")
 
-    expect(prog).to.be(None)
+    expect(res).to.be(None)
     expect(errt != None).to.be(True)
 elif testcase == "match_from_captures should work with leading ^ and captures":
-    p = regex.compile_program("^(a)$")
-    m = regex.match_from_captures(p, "a", 0)
+    rx = regex.compile("^(a)$")
+    m = rx.match_from_captures("a", 0)
 
     expect(m != None).to.be(True)
     expect(m.groups[0]).to.be("a")
     expect(m.groups[1]).to.be("a")
 elif testcase == "match_from should fail ^ when start not at string zero even if suffix matches":
-    p = regex.compile_program("^a")
+    rx = regex.compile("^a")
 
-    expect(regex.match_from(p, "aa", 1)).to.be(None)
+    expect(rx.match_from("aa", 1)).to.be(None)
 elif testcase == "search_from_captures should honor all arms leading ^":
-    p = regex.compile_program("^a|^bc")
-    hit = regex.search_from_captures(p, "bc", 0)
+    rx = regex.compile("^a|^bc")
+    hit = rx.search_captures("bc", 0)
 
     expect(hit != None).to.be(True)
     expect(hit.start).to.be(0)
     expect(hit.groups[0]).to.be("bc")
 elif testcase == "match_from should return None when start past end":
-    p = regex.compile_program("a")
+    rx = regex.compile("a")
 
-    expect(regex.match_from(p, "x", 2)).to.be(None)
+    expect(rx.match_from("x", 2)).to.be(None)
 elif testcase == "full_match should be false when pos past end":
-    p = regex.compile_program("a")
+    rx = regex.compile("a")
 
-    expect(regex.full_match(p, "x", 2)).to.be(False)
+    expect(rx.full_match("x", 2)).to.be(False)
 elif testcase == "search_from should return None when pos past haystack end":
-    p = regex.compile_program("a")
+    rx = regex.compile("a")
 
-    expect(regex.search_from(p, "x", 2)).to.be(None)
+    expect(rx.search("x", 2)).to.be(None)
 </drac2>

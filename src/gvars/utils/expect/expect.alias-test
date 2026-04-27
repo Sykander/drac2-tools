@@ -47,3 +47,33 @@ name: expect.have_index should pass when index exists and value matches
 ---
 ---
 name: expect.is_in should err when value is not in container
+
+!expect -testcase = "expect.to.does_not.equal should pass when values differ and fail when equal"
+---
+---
+name: expect.to.does_not.equal should pass when values differ and fail when equal
+
+!expect -testcase = "expect.to_not should mirror does_not for equality"
+---
+---
+name: expect.to_not should mirror does_not for equality
+
+!expect -testcase = "expect.does_not should toggle for double negation on equal"
+---
+---
+name: expect.does_not should toggle for double negation on equal
+
+!expect -testcase = "expect.to.does_not.is_in and does_not.have_element should invert membership"
+---
+---
+name: expect.to.does_not.is_in and does_not.have_element should invert membership
+
+!expect -testcase = "expect.to.does_not.have_property should reject present keys and matching values"
+---
+---
+name: expect.to.does_not.have_property should reject present keys and matching values
+
+!expect -testcase = "expect.to.does_not.raise_exception should pass when callable does not throw"
+---
+---
+name: expect.to.does_not.raise_exception should pass when callable does not throw

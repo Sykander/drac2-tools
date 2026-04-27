@@ -100,4 +100,35 @@ elif testcase == "expect.is_in should err when value is not in container":
     needle = "y"
 
     expect_to_raise_exception(lambda _ = None: expect(needle).to.is_in(container))
+elif testcase == "expect.to.does_not.equal should pass when values differ and fail when equal":
+    expect_to_not_raise_exception(lambda _ = None: expect(1).to.does_not.equal(2))
+    expect_to_raise_exception(lambda _ = None: expect(1).to.does_not.equal(1))
+    expect_to_not_raise_exception(lambda _ = None: expect(1).to["not"].equal(2))
+elif testcase == "expect.to_not should mirror does_not for equality":
+    expect_to_not_raise_exception(lambda _ = None: expect(1).to_not.equal(2))
+    expect_to_raise_exception(lambda _ = None: expect(1).to_not.equal(1))
+    expect_to_not_raise_exception(lambda _ = None: expect(3).to_not.to_not.equal(3))
+elif testcase == "expect.does_not should toggle for double negation on equal":
+    expect_to_not_raise_exception(lambda _ = None: expect(3).does_not.does_not.to.equal(3))
+    expect_to_raise_exception(lambda _ = None: expect(3).does_not.does_not.to.equal(2))
+elif testcase == "expect.to.does_not.is_in and does_not.have_element should invert membership":
+    expect_to_not_raise_exception(lambda _ = None: expect("y").to.does_not.is_in(["x"]))
+    expect_to_raise_exception(lambda _ = None: expect("x").to.does_not.is_in(["x"]))
+    expect_to_not_raise_exception(lambda _ = None: expect([1, 2]).to.does_not.have_element(3))
+    expect_to_raise_exception(lambda _ = None: expect([1, 2]).to.does_not.have_element(2))
+elif testcase == "expect.to.does_not.have_property should reject present keys and matching values":
+    obj = {"a": True, "b": 2}
+
+    expect_to_not_raise_exception(lambda _ = None: expect(obj).to.does_not.have_property("missing"))
+    expect_to_raise_exception(lambda _ = None: expect(obj).to.does_not.have_property("a"))
+    expect_to_not_raise_exception(lambda _ = None: expect(obj).to.does_not.have_property("b", 3))
+    expect_to_raise_exception(lambda _ = None: expect(obj).to.does_not.have_property("b", 2))
+elif testcase == "expect.to.does_not.raise_exception should pass when callable does not throw":
+    quiet = lambda _ = None: None
+    throws_err = lambda _ = None: err("throw")
+
+    expect_to_not_raise_exception(lambda _ = None: expect(quiet).to.does_not.raise_exception())
+    expect_to_raise_exception(lambda _ = None: expect(throws_err).to.does_not.raise_exception())
+    expect_to_not_raise_exception(lambda _ = None: expect(throws_err).to.does_not.raise_exception(AliasException))
+    expect_to_raise_exception(lambda _ = None: expect(throws_err).to.does_not.raise_exception(ValueError))
 </drac2>

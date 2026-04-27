@@ -34,12 +34,12 @@ elif testcase == "benchmark class brace loop should keep full matches":
     loops = int(args.last("loops", "1"))
     if loops < 1:
         loops = 1
-    p = regex.compile_program("\\w{250}")
+    rx = regex.compile("\\w{250}")
     text = "a" * 250
     misses = 0
     i = 0
     while i < loops:
-        if not regex.full_match(p, text):
+        if not rx.full_match(text):
             misses = misses + 1
         i = i + 1
     expect(misses).to.be(0)
@@ -47,12 +47,12 @@ elif testcase == "benchmark quantified alternation loop should keep matches":
     loops = int(args.last("loops", "1"))
     if loops < 1:
         loops = 1
-    p = regex.compile_program("([01]{2}|aa){50}(z|ww)")
+    rx = regex.compile("([01]{2}|aa){50}(z|ww)")
     body = "01" * 50 + "ww"
     misses = 0
     i = 0
     while i < loops:
-        if not regex.full_match(p, body):
+        if not rx.full_match(body):
             misses = misses + 1
         i = i + 1
     expect(misses).to.be(0)

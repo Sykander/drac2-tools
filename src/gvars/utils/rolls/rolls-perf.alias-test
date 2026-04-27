@@ -8,10 +8,10 @@ name: benchmark get_roll flat 1d1 boundary loops 287
 ---
 name: benchmark get_roll check boundary loops 110
 
-!rolls-perf -testcase "benchmark get_roll save loop should keep dexterity" -loops "132"
+!rolls-perf -testcase "benchmark get_roll save loop should keep dexterity" -loops "120"
 ---
 ---
-name: benchmark get_roll save boundary loops 132
+name: benchmark get_roll save boundary loops 120
 
 !rolls-perf -testcase "benchmark get_roll attack loop should keep melee" -loops "166"
 ---
