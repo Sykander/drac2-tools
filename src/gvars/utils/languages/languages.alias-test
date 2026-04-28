@@ -29,6 +29,14 @@ character:
   cvars:
     languages: "Common"
 
+!languages -testcase "language_comprehension_score known Deep Speech supported and unsupported channels"
+---
+---
+name: language_comprehension_score known Deep Speech supported and unsupported channels
+character:
+  cvars:
+    languages: "Deep Speech"
+
 !languages -testcase "get_character_languages splits cvar and resolves tokens"
 ---
 ---
@@ -135,26 +143,26 @@ character:
 ---
 name: language_comprehension_score unknown name is 0
 
-!languages -testcase "language_comprehension_score sheet language vocal scales by rarity"
+!languages -testcase "language_comprehension_score known Common vocal and script return 100"
 ---
 ---
-name: language_comprehension_score sheet language vocal scales by rarity
+name: language_comprehension_score known Common vocal and script return 100
 character:
   cvars:
     languages: "Common"
 
-!languages -testcase "language_comprehension_score sheet language script scales by rarity"
+!languages -testcase "language_comprehension_score known Common script case insensitive returns 100"
 ---
 ---
-name: language_comprehension_score sheet language script scales by rarity
+name: language_comprehension_score known Common script case insensitive returns 100
 character:
   cvars:
     languages: "Common"
 
-!languages -testcase "language_comprehension_score Deep Speech telepathic when known uses rarity"
+!languages -testcase "language_comprehension_score Deep Speech telepathic when known returns 100"
 ---
 ---
-name: language_comprehension_score Deep Speech telepathic when known uses rarity
+name: language_comprehension_score Deep Speech telepathic when known returns 100
 character:
   cvars:
     languages: "Deep Speech"
@@ -166,6 +174,14 @@ name: language_comprehension_score similar language partial without sheet entry
 character:
   cvars:
     languages: "Elvish"
+
+!languages -testcase "language_comprehension_score implicit Common when cvar omits it"
+---
+---
+name: language_comprehension_score implicit Common when cvar omits it
+character:
+  cvars:
+    languages: ""
 
 !languages -testcase "language_comprehension_score crowd bonus multiple known overlaps"
 ---
@@ -192,10 +208,10 @@ character:
   cvars:
     languages: "Common"
 
-!languages -testcase "language_comprehension_score Deep Speech script modality when known"
+!languages -testcase "language_comprehension_score Deep Speech script unsupported when known returns 0"
 ---
 ---
-name: language_comprehension_score Deep Speech script modality when known
+name: language_comprehension_score Deep Speech script unsupported when known returns 0
 character:
   cvars:
     languages: "Deep Speech"

@@ -34,14 +34,15 @@ A **list** of canonical language names from **`_LANGUAGES`**, in dict key order.
 
 ### `COMMUNICATION_METHODS`
 
-A **list** of canonical channel names, in stable order: **`vocal`**, **`script`**, **`telepathic`**, **`visual`**. Pass these strings as **`communication_method`** to **`language_comprehension_score`** (or iterate them when probing all channels).
+A **list** of canonical channel names, in stable order: **`vocal`**, **`script`**, **`telepathic`**, **`gestural`**. Pass these strings as **`communication_method`** to **`language_comprehension_score`** (or iterate them when probing all channels).
 
 ### `language_comprehension_score(language_name: str, char=None, communication_method="vocal") -> int`
 
 **0–100** heuristic (not RAW) for how plausibly **`char`** could follow **`language_name`** in **`communication_method`** (default **`vocal`**).
 
-- **Known** the target (on the resolved cvar list **or** class-granted **Thieves’ Cant** / **Druidic** when applicable): score scales with how well that **medium** fits the language (uses per-channel **`rarity`** when the channel is supported in **`_LANGUAGES`**).
-- **Otherwise**: combines directed cross-language overlap on that **same medium** from every effective known language, a small bonus when several known languages each overlap the target, optional **race** hints against **`common_speakers`**, then applies the modality factor.
-- **0** when the sheet resolves no languages, the character has no Rogue/Druid grants, and race gives no hint for that target.
+- **Known** the target (on the resolved cvar list **or** class-granted **Thieves’ Cant** / **Druidic** when applicable, or **implicit Common** — see below): **100** if that language **supports** the requested channel in **`_LANGUAGES`** (the channel is present as a dict, not **`False`**); **0** if the language does not use that channel (incomprehensible on that medium).
+- **Otherwise**: combines directed cross-language overlap on that **same medium** from every effective known language (again including **implicit Common** when the cvar omitted it), a small bonus when several known languages each overlap the target, optional **race** hints against **`common_speakers`**, then applies the modality factor.
+- **Implicit Common (PHB-style):** for this heuristic only, **Common** is treated as known if it is missing from the **`languages`** cvar and not already granted by class. 5e assumes every PC speaks **Common**; the cvar often forgets to list it. **`get_character_languages`** is unchanged — it still reflects only what resolves on the sheet (plus class grants where applicable).
+- **0** when, after that implicit **Common**, there is still no usable overlap or race hint for the target.
 
-**`communication_method`** accepts the canonical names in **`COMMUNICATION_METHODS`** plus common aliases (**`telepathy`**, **`written`** / **`writing`**, **`sign`**, **`speech`** / **`spoken`**, case-insensitive). Unrecognized labels fall back to **`vocal`**.
+**`communication_method`** accepts the canonical names in **`COMMUNICATION_METHODS`** plus common aliases (**`telepathy`**, **`written`** / **`writing`**, **`sign`** and legacy **`visual`** → **`gestural`**, **`speech`** / **`spoken`**, case-insensitive). Unrecognized labels fall back to **`vocal`**.

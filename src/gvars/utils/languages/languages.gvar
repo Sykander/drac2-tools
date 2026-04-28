@@ -1,7 +1,8 @@
 """Languages — D&D 5e (2014-era) catalog. Single source: ``_LANGUAGES`` (canonical name → metadata).
 
-**Public API** (unprefixed): ``get_character_languages``; ``language_comprehension_score``; ``COMMUNICATION_METHODS``;
-``LANGUAGE_NAMES`` (canonical catalog names in dict key order). Everything else is ``_``-prefixed for maintainers and tests.
+**Public API** (unprefixed): ``get_character_languages``; ``language_comprehension_score`` (PHB-style implicit **Common**
+for scoring when the cvar omits it); ``COMMUNICATION_METHODS``; ``LANGUAGE_NAMES``. Everything else is ``_``-prefixed
+for maintainers and tests.
 
 Offline regen: ``python3 utils/_emit_languages_catalog.py`` (not run by Avrae).
 """
@@ -9,7 +10,7 @@ Offline regen: ``python3 utils/_emit_languages_catalog.py`` (not run by Avrae).
 _languages_cvar_key = "languages"
 
 # Canonical ``communication_method`` values for ``language_comprehension_score`` / ``_get_similarity``. Order is stable.
-COMMUNICATION_METHODS = ["vocal", "script", "telepathic", "visual"]
+COMMUNICATION_METHODS = ["vocal", "script", "telepathic", "gestural"]
 
 
 def _name_subtoken_match(lang_lower: str, tok_lower: str) -> bool:
@@ -42,9 +43,9 @@ Record fields (each value in _LANGUAGES)
   - name: Human-readable label; usually matches the key. For display or logs, not matching logic.
   - aliases: Extra tokens that should resolve to this key (legacy spellings, Primordial (Dialect), Human (Ethnic), etc.).
     Used only inside _canonicalize_language_token.
-  - primary_method: Typical medium in fiction (vocal, script, telepathic, visual). Informative; gates no logic by itself.
+  - primary_method: Typical medium in fiction (vocal, script, telepathic, gestural). Informative; gates no logic by itself.
   - common_speakers: Short tags of typical speakers; used for optional race-based comprehension hints, not rules.
-  - methods: Dict keyed by channel name (vocal, script, telepathic, visual). Value is either False (channel not
+  - methods: Dict keyed by channel name (vocal, script, telepathic, gestural). Value is either False (channel not
     used for this language) or a dict with:
       - rarity: int 0-100. Used as the modality factor when that channel is supported (_modality_compatibility).
       - similar_to: dict of other canonical language names -> int 0-100, directed from this language toward
@@ -61,7 +62,7 @@ _LANGUAGES = {
         "common_speakers": ["Humans"],
         "methods": {
             "vocal": {
-                "rarity": 85,
+                "rarity": 75,
                 "similar_to": {
                     "Elvish": 20,
                     "Goblin": 25,
@@ -74,7 +75,7 @@ _LANGUAGES = {
                 }
             },
             "script": {
-                "rarity": 15,
+                "rarity": 25,
                 "similar_to": {
                     "Halfling": 95,
                     "Chondathan": 95,
@@ -83,10 +84,10 @@ _LANGUAGES = {
                 }
             },
             "telepathic": False,
-            "visual": {
-                "rarity": 10,
+            "gestural": {
+                "rarity": 5,
                 "similar_to": {
-                    "Common Sign Language": 95
+                    "Common Sign Language": 55
                 }
             }
         },
@@ -117,7 +118,7 @@ _LANGUAGES = {
                 }
             },
             "telepathic": False,
-            "visual": False
+            "gestural": False
         },
         "type": "standard",
         "writing_system": "Elvish",
@@ -148,7 +149,7 @@ _LANGUAGES = {
                 }
             },
             "telepathic": False,
-            "visual": False
+            "gestural": False
         },
         "type": "standard",
         "writing_system": "Dwarvish",
@@ -176,7 +177,7 @@ _LANGUAGES = {
                 }
             },
             "telepathic": False,
-            "visual": False
+            "gestural": False
         },
         "type": "standard",
         "writing_system": "Dwarvish",
@@ -203,7 +204,7 @@ _LANGUAGES = {
                 }
             },
             "telepathic": False,
-            "visual": False
+            "gestural": False
         },
         "type": "standard",
         "writing_system": "Dwarvish",
@@ -230,7 +231,7 @@ _LANGUAGES = {
                 }
             },
             "telepathic": False,
-            "visual": False
+            "gestural": False
         },
         "type": "standard",
         "writing_system": "Dwarvish",
@@ -256,7 +257,7 @@ _LANGUAGES = {
                 }
             },
             "telepathic": False,
-            "visual": False
+            "gestural": False
         },
         "type": "standard",
         "writing_system": "Dwarvish",
@@ -282,7 +283,7 @@ _LANGUAGES = {
                 }
             },
             "telepathic": False,
-            "visual": False
+            "gestural": False
         },
         "type": "standard",
         "writing_system": "Common",
@@ -295,7 +296,7 @@ _LANGUAGES = {
         "common_speakers": ["Underdark residents"],
         "methods": {
             "vocal": {
-                "rarity": 85,
+                "rarity": 90,
                 "similar_to": {
                     "Common": 35,
                     "Elvish": 55,
@@ -303,13 +304,13 @@ _LANGUAGES = {
                 }
             },
             "script": {
-                "rarity": 15,
+                "rarity": 10,
                 "similar_to": {
                     "Elvish": 85
                 }
             },
             "telepathic": False,
-            "visual": False
+            "gestural": False
         },
         "type": "uncommon",
         "writing_system": "Elvish",
@@ -334,7 +335,7 @@ _LANGUAGES = {
                     "Psionics": 60
                 }
             },
-            "visual": False
+            "gestural": False
         },
         "type": "exotic",
         "writing_system": "none",
@@ -354,7 +355,7 @@ _LANGUAGES = {
             },
             "script": False,
             "telepathic": False,
-            "visual": {
+            "gestural": {
                 "rarity": 40,
                 "similar_to": {
                     "Common": 50
@@ -606,7 +607,12 @@ def _race_familiarity_bonus(char, target_canonical: str) -> int:
 
 
 def _merged_known_languages_for_comprehension(char) -> list:
-    """Sheet languages plus class-granted (Thieves' Cant, Druidic), deduped in sheet order then extras."""
+    """Sheet languages plus class-granted (Thieves' Cant, Druidic), deduped in sheet order then extras.
+
+    **PHB-style default:** if **Common** exists in ``_LANGUAGES`` but is missing from the sheet and grants, it is
+    **prepended** anyway. 5e assumes every PC speaks Common; the ``languages`` cvar often omits it. This affects only
+    ``language_comprehension_score`` (not ``get_character_languages``).
+    """
     sheet = get_character_languages(char)
     grant = _class_granted_languages(char)
     seen = {}
@@ -615,6 +621,8 @@ def _merged_known_languages_for_comprehension(char) -> list:
         if seen.get(x, False) == False:
             seen[x] = True
             out.append(x)
+    if _LANGUAGES.get("Common") != None and seen.get("Common", False) == False:
+        out = ["Common"] + out
     return out
 
 
@@ -631,9 +639,18 @@ def _normalize_communication_method(method) -> str:
         return "telepathic"
     if m == "script" or m == "written" or m == "writing":
         return "script"
-    if m == "visual" or m == "sign":
-        return "visual"
+    if m == "gestural" or m == "visual" or m == "sign":
+        return "gestural"
     return "vocal"
+
+
+def _language_supports_communication_method(canonical_lang: str, method: str) -> bool:
+    """True when the catalog marks ``method`` as a real channel for ``canonical_lang`` (``methods[method]`` is a dict, not ``False``)."""
+    spec = _LANGUAGES.get(canonical_lang)
+    if spec == None:
+        return False
+    slot = spec["methods"].get(method, False)
+    return slot != False
 
 
 def _modality_compatibility(canonical_lang: str, method: str) -> int:
@@ -657,13 +674,13 @@ def _modality_compatibility(canonical_lang: str, method: str) -> int:
     if canonical_lang == "Psionics" and method == "script":
         return 15
 
-    if method == "vocal" and md.get("visual") is not False and md.get("vocal") is False:
+    if method == "vocal" and md.get("gestural") is not False and md.get("vocal") is False:
         return 25
 
-    if method == "visual" and md.get("visual") is False and md.get("script") is not False:
+    if method == "gestural" and md.get("gestural") is False and md.get("script") is not False:
         return 55
 
-    if method == "script" and md.get("visual") is not False and md.get("script") is False:
+    if method == "script" and md.get("gestural") is not False and md.get("script") is False:
         return 45
 
     if method == "telepathic":
@@ -691,7 +708,7 @@ def _modality_compatibility(canonical_lang: str, method: str) -> int:
             return 20
         return 30
 
-    if method == "visual":
+    if method == "gestural":
         return 30
 
     return 100
@@ -704,12 +721,17 @@ def language_comprehension_score(
 ) -> int:
     """0–100 heuristic: how well ``char`` might follow ``language_name`` via ``communication_method`` (``vocal`` default).
 
-    ``100`` means full grasp for that medium when the language is known (cvar or class-granted); lower when the medium mismatches.
-    Otherwise combines **directed** similarities from every known language (sheet + Thieves' Cant / Druidic when class applies),
-    a small bonus when several known languages each overlap the target, **race** vs ``common_speakers`` hints, then scales by modality.
+    When the character **knows** the target (cvar, class-granted, or **implicit Common** — see
+    ``_merged_known_languages_for_comprehension``): returns **100** if that language **supports** the requested
+    ``communication_method`` in ``_LANGUAGES`` (the channel is a dict, not ``False``); otherwise **0** (channel not
+    used for that language — incomprehensible on that medium).
 
-    Returns ``0`` when the sheet lists no resolved languages, the character has no class-granted languages, and race gives no hint.
-    Unknown ``language_name`` → ``0``.
+    When the target is **not** known: combines **directed** similarities from every effective known language, a small
+    bonus when several known languages each overlap the target, **race** vs ``common_speakers`` hints, then scales by
+    ``_modality_compatibility``.
+
+    Returns ``0`` when there is no effective known language (after grants and implicit **Common**), no similarity or
+    race hint applies, and the target is not known. Unknown ``language_name`` → ``0``.
     """
     target = _canonicalize_language_token(language_name)
     if target == None:
@@ -717,18 +739,17 @@ def language_comprehension_score(
 
     method = _normalize_communication_method(communication_method)
     char = _require_character(char, "language comprehension")
-    sheet = get_character_languages(char)
-    class_grant = _class_granted_languages(char)
     heritage = _race_familiarity_bonus(char, target)
-    if len(sheet) == 0 and len(class_grant) == 0 and heritage == 0:
+    known = _merged_known_languages_for_comprehension(char)
+    if len(known) == 0 and heritage == 0:
         return 0
 
-    known = _merged_known_languages_for_comprehension(char)
-    modality_fac = _modality_compatibility(target, method)
-
     if _character_knows_language(target, known):
-        return int(100 * modality_fac / 100)
+        if _language_supports_communication_method(target, method):
+            return 100
+        return 0
 
+    modality_fac = _modality_compatibility(target, method)
     sims = []
     for _k in known:
         if _k == target:

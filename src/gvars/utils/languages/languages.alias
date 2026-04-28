@@ -21,7 +21,7 @@ elif testcase == "COMMUNICATION_METHODS lists canonical channels":
     expect(m).to.have_index(0, "vocal")
     expect(m).to.have_index(1, "script")
     expect(m).to.have_index(2, "telepathic")
-    expect(m).to.have_index(3, "visual")
+    expect(m).to.have_index(3, "gestural")
 elif testcase == "LANGUAGE_NAMES matches catalog key order":
     names = languages.LANGUAGE_NAMES
 
@@ -29,16 +29,22 @@ elif testcase == "LANGUAGE_NAMES matches catalog key order":
     expect(names).to.have_element("Orc")
     expect(names).to.have_element("Thieves' Cant")
 elif testcase == "language_comprehension_score communication_method aliases match canonical":
-    expect(languages.language_comprehension_score("Common", None, "written")).to.be(15)
-    expect(languages.language_comprehension_score("Common", None, "writing")).to.be(15)
-    expect(languages.language_comprehension_score("Common", None, "sign")).to.be(10)
-    expect(languages.language_comprehension_score("Deep Speech", None, "telepathy")).to.be(70)
+    expect(languages.language_comprehension_score("Common", None, "written")).to.be(100)
+    expect(languages.language_comprehension_score("Common", None, "writing")).to.be(100)
+    expect(languages.language_comprehension_score("Common", None, "sign")).to.be(100)
+    expect(languages.language_comprehension_score("Common", None, "visual")).to.be(100)
+    expect(languages.language_comprehension_score("Deep Speech", None, "telepathy")).to.be(100)
 elif testcase == "language_comprehension_score each COMMUNICATION_METHOD for known Common":
     cm = languages.COMMUNICATION_METHODS
-    expect(languages.language_comprehension_score("Common", None, cm[0])).to.be(85)
-    expect(languages.language_comprehension_score("Common", None, cm[1])).to.be(15)
-    expect(languages.language_comprehension_score("Common", None, cm[2])).to.be(40)
-    expect(languages.language_comprehension_score("Common", None, cm[3])).to.be(10)
+    expect(languages.language_comprehension_score("Common", None, cm[0])).to.be(100)
+    expect(languages.language_comprehension_score("Common", None, cm[1])).to.be(100)
+    expect(languages.language_comprehension_score("Common", None, cm[2])).to.be(0)
+    expect(languages.language_comprehension_score("Common", None, cm[3])).to.be(100)
+elif testcase == "language_comprehension_score known Deep Speech supported and unsupported channels":
+    expect(languages.language_comprehension_score("Deep Speech", None, "vocal")).to.be(100)
+    expect(languages.language_comprehension_score("Deep Speech", None, "telepathic")).to.be(100)
+    expect(languages.language_comprehension_score("Deep Speech", None, "script")).to.be(0)
+    expect(languages.language_comprehension_score("Deep Speech", None, "gestural")).to.be(0)
 elif testcase == "get_character_languages splits cvar and resolves tokens":
     toks = languages.get_character_languages()
 
@@ -116,26 +122,29 @@ elif testcase == "language_comprehension_score unknown name is 0":
     s = languages.language_comprehension_score("xyzzy")
 
     expect(s).to.be(0)
-elif testcase == "language_comprehension_score sheet language vocal scales by rarity":
-    s = languages.language_comprehension_score("Common", None, "vocal")
-
-    expect(s).to.be(85)
-elif testcase == "language_comprehension_score sheet language script scales by rarity":
+elif testcase == "language_comprehension_score known Common vocal and script return 100":
+    expect(languages.language_comprehension_score("Common", None, "vocal")).to.be(100)
+    expect(languages.language_comprehension_score("Common", None, "telepathic")).to.be(0)
+elif testcase == "language_comprehension_score known Common script case insensitive returns 100":
     s = languages.language_comprehension_score("common", None, "script")
 
-    expect(s).to.be(15)
-elif testcase == "language_comprehension_score Deep Speech telepathic when known uses rarity":
+    expect(s).to.be(100)
+elif testcase == "language_comprehension_score Deep Speech telepathic when known returns 100":
     s = languages.language_comprehension_score("Deep Speech", None, "telepathic")
 
-    expect(s).to.be(70)
+    expect(s).to.be(100)
 elif testcase == "language_comprehension_score similar language partial without sheet entry":
     s = languages.language_comprehension_score("Undercommon", None, "vocal")
 
-    expect(s).to.be(25)
+    expect(s).to.be(28)
+elif testcase == "language_comprehension_score implicit Common when cvar omits it":
+    s = languages.language_comprehension_score("Common", None, "vocal")
+
+    expect(s).to.be(100)
 elif testcase == "language_comprehension_score crowd bonus multiple known overlaps":
     s = languages.language_comprehension_score("Undercommon", None, "vocal")
 
-    expect(s).to.be(27)
+    expect(s).to.be(28)
 elif testcase == "language_comprehension_score heritage only empty sheet Half-Orc Orc":
     s = languages.language_comprehension_score("Orc", None, "vocal")
 
@@ -143,11 +152,11 @@ elif testcase == "language_comprehension_score heritage only empty sheet Half-Or
 elif testcase == "language_comprehension_score unknown communication_method falls back to vocal":
     s = languages.language_comprehension_score("Common", None, "not_a_real_method_xyz")
 
-    expect(s).to.be(85)
-elif testcase == "language_comprehension_score Deep Speech script modality when known":
+    expect(s).to.be(100)
+elif testcase == "language_comprehension_score Deep Speech script unsupported when known returns 0":
     s = languages.language_comprehension_score("Deep Speech", None, "script")
 
-    expect(s).to.be(40)
+    expect(s).to.be(0)
 elif testcase == "language_comprehension_score no overlap is zero":
     s = languages.language_comprehension_score("Dwarvish", None, "vocal")
 
