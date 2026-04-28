@@ -118,6 +118,16 @@ elif testcase == "get_character_languages slash does not split tokens":
     known = languages.get_character_languages()
 
     expect(known).to.have.length(0)
+elif testcase == "get_character_languages resolves Primordial dialect Ignan":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(1)
+    expect(known).to.have_index(0, "Primordial")
+elif testcase == "get_character_languages resolves Draconic":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(1)
+    expect(known).to.have_index(0, "Draconic")
 elif testcase == "language_comprehension_score unknown name is 0":
     s = languages.language_comprehension_score("xyzzy")
 

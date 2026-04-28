@@ -289,6 +289,198 @@ _LANGUAGES = {
         "writing_system": "Common",
     },
 
+    "Abyssal": {
+        "name": "Abyssal",
+        "aliases": ["Abyssal Tongue", "Demonic"],
+        "primary_method": "vocal",
+        "common_speakers": ["Demons", "Fiends"],
+        "methods": {
+            "vocal": {
+                "rarity": 80,
+                "similar_to": {
+                    "Infernal": 45,
+                    "Celestial": 25,
+                    "Deep Speech": 20,
+                    "Undercommon": 30
+                }
+            },
+            "script": {
+                "rarity": 20,
+                "similar_to": {
+                    "Infernal": 55,
+                    "Celestial": 35
+                }
+            },
+            "telepathic": False,
+            "gestural": False
+        },
+        "type": "exotic",
+        "writing_system": "Infernal",
+    },
+
+    "Celestial": {
+        "name": "Celestial",
+        "aliases": ["Celestial Tongue", "Angelic"],
+        "primary_method": "vocal",
+        "common_speakers": ["Celestials", "Angels", "Aasimar"],
+        "methods": {
+            "vocal": {
+                "rarity": 80,
+                "similar_to": {
+                    "Infernal": 30,
+                    "Abyssal": 25,
+                    "Common": 15,
+                    "Elvish": 25
+                }
+            },
+            "script": {
+                "rarity": 20,
+                "similar_to": {
+                    "Infernal": 40,
+                    "Abyssal": 35
+                }
+            },
+            "telepathic": False,
+            "gestural": False
+        },
+        "type": "exotic",
+        "writing_system": "Celestial",
+    },
+
+    "Infernal": {
+        "name": "Infernal",
+        "aliases": ["Infernal Tongue", "Diabolic"],
+        "primary_method": "vocal",
+        "common_speakers": ["Devils", "Tieflings"],
+        "methods": {
+            "vocal": {
+                "rarity": 80,
+                "similar_to": {
+                    "Abyssal": 45,
+                    "Celestial": 30,
+                    "Common": 15,
+                    "Undercommon": 25
+                }
+            },
+            "script": {
+                "rarity": 25,
+                "similar_to": {
+                    "Abyssal": 55,
+                    "Celestial": 40
+                }
+            },
+            "telepathic": False,
+            "gestural": False
+        },
+        "type": "exotic",
+        "writing_system": "Infernal",
+    },
+
+    "Draconic": {
+        "name": "Draconic",
+        "aliases": ["Draconic Tongue", "Dragontongue", "Dragon Tongue"],
+        "primary_method": "vocal",
+        "common_speakers": ["Dragons", "Dragonborn"],
+        "methods": {
+            "vocal": {
+                "rarity": 75,
+                "similar_to": {
+                    "Primordial": 40,
+                    "Infernal": 25,
+                    "Celestial": 30,
+                    "Elvish": 25,
+                    "Common": 15,
+                    "Giant": 30,
+                    "Undercommon": 20
+                }
+            },
+            "script": {
+                "rarity": 25,
+                "similar_to": {
+                    "Elvish": 50,
+                    "Infernal": 35,
+                    "Celestial": 35,
+                    "Primordial": 40
+                }
+            },
+            "telepathic": False,
+            "gestural": False
+        },
+        "type": "exotic",
+        "writing_system": "Draconic",
+    },
+
+    "Primordial": {
+        "name": "Primordial",
+        "aliases": [
+            "Primordial (Aquan)",
+            "Primordial (Auran)",
+            "Primordial (Ignan)",
+            "Primordial (Terran)",
+            "Aquan",
+            "Auran",
+            "Ignan",
+            "Terran",
+            "Elemental",
+        ],
+        "primary_method": "vocal",
+        "common_speakers": ["Elementals"],
+        "methods": {
+            "vocal": {
+                "rarity": 75,
+                "similar_to": {
+                    "Dwarvish": 55,
+                    "Giant": 40,
+                    "Draconic": 35,
+                    "Gnomish": 35,
+                    "Common": 15
+                }
+            },
+            "script": {
+                "rarity": 25,
+                "similar_to": {
+                    "Dwarvish": 90,
+                    "Draconic": 45,
+                    "Giant": 50
+                }
+            },
+            "telepathic": False,
+            "gestural": False
+        },
+        "type": "exotic",
+        "writing_system": "Dwarvish",
+    },
+
+    "Sylvan": {
+        "name": "Sylvan",
+        "aliases": ["Sylvan Tongue", "Language of the fey"],
+        "primary_method": "vocal",
+        "common_speakers": ["Fey", "Elves"],
+        "methods": {
+            "vocal": {
+                "rarity": 80,
+                "similar_to": {
+                    "Elvish": 90,
+                    "Common": 20,
+                    "Draconic": 25,
+                    "Goblin": 20,
+                    "Primordial": 25
+                }
+            },
+            "script": {
+                "rarity": 20,
+                "similar_to": {
+                    "Elvish": 95,
+                    "Draconic": 40
+                }
+            },
+            "telepathic": False,
+            "gestural": False
+        },
+        "type": "exotic",
+        "writing_system": "Elvish",
+    },
+
     "Undercommon": {
         "name": "Undercommon",
         "aliases": ["Underdark Trade Tongue", "Deep Common"],
@@ -364,7 +556,30 @@ _LANGUAGES = {
         },
         "type": "secret",
         "writing_system": "none",
-    }
+    },
+
+    "Druidic": {
+        "name": "Druidic",
+        "aliases": ["Druidic Tongue", "Druid tongue", "Druid cant"],
+        "primary_method": "vocal",
+        "common_speakers": ["Druids"],
+        "methods": {
+            "vocal": {
+                "rarity": 55,
+                "similar_to": {
+                    "Sylvan": 50,
+                    "Elvish": 40,
+                    "Primordial": 35,
+                    "Common": 25
+                }
+            },
+            "script": False,
+            "telepathic": False,
+            "gestural": False
+        },
+        "type": "secret",
+        "writing_system": "none",
+    },
 }
 
 LANGUAGE_NAMES = []

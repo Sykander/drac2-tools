@@ -138,6 +138,22 @@ character:
   cvars:
     languages: "Goblin/Halfling"
 
+!languages -testcase "get_character_languages resolves Primordial dialect Ignan"
+---
+---
+name: get_character_languages resolves Primordial dialect Ignan
+character:
+  cvars:
+    languages: "Ignan"
+
+!languages -testcase "get_character_languages resolves Draconic"
+---
+---
+name: get_character_languages resolves Draconic
+character:
+  cvars:
+    languages: "Draconic"
+
 !languages -testcase "language_comprehension_score unknown name is 0"
 ---
 ---

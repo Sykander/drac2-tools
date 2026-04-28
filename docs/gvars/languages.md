@@ -10,7 +10,7 @@ The Avrae **`languages`** cvar holds a comma- or semicolon-separated list of lan
 
 To regenerate the catalog block in `languages.gvar`, run **`python3 utils/_emit_languages_catalog.py`** from the repo root (offline only; Avrae does not run that script). The script prints **`_LANGUAGES = { … }`** plus a trailing **`LANGUAGE_NAMES`** rebuild loop—paste to replace the matching section in the gvar.
 
-Which languages exist, their **`aliases`**, and per-channel **`methods`** are entirely whatever the shipped **`_LANGUAGES`** map contains (see that dict in `languages.gvar`).
+The shipped **`_LANGUAGES`** map is aligned to **D&D 5e (2014) PHB / SRD** standard and exotic language tables, plus **Thieves’ Cant**, **Druidic**, and **Primordial** dialect aliases (**Aquan**, **Auran**, **Ignan**, **Terran**). Creature-only or campaign-specific tongues are out of scope unless added to the dict.
 
 **`LANGUAGE_NAMES`** is a **list** of those canonical names in the same order as dict keys in **`_LANGUAGES`** (insertion order in the shipped gvar).
 
