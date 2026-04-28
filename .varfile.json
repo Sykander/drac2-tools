@@ -24,6 +24,9 @@
         "a2f94784-2002-40ed-b875-72de479efb1c": {
             "filePath": "src/gvars/utils/lists/lists.gvar"
         },
+        "c5a5e2ec-ceaf-459a-9587-81b5b244a0e0": {
+            "filePath": "src/gvars/utils/languages/languages.gvar"
+        },
         "e9e46b1d-71bd-4698-a029-cc4a1d79b418": {
             "filePath": "src/gvars/utils/notes/notes.gvar"
         },

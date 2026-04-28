@@ -44,6 +44,11 @@
       "id": "be56beeb-512b-4cc3-93e3-e3b9a8d2b70c"
     },
     {
+      "name": "languages",
+      "file": "src/gvars/utils/languages/languages.gvar",
+      "id": "3fd35bcf-1202-4a42-a0e1-abd1356b4cb3"
+    },
+    {
       "name": "notes",
       "file": "src/gvars/utils/notes/notes.gvar",
       "id": "b0a504fa-568a-44ca-a899-807660980ee5"

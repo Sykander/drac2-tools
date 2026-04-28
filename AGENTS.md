@@ -14,7 +14,7 @@ Project rules in **`.cursor/rules/`** spell this out: **`drac2-tools-maintainer.
 
 ## Tooling
 
-- **Drac2 tests:** `avrae-ls --run-tests src` (see `.github/workflows/test.yaml`).
+- **Drac2 tests:** `avrae-ls --run-tests src` (see `.github/workflows/test.yaml`). The **`languages`** gvar intentionally exposes only **`get_character_languages`** and **`language_comprehension_score`** without a leading **`_`**; Avrae disallows calling **`_*`** on `using`-bound gvars from aliases, so **`languages.alias-test`** covers those two surfaces only.
 - **Perf stress boundaries (any util):** Re-tune **`*-perf.alias-test`** with a **single-test probe file** + **cap / gallop / binary** search. Tool: **`python3 .cursor/scripts/probe_perf_boundaries.py`** (`--preset regex` / `--preset rolls`, or **`--dimension`** / **`--dimensions-file`**; template **`.cursor/templates/probe-perf-dimensions.example.txt`**). Workflow: **`.cursor/rules/gvar-perf-boundaries.mdc`**.
 - **avrae-ls behavior (`.alias-test`, `.avraels.json`, `varFiles`, mock context):** cached upstream docs under **`.cursor/avrae-ls-reference/`** ([avrae-ls](https://github.com/1drturtle/avrae-ls) on GitHub). Refresh with **`.cursor/avrae-ls-reference/refresh-avrae-ls-docs.sh`** when releases or `main` docs change; bump the version/date in **`.cursor/avrae-ls-reference/README.md`**.
 - **Sourcemaps** (`utils/sourcemap.*.json`) are the **source of truth** for workshop layout. **`src/gvars/env.*.gvar`** and **`.varfile.json`** are **generated** by `npm run generate-env` / `npm run generate-vars` — do not edit those outputs by hand; run **`make rebuild`** (see **`Makefile`**) after sourcemap changes. Optional **`ENVIRONMENT=Development`** or **`Production`** selects which map many scripts use.

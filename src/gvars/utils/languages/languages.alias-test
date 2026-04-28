@@ -1,0 +1,277 @@
+!languages -testcase "languages gvar loads"
+---
+---
+name: languages gvar loads
+
+!languages -testcase "COMMUNICATION_METHODS lists canonical channels"
+---
+---
+name: COMMUNICATION_METHODS lists canonical channels
+
+!languages -testcase "LANGUAGE_NAMES matches catalog key order"
+---
+---
+name: LANGUAGE_NAMES matches catalog key order
+
+!languages -testcase "language_comprehension_score communication_method aliases match canonical"
+---
+---
+name: language_comprehension_score communication_method aliases match canonical
+character:
+  cvars:
+    languages: "Common, Deep Speech"
+
+!languages -testcase "language_comprehension_score each COMMUNICATION_METHOD for known Common"
+---
+---
+name: language_comprehension_score each COMMUNICATION_METHOD for known Common
+character:
+  cvars:
+    languages: "Common"
+
+!languages -testcase "language_comprehension_score known Deep Speech supported and unsupported channels"
+---
+---
+name: language_comprehension_score known Deep Speech supported and unsupported channels
+character:
+  cvars:
+    languages: "Deep Speech"
+
+!languages -testcase "get_character_languages splits cvar and resolves tokens"
+---
+---
+name: get_character_languages splits cvar and resolves tokens
+character:
+  cvars:
+    languages: " Common ; Elvish , Orc "
+
+!languages -testcase "get_character_languages resolves Undercommon alias Deep Common"
+---
+---
+name: get_character_languages resolves Undercommon alias Deep Common
+character:
+  cvars:
+    languages: "Common, Deep Common"
+
+!languages -testcase "get_character_languages resolves Thieves Cant alias"
+---
+---
+name: get_character_languages resolves Thieves Cant alias
+character:
+  cvars:
+    languages: "Thieves Cant"
+
+!languages -testcase "get_character_languages resolves Orcish sheet spelling"
+---
+---
+name: get_character_languages resolves Orcish sheet spelling
+character:
+  cvars:
+    languages: "orcish"
+
+!languages -testcase "get_character_languages fuzzy resolves deep speech"
+---
+---
+name: get_character_languages fuzzy resolves deep speech
+character:
+  cvars:
+    languages: "speech"
+
+!languages -testcase "get_character_languages empty when cvar unset"
+---
+---
+name: get_character_languages empty when cvar unset
+
+!languages -testcase "get_character_languages dedupes repeated tokens on sheet"
+---
+---
+name: get_character_languages dedupes repeated tokens on sheet
+character:
+  cvars:
+    languages: "Common, common, Orc"
+
+!languages -testcase "get_character_languages omits unknown sheet tokens"
+---
+---
+name: get_character_languages omits unknown sheet tokens
+character:
+  cvars:
+    languages: "Common, Klingon, undercommon"
+
+!languages -testcase "get_character_languages excludes Elvish when not on sheet"
+---
+---
+name: get_character_languages excludes Elvish when not on sheet
+character:
+  cvars:
+    languages: "Common"
+
+!languages -testcase "get_character_languages tolerates repeated commas and mixed separators"
+---
+---
+name: get_character_languages tolerates repeated commas and mixed separators
+character:
+  cvars:
+    languages: ",,,  common  ,,;  elvish  ,,,"
+
+!languages -testcase "get_character_languages messy spacing mixed case and trailing punctuation"
+---
+---
+name: get_character_languages messy spacing mixed case and trailing punctuation
+character:
+  cvars:
+    languages: "  commON ,  orc.  ; elvish"
+
+!languages -testcase "get_character_languages drops ambiguous deep token keeps neighbors"
+---
+---
+name: get_character_languages drops ambiguous deep token keeps neighbors
+character:
+  cvars:
+    languages: "Common, deep, Orc"
+
+!languages -testcase "get_character_languages slash does not split tokens"
+---
+---
+name: get_character_languages slash does not split tokens
+character:
+  cvars:
+    languages: "Goblin/Halfling"
+
+!languages -testcase "get_character_languages resolves Primordial dialect Ignan"
+---
+---
+name: get_character_languages resolves Primordial dialect Ignan
+character:
+  cvars:
+    languages: "Ignan"
+
+!languages -testcase "get_character_languages resolves Draconic"
+---
+---
+name: get_character_languages resolves Draconic
+character:
+  cvars:
+    languages: "Draconic"
+
+!languages -testcase "language_comprehension_score unknown name is 0"
+---
+---
+name: language_comprehension_score unknown name is 0
+
+!languages -testcase "language_comprehension_score known Common vocal and script return 100"
+---
+---
+name: language_comprehension_score known Common vocal and script return 100
+character:
+  cvars:
+    languages: "Common"
+
+!languages -testcase "language_comprehension_score known Common script case insensitive returns 100"
+---
+---
+name: language_comprehension_score known Common script case insensitive returns 100
+character:
+  cvars:
+    languages: "Common"
+
+!languages -testcase "language_comprehension_score Deep Speech telepathic when known returns 100"
+---
+---
+name: language_comprehension_score Deep Speech telepathic when known returns 100
+character:
+  cvars:
+    languages: "Deep Speech"
+
+!languages -testcase "language_comprehension_score similar language partial without sheet entry"
+---
+---
+name: language_comprehension_score similar language partial without sheet entry
+character:
+  cvars:
+    languages: "Elvish"
+
+!languages -testcase "language_comprehension_score implicit Common when cvar omits it"
+---
+---
+name: language_comprehension_score implicit Common when cvar omits it
+character:
+  cvars:
+    languages: ""
+
+!languages -testcase "language_comprehension_score crowd bonus multiple known overlaps"
+---
+---
+name: language_comprehension_score crowd bonus multiple known overlaps
+character:
+  cvars:
+    languages: "Common, Elvish"
+
+!languages -testcase "language_comprehension_score heritage only empty sheet Half-Orc Orc"
+---
+---
+name: language_comprehension_score heritage only empty sheet Half-Orc Orc
+character:
+  race: Half-Orc
+  cvars:
+    languages: ""
+
+!languages -testcase "language_comprehension_score unknown communication_method falls back to vocal"
+---
+---
+name: language_comprehension_score unknown communication_method falls back to vocal
+character:
+  cvars:
+    languages: "Common"
+
+!languages -testcase "language_comprehension_score Deep Speech script unsupported when known returns 0"
+---
+---
+name: language_comprehension_score Deep Speech script unsupported when known returns 0
+character:
+  cvars:
+    languages: "Deep Speech"
+
+!languages -testcase "language_comprehension_score no overlap is zero"
+---
+---
+name: language_comprehension_score no overlap is zero
+character:
+  race: Human
+  cvars:
+    languages: "Common"
+
+!languages -testcase "language_comprehension_score race hints Orc for Half-Orc"
+---
+---
+name: language_comprehension_score race hints Orc for Half-Orc
+character:
+  race: Half-Orc
+  cvars:
+    languages: "Common"
+
+!languages -testcase "language_comprehension_score Rogue grants Thieves Cant overlap Common"
+---
+---
+name: language_comprehension_score Rogue grants Thieves Cant overlap Common
+character:
+  levels:
+    Rogue: 3
+  cvars:
+    languages: ""
+
+!languages -testcase "get_character_languages resolves Common Sign Language alias CSL"
+---
+---
+name: get_character_languages resolves Common Sign Language alias CSL
+character:
+  cvars:
+    languages: "CSL"
+
+!languages -testcase "language_comprehension_score known Common Sign Language gestural not vocal"
+---
+---
+name: language_comprehension_score known Common Sign Language gestural not vocal
+character:
+  cvars:
+    languages: "Common Sign Language"
