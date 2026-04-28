@@ -1,0 +1,163 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    languages = env.gvars.languages,
+    expect = env.gvars.expect,
+)
+
+expect = expect.expect
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "languages gvar loads":
+    xs = languages.get_character_languages()
+
+    expect(xs).to.have.length(0)
+elif testcase == "COMMUNICATION_METHODS lists canonical channels":
+    m = languages.COMMUNICATION_METHODS
+
+    expect(m).to.have.length(4)
+    expect(m).to.have_index(0, "vocal")
+    expect(m).to.have_index(1, "script")
+    expect(m).to.have_index(2, "telepathic")
+    expect(m).to.have_index(3, "visual")
+elif testcase == "LANGUAGE_NAMES matches catalog key order":
+    names = languages.LANGUAGE_NAMES
+
+    expect(names).to.have_index(0, "Common")
+    expect(names).to.have_element("Orc")
+    expect(names).to.have_element("Thieves' Cant")
+elif testcase == "language_comprehension_score communication_method aliases match canonical":
+    expect(languages.language_comprehension_score("Common", None, "written")).to.be(15)
+    expect(languages.language_comprehension_score("Common", None, "writing")).to.be(15)
+    expect(languages.language_comprehension_score("Common", None, "sign")).to.be(10)
+    expect(languages.language_comprehension_score("Deep Speech", None, "telepathy")).to.be(70)
+elif testcase == "language_comprehension_score each COMMUNICATION_METHOD for known Common":
+    cm = languages.COMMUNICATION_METHODS
+    expect(languages.language_comprehension_score("Common", None, cm[0])).to.be(85)
+    expect(languages.language_comprehension_score("Common", None, cm[1])).to.be(15)
+    expect(languages.language_comprehension_score("Common", None, cm[2])).to.be(40)
+    expect(languages.language_comprehension_score("Common", None, cm[3])).to.be(10)
+elif testcase == "get_character_languages splits cvar and resolves tokens":
+    toks = languages.get_character_languages()
+
+    expect(toks).to.have.length(3)
+    expect(toks).to.have_element("Common")
+    expect(toks).to.have_element("Elvish")
+    expect(toks).to.have_element("Orc")
+elif testcase == "get_character_languages resolves Undercommon alias Deep Common":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(2)
+    expect(known).to.have_element("Common")
+    expect(known).to.have_element("Undercommon")
+elif testcase == "get_character_languages resolves Thieves Cant alias":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(1)
+    expect(known).to.have_index(0, "Thieves' Cant")
+elif testcase == "get_character_languages resolves Orcish sheet spelling":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(1)
+    expect(known).to.have_index(0, "Orc")
+elif testcase == "get_character_languages fuzzy resolves deep speech":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(1)
+    expect(known).to.have_index(0, "Deep Speech")
+elif testcase == "get_character_languages empty when cvar unset":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(0)
+elif testcase == "get_character_languages dedupes repeated tokens on sheet":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(2)
+    expect(known).to.have_element("Common")
+    expect(known).to.have_element("Orc")
+elif testcase == "get_character_languages omits unknown sheet tokens":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(2)
+    expect(known).to.have_element("Common")
+    expect(known).to.have_element("Undercommon")
+elif testcase == "get_character_languages excludes Elvish when not on sheet":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(1)
+    expect(known).to.have_element("Common")
+    expect(known).does_not.to_have_element("Elvish")
+elif testcase == "get_character_languages tolerates repeated commas and mixed separators":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(2)
+    expect(known).to.have_index(0, "Common")
+    expect(known).to.have_index(1, "Elvish")
+elif testcase == "get_character_languages messy spacing mixed case and trailing punctuation":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(3)
+    expect(known).to.have_element("Common")
+    expect(known).to.have_element("Orc")
+    expect(known).to.have_element("Elvish")
+elif testcase == "get_character_languages drops ambiguous deep token keeps neighbors":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(2)
+    expect(known).to.have_element("Common")
+    expect(known).to.have_element("Orc")
+elif testcase == "get_character_languages slash does not split tokens":
+    known = languages.get_character_languages()
+
+    expect(known).to.have.length(0)
+elif testcase == "language_comprehension_score unknown name is 0":
+    s = languages.language_comprehension_score("xyzzy")
+
+    expect(s).to.be(0)
+elif testcase == "language_comprehension_score sheet language vocal scales by rarity":
+    s = languages.language_comprehension_score("Common", None, "vocal")
+
+    expect(s).to.be(85)
+elif testcase == "language_comprehension_score sheet language script scales by rarity":
+    s = languages.language_comprehension_score("common", None, "script")
+
+    expect(s).to.be(15)
+elif testcase == "language_comprehension_score Deep Speech telepathic when known uses rarity":
+    s = languages.language_comprehension_score("Deep Speech", None, "telepathic")
+
+    expect(s).to.be(70)
+elif testcase == "language_comprehension_score similar language partial without sheet entry":
+    s = languages.language_comprehension_score("Undercommon", None, "vocal")
+
+    expect(s).to.be(25)
+elif testcase == "language_comprehension_score crowd bonus multiple known overlaps":
+    s = languages.language_comprehension_score("Undercommon", None, "vocal")
+
+    expect(s).to.be(27)
+elif testcase == "language_comprehension_score heritage only empty sheet Half-Orc Orc":
+    s = languages.language_comprehension_score("Orc", None, "vocal")
+
+    expect(s).to.be(10)
+elif testcase == "language_comprehension_score unknown communication_method falls back to vocal":
+    s = languages.language_comprehension_score("Common", None, "not_a_real_method_xyz")
+
+    expect(s).to.be(85)
+elif testcase == "language_comprehension_score Deep Speech script modality when known":
+    s = languages.language_comprehension_score("Deep Speech", None, "script")
+
+    expect(s).to.be(40)
+elif testcase == "language_comprehension_score no overlap is zero":
+    s = languages.language_comprehension_score("Dwarvish", None, "vocal")
+
+    expect(s).to.be(0)
+elif testcase == "language_comprehension_score race hints Orc for Half-Orc":
+    s = languages.language_comprehension_score("Orc", None, "vocal")
+
+    expect(s).to_not.be(0)
+elif testcase == "language_comprehension_score Rogue grants Thieves Cant overlap Common":
+    s = languages.language_comprehension_score("Common", None, "vocal")
+
+    expect(s).to_not.be(0)
+</drac2>

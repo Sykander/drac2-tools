@@ -13,6 +13,7 @@ Drac2 global-variable helpers live under `src/gvars/utils/`. Production workshop
 | expect | Fluent assertions in alias tests (`err` on failure); not for player-facing commands. | [gvars/expect.md](gvars/expect.md) |
 | faker | Plausible random test data: names, D&D-style labels, ids, lorem, dice strings. | [gvars/faker.md](gvars/faker.md) |
 | lists | List → dict by key, random picks without replacement, list type check, search helpers. | [gvars/lists.md](gvars/lists.md) |
+| languages | 5e (2014-era) catalog; public API: `get_character_languages`, `language_comprehension_score`, `COMMUNICATION_METHODS`, `LANGUAGE_NAMES`; `languages` cvar. | [gvars/languages.md](gvars/languages.md) |
 | notes | Named per-character notebooks in cvars; append lines or replace whole notebooks. | [gvars/notes.md](gvars/notes.md) |
 | random | Seeded or one-shot random integers for reproducible or isolated rolls. | [gvars/random.md](gvars/random.md) |
 | regex | Small regexp subset: compile once, match with low statement overhead (no `re` in Drac2). | [gvars/regex.md](gvars/regex.md) |
