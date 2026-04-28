@@ -48,6 +48,8 @@ Record fields (each value in _LANGUAGES)
   - methods: Dict keyed by channel name (vocal, script, telepathic, gestural). Value is either False (channel not
     used for this language) or a dict with:
       - rarity: int 0-100. Used as the modality factor when that channel is supported (_modality_compatibility).
+      For each language, the ``rarity`` values on **supported** channels (those with a dict, not ``False``) sum to **100**
+      so modality weights partition attention across media for that tongue.
       - similar_to: dict of other canonical language names -> int 0-100, directed from this language toward
         the other on that channel only; omitted keys mean 0. Used by _get_similarity(lang_from, lang_to, method).
   - type: standard | uncommon | exotic | secret | other. Used by _modality_compatibility fallbacks when the requested channel is absent from methods.
@@ -62,7 +64,7 @@ _LANGUAGES = {
         "common_speakers": ["Humans"],
         "methods": {
             "vocal": {
-                "rarity": 75,
+                "rarity": 70,
                 "similar_to": {
                     "Elvish": 20,
                     "Goblin": 25,
@@ -93,6 +95,26 @@ _LANGUAGES = {
         },
         "type": "standard",
         "writing_system": "Common",
+    },
+
+    "Common Sign Language": {
+        "name": "Common Sign Language",
+        "aliases": ["CSL", "Common Sign"],
+        "primary_method": "gestural",
+        "common_speakers": ["Humans"],
+        "methods": {
+            "vocal": False,
+            "script": False,
+            "telepathic": False,
+            "gestural": {
+                "rarity": 100,
+                "similar_to": {
+                    "Common": 55,
+                }
+            }
+        },
+        "type": "standard",
+        "writing_system": "none",
     },
 
     "Elvish": {
@@ -354,7 +376,7 @@ _LANGUAGES = {
         "common_speakers": ["Devils", "Tieflings"],
         "methods": {
             "vocal": {
-                "rarity": 80,
+                "rarity": 75,
                 "similar_to": {
                     "Abyssal": 45,
                     "Celestial": 30,
@@ -565,7 +587,7 @@ _LANGUAGES = {
         "common_speakers": ["Druids"],
         "methods": {
             "vocal": {
-                "rarity": 55,
+                "rarity": 100,
                 "similar_to": {
                     "Sylvan": 50,
                     "Elvish": 40,

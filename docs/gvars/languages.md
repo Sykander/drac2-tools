@@ -10,7 +10,7 @@ The Avrae **`languages`** cvar holds a comma- or semicolon-separated list of lan
 
 To regenerate the catalog block in `languages.gvar`, run **`python3 utils/_emit_languages_catalog.py`** from the repo root (offline only; Avrae does not run that script). The script prints **`_LANGUAGES = { … }`** plus a trailing **`LANGUAGE_NAMES`** rebuild loop—paste to replace the matching section in the gvar.
 
-The shipped **`_LANGUAGES`** map is aligned to **D&D 5e (2014) PHB / SRD** standard and exotic language tables, plus **Thieves’ Cant**, **Druidic**, and **Primordial** dialect aliases (**Aquan**, **Auran**, **Ignan**, **Terran**). Creature-only or campaign-specific tongues are out of scope unless added to the dict.
+The shipped **`_LANGUAGES`** map is aligned to **D&D 5e (2014) PHB / SRD** standard and exotic language tables, plus **Thieves’ Cant**, **Druidic**, **Primordial** dialect aliases (**Aquan**, **Auran**, **Ignan**, **Terran**), and **Common Sign Language** (gestural-only table extension many groups use even though it is not a separate 2014 PHB language entry). Creature-only or campaign-specific tongues are out of scope unless added to the dict.
 
 **`LANGUAGE_NAMES`** is a **list** of those canonical names in the same order as dict keys in **`_LANGUAGES`** (insertion order in the shipped gvar).
 
@@ -41,7 +41,7 @@ A **list** of canonical channel names, in stable order: **`vocal`**, **`script`*
 **0–100** heuristic (not RAW) for how plausibly **`char`** could follow **`language_name`** in **`communication_method`** (default **`vocal`**).
 
 - **Known** the target (on the resolved cvar list **or** class-granted **Thieves’ Cant** / **Druidic** when applicable, or **implicit Common** — see below): **100** if that language **supports** the requested channel in **`_LANGUAGES`** (the channel is present as a dict, not **`False`**); **0** if the language does not use that channel (incomprehensible on that medium).
-- **Otherwise**: combines directed cross-language overlap on that **same medium** from every effective known language (again including **implicit Common** when the cvar omitted it), a small bonus when several known languages each overlap the target, optional **race** hints against **`common_speakers`**, then applies the modality factor.
+- **Otherwise**: combines directed cross-language overlap on that **same medium** from every effective known language (again including **implicit Common** when the cvar omitted it), a small bonus when several known languages each overlap the target, optional **race** hints against **`common_speakers`**, then applies the modality factor. In the catalog, each language’s **`rarity`** on **supported** channels (those it actually uses) sums to **100**, so modality weights partition that language across speech, writing, telepathy, and sign where applicable.
 - **Implicit Common (PHB-style):** for this heuristic only, **Common** is treated as known if it is missing from the **`languages`** cvar and not already granted by class. 5e assumes every PC speaks **Common**; the cvar often forgets to list it. **`get_character_languages`** is unchanged — it still reflects only what resolves on the sheet (plus class grants where applicable).
 - **0** when, after that implicit **Common**, there is still no usable overlap or race hint for the target.
 

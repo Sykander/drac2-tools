@@ -259,3 +259,19 @@ character:
     Rogue: 3
   cvars:
     languages: ""
+
+!languages -testcase "get_character_languages resolves Common Sign Language alias CSL"
+---
+---
+name: get_character_languages resolves Common Sign Language alias CSL
+character:
+  cvars:
+    languages: "CSL"
+
+!languages -testcase "language_comprehension_score known Common Sign Language gestural not vocal"
+---
+---
+name: language_comprehension_score known Common Sign Language gestural not vocal
+character:
+  cvars:
+    languages: "Common Sign Language"

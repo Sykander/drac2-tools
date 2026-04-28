@@ -28,6 +28,7 @@ elif testcase == "LANGUAGE_NAMES matches catalog key order":
     expect(names).to.have_index(0, "Common")
     expect(names).to.have_element("Orc")
     expect(names).to.have_element("Thieves' Cant")
+    expect(names).to.have_element("Common Sign Language")
 elif testcase == "language_comprehension_score communication_method aliases match canonical":
     expect(languages.language_comprehension_score("Common", None, "written")).to.be(100)
     expect(languages.language_comprehension_score("Common", None, "writing")).to.be(100)
@@ -179,4 +180,13 @@ elif testcase == "language_comprehension_score Rogue grants Thieves Cant overlap
     s = languages.language_comprehension_score("Common", None, "vocal")
 
     expect(s).to_not.be(0)
+elif testcase == "get_character_languages resolves Common Sign Language alias CSL":
+    known = languages.get_character_languages()
+
+    expect(known).to.have_length(1)
+    expect(known).to.have_index(0, "Common Sign Language")
+elif testcase == "language_comprehension_score known Common Sign Language gestural not vocal":
+    expect(languages.language_comprehension_score("Common Sign Language", None, "gestural")).to.be(100)
+    expect(languages.language_comprehension_score("Common Sign Language", None, "vocal")).to.be(0)
+    expect(languages.language_comprehension_score("CSL", None, "gestural")).to.be(100)
 </drac2>
