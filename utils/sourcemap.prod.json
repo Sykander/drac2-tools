@@ -82,6 +82,11 @@
       "name": "tools",
       "file": "src/gvars/utils/tools/tools.gvar",
       "id": "254cb78d-e9ae-4b03-afc5-d2cbc93bb27e"
+    },
+    {
+      "name": "performance_examples",
+      "file": "src/gvars/utils/performance_examples/performance_examples.gvar",
+      "id": "e2bfc37f-c379-42ec-8ee5-77f1cd79e37b"
     }
   ]
 }

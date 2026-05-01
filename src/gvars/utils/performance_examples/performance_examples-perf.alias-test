@@ -1,0 +1,69 @@
+!performance_examples-perf -testcase "benchmark adv dice list index loop should keep checksum" -loops "4280"
+---
+---
+name: benchmark adv dice list index loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark adv dice if chain loop should keep checksum" -loops "3380"
+---
+---
+name: benchmark adv dice if chain loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark three way list index loop should keep checksum" -loops "4450"
+---
+---
+name: benchmark three way list index loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark three way if chain loop should keep checksum" -loops "3920"
+---
+---
+name: benchmark three way if chain loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict get loop should keep checksum" -loops "6550"
+---
+---
+name: benchmark dict get loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict in and subscript loop should keep checksum" -loops "5750"
+---
+---
+name: benchmark dict in and subscript loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark tuple membership loop should keep checksum" -loops "4450"
+---
+---
+name: benchmark tuple membership loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark list membership loop should keep checksum" -loops "4450"
+---
+---
+name: benchmark list membership loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict bracket known key loop should keep checksum" -loops "7580"
+---
+---
+name: benchmark dict bracket known key loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict get known key loop should keep checksum" -loops "6550"
+---
+---
+name: benchmark dict get known key loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark counter plus assign loop should keep checksum" -loops "9800"
+---
+---
+name: benchmark counter plus assign loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark counter plus eq loop should keep checksum" -loops "9800"
+---
+---
+name: benchmark counter plus eq loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark string concat assign loop should keep checksum" -loops "8930"
+---
+---
+name: benchmark string concat assign loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark string concat plus eq loop should keep checksum" -loops "9850"
+---
+---
+name: benchmark string concat plus eq loop should keep checksum

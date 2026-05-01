@@ -1,0 +1,230 @@
+"""Micro-patterns for Drac2 statement-budget awareness.
+
+These functions exist so **``performance_examples-perf``** (and manual probes) can
+compare *equivalent-result* coding styles under Avrae's **per-invocation statement cap**.
+
+**Raw probed maxima** (``probe_perf_boundaries.py``, baselines from prior CI **``-loops``**, cap **120000**, ``--max-binary 20``):
+adv list **4313** vs if-chain **3421**; three-way list **4509** vs if **3968**;
+``dict.get`` for present ``"a"`` **6613** vs ``in``+subscript **5834**; tuple vs list ``in`` **4508** tie;
+known-key **``d["k"]``** **7629** vs **``d.get("k",0)``** **6611**; counter **``i=i+1``** vs **``i+=1``** both **10000**;
+string **``s=s+"x"``** **9015** vs **``s+="x"``** **9916**.
+CI **``-loops``** in **``performance_examples-perf.alias-test``** sit slightly below these for headroom. Re-validate with **``.cursor/templates/probe-performance_examples-from-committed.txt``** (omit ``--preset`` when using that file).
+
+Each pair keeps the same return value for the same ``loops`` so checksum assertions stay strict.
+"""
+
+# Pair 1 — four-way d20 shape (list index vs if/elif). List index allows more loop iterations here.
+
+
+def bench_adv_dice_list_index(loops):
+    """``adv`` fixed to ``2`` → always ``'3d20kh1'``; sum string lengths."""
+    s = 0
+    i = 0
+    while i < loops:
+        adv_int = 2
+        dice = ["1d20", "2d20kh1", "3d20kh1", "2d20kl1"][adv_int]
+        s = s + len(dice)
+        i = i + 1
+    return s
+
+
+def bench_adv_dice_if_chain(loops):
+    """Same observable result as ``bench_adv_dice_list_index`` for ``adv_int == 2``."""
+    s = 0
+    i = 0
+    while i < loops:
+        adv_int = 2
+        if adv_int == 0:
+            dice = "1d20"
+        elif adv_int == 1:
+            dice = "2d20kh1"
+        elif adv_int == 2:
+            dice = "3d20kh1"
+        else:
+            dice = "2d20kl1"
+        s = s + len(dice)
+        i = i + 1
+    return s
+
+
+# Pair 2 — three-way string pick (index 1).
+
+
+def bench_three_way_list_index(loops):
+    """Pick middle token ``'bb'`` via list index."""
+    s = 0
+    i = 0
+    while i < loops:
+        pick = 1
+        tok = ["aa", "bb", "cc"][pick]
+        s = s + len(tok)
+        i = i + 1
+    return s
+
+
+def bench_three_way_if_chain(loops):
+    """Same as list index for ``pick == 1``."""
+    s = 0
+    i = 0
+    while i < loops:
+        pick = 1
+        if pick == 0:
+            tok = "aa"
+        elif pick == 1:
+            tok = "bb"
+        else:
+            tok = "cc"
+        s = s + len(tok)
+        i = i + 1
+    return s
+
+
+# Pair 3 — read stable int from small mapping: ``dict.get`` vs ``in`` + subscript.
+
+
+def bench_dict_get_repeated(loops):
+    """``m.get('a', 0)`` each iteration."""
+    m = {"a": 7, "b": 3}
+    s = 0
+    i = 0
+    while i < loops:
+        s = s + m.get("a", 0)
+        i = i + 1
+    return s
+
+
+def bench_dict_in_and_subscript(loops):
+    """``m['a']`` guarded by ``'a' in m`` each iteration."""
+    m = {"a": 7, "b": 3}
+    s = 0
+    i = 0
+    while i < loops:
+        if "a" in m:
+            s = s + m["a"]
+        else:
+            s = s + 0
+        i = i + 1
+    return s
+
+
+# Pair 4 — fixed small membership: tuple vs list literal.
+
+
+def bench_membership_tuple_literal(loops):
+    """``needle in (1, 2, 3, 4, 5)`` — true each time."""
+    s = 0
+    i = 0
+    while i < loops:
+        needle = 3
+        if needle in (1, 2, 3, 4, 5):
+            s = s + 1
+        i = i + 1
+    return s
+
+
+def bench_membership_list_literal(loops):
+    """Same truth value as tuple variant."""
+    s = 0
+    i = 0
+    while i < loops:
+        needle = 3
+        if needle in [1, 2, 3, 4, 5]:
+            s = s + 1
+        i = i + 1
+    return s
+
+
+# Pair 5 — known key every time: ``d["k"]`` vs ``d.get("k", default)`` (regex uses both styles).
+
+
+def bench_dict_bracket_known_key(loops):
+    """Subscript when the key is always present (common after a shape tag check)."""
+    d = {"k": 42}
+    s = 0
+    i = 0
+    while i < loops:
+        s = s + d["k"]
+        i = i + 1
+    return s
+
+
+def bench_dict_get_known_key_with_default(loops):
+    """Same numeric result as bracket form; ``get`` carries a default branch in CPython—compare in Drac2."""
+    d = {"k": 42}
+    s = 0
+    i = 0
+    while i < loops:
+        s = s + d.get("k", 0)
+        i = i + 1
+    return s
+
+
+# Pair 6 — loop counter update (``regex.gvar`` uses ``i = i + 1`` throughout).
+
+
+def bench_counter_plus_assign(loops):
+    """``i = i + 1`` each iteration; returns final counter."""
+    i = 0
+    while i < loops:
+        i = i + 1
+    return i
+
+
+def bench_counter_plus_eq(loops):
+    """``i += 1`` when supported; same return as ``bench_counter_plus_assign``."""
+    i = 0
+    while i < loops:
+        i += 1
+    return i
+
+
+# Pair 7 — string accumulation (``regex.gvar`` uses ``out += pool[si]`` in one hot path).
+
+
+def bench_string_concat_assign(loops):
+    """``s = s + "x"`` — new string each step; length equals ``loops``."""
+    s = ""
+    i = 0
+    while i < loops:
+        s = s + "x"
+        i = i + 1
+    return len(s)
+
+
+def bench_string_concat_plus_eq(loops):
+    """``s += "x"`` if supported; same length as assign form."""
+    s = ""
+    i = 0
+    while i < loops:
+        s += "x"
+        i = i + 1
+    return len(s)
+
+
+def expected_checksum_adv_dice(loops):
+    """``len('3d20kh1') * loops`` == ``7 * loops``."""
+    return 7 * loops
+
+
+def expected_checksum_three_way(loops):
+    return 2 * loops
+
+
+def expected_checksum_dict(loops):
+    return 7 * loops
+
+
+def expected_checksum_membership(loops):
+    return loops
+
+
+def expected_checksum_dict_known_key(loops):
+    return 42 * loops
+
+
+def expected_checksum_counter(loops):
+    return loops
+
+
+def expected_checksum_string_len(loops):
+    return loops

@@ -49,6 +49,27 @@ PRESETS: dict[str, dict] = {
             ("benchmark get_roll passive loop should keep perception", "loops", 50, 12000),
         ],
     },
+    "performance_examples": {
+        "alias_dir": "src/gvars/utils/performance_examples",
+        "stress_alias": "performance_examples-perf",
+        "probe_filename": "_probe.performance_examples-perf.alias-test",
+        "dimensions": [
+            ("benchmark adv dice list index loop should keep checksum", "loops", 500, 80000),
+            ("benchmark adv dice if chain loop should keep checksum", "loops", 500, 80000),
+            ("benchmark three way list index loop should keep checksum", "loops", 500, 80000),
+            ("benchmark three way if chain loop should keep checksum", "loops", 500, 80000),
+            ("benchmark dict get loop should keep checksum", "loops", 500, 80000),
+            ("benchmark dict in and subscript loop should keep checksum", "loops", 500, 80000),
+            ("benchmark tuple membership loop should keep checksum", "loops", 500, 80000),
+            ("benchmark list membership loop should keep checksum", "loops", 500, 80000),
+            ("benchmark dict bracket known key loop should keep checksum", "loops", 500, 80000),
+            ("benchmark dict get known key loop should keep checksum", "loops", 500, 80000),
+            ("benchmark counter plus assign loop should keep checksum", "loops", 500, 80000),
+            ("benchmark counter plus eq loop should keep checksum", "loops", 500, 80000),
+            ("benchmark string concat assign loop should keep checksum", "loops", 200, 20000),
+            ("benchmark string concat plus eq loop should keep checksum", "loops", 200, 20000),
+        ],
+    },
 }
 
 
@@ -101,7 +122,7 @@ def find_max(
     baseline: int,
     cap: int,
     timeout: int,
-    max_binary: int = 6,
+    max_binary: int,
 ) -> int:
     def trial(line: str, label: str) -> bool:
         return try_val(root, probe_rel, stress_alias, line, label, timeout)
@@ -156,6 +177,11 @@ def main() -> None:
   python3 .cursor/scripts/probe_perf_boundaries.py \\
     --alias-dir src/gvars/utils/foo --stress-alias foo-perf \\
     --dimension "Full testcase title as in *-perf.alias,loops,10,5000"
+  python3 .cursor/scripts/probe_perf_boundaries.py \\
+    --alias-dir src/gvars/utils/performance_examples \\
+    --stress-alias performance_examples-perf \\
+    --dimensions-file .cursor/templates/probe-performance_examples-from-committed.txt \\
+    --max-binary 20
 
 TSV on stdout (testcase, param, maxima). Progress on stderr."""
     ap = argparse.ArgumentParser(
@@ -208,6 +234,13 @@ TSV on stdout (testcase, param, maxima). Progress on stderr."""
         default=120,
         help="Seconds per avrae-ls invocation (default: 120)",
     )
+    ap.add_argument(
+        "--max-binary",
+        type=int,
+        default=6,
+        metavar="N",
+        help="Max binary-search refinement steps between last pass and first fail (default: 6; use 16–24 when re-probing from an already-high baseline)",
+    )
     args = ap.parse_args()
 
     root = (args.root or _repo_root()).resolve()
@@ -256,7 +289,17 @@ TSV on stdout (testcase, param, maxima). Progress on stderr."""
     results: list[tuple[str, str, int]] = []
     try:
         for sub, param, low, cap in dimensions:
-            m = find_max(root, probe_rel, stress_alias, sub, param, low, cap, args.timeout)
+            m = find_max(
+                root,
+                probe_rel,
+                stress_alias,
+                sub,
+                param,
+                low,
+                cap,
+                args.timeout,
+                args.max_binary,
+            )
             results.append((sub, param, m))
             print(f"{m}\t{sub[:52]}…", file=sys.stderr)
     finally:

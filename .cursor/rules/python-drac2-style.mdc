@@ -1,0 +1,57 @@
+---
+description: Drac2 statement-budget performance + Python-style patterns (subset-aware); cross-ref drac2-avrae-sources
+globs:
+  - "**/*.gvar"
+  - "**/*-perf.alias"
+  - "**/*-perf.alias-test"
+alwaysApply: false
+---
+
+# Python style in Drac2 (and why “performance” means statements)
+
+## Performance on Avrae / Drac2
+
+**More performant** Drac2 code, in this repo and on Avrae, means code that can run **more work inside a single alias or gvar invocation** before the engine raises **“too many statements”** (per-invocation **statement budget**). It is **not** wall-clock CPU in the CPython sense.
+
+- Prefer **fewer statements per unit of work** (shorter hot loops, cheaper conditionals, avoid redundant work).
+- **Validate** guesses with **`performance_examples`** (micro-benchmarks + **`performance_examples-perf`**) and **`.cursor/scripts/probe_perf_boundaries.py --preset performance_examples`** — Drac2 is not full CPython; ordering can differ.
+
+## “Python expert” stance (Drac2-aware)
+
+Drac2 is a **Python subset** with Avrae-specific limits. Treat idioms from **`.cursor/rules/drac2-avrae-sources.mdc`** and cached **`.cursor/avrae-reference/`** as authoritative for **what exists**; treat normal Python docs as **style inspiration**, not guaranteed-available APIs.
+
+- Prefer **clear control flow** and **small helpers** when it **reduces** duplicated statements.
+- Prefer **readable** table-driven dispatch (`list[index]`, small `dict` maps) when probes show it **wins** or ties under Drac2.
+- **List / dict access**, indexing, comprehensions (where supported), and string ops are usually fair game; **stdlib**, decorators, and exotic metaprogramming usually are not—check Drac2 docs.
+
+## Measured pattern pairs (`performance_examples` gvar, probed max loop counts)
+
+Each row is **equivalent checksum** for the same `loops`; higher `loops` max = more statements left under the cap (better). Last full probe: baselines from committed CI **``-loops``**, cap **120000**, **`--max-binary 20`** (see **`.cursor/templates/probe-performance_examples-from-committed.txt`**).
+
+| Pattern | Alternative | Probed max `loops` (higher = better) |
+| --- | --- | --- |
+| List index (`["1d20",…][adv_int]`) | `if` / `elif` / `else` same branches | **4313** vs **3421** |
+| List index three-way token | `if` / `elif` / `else` three-way | **4509** vs **3968** |
+| `dict.get("a", 0)` (key present) | `"a" in m` then `m["a"]` | **6613** vs **5834** |
+| `d["k"]` (key always present) | `d.get("k", 0)` same value | **7629** vs **6611** |
+| `i = i + 1` | `i += 1` | **10000** vs **10000** (tie here) |
+| `s = s + "x"` | `s += "x"` | **9015** vs **9916** |
+| `needle in (1,…,5)` tuple literal | same with list literal | **4508** vs **4508** (tie) |
+
+**Takeaways for this runtime:** **list index** dispatch beats **if-chains**; for dict reads, **`.get` vs `in`+`[]`** depends on whether you already know the key is present (**subscript** wins in the known-key pair); **`i += 1` vs `i = i + 1`** tied; **`s += "x"`** beat **`s = s + "x"`** for repeated one-char append (see **`regex.gvar`** hot paths like `out += …`).
+
+Regex-heavy code in this repo mixes **`node["k"]`** after tag checks with **`.get("mc", 0)`**, **`set_map.get(ch, False)`**, etc.—when the key is **guaranteed**, prefer **subscript**; when optional, **`.get`** avoids extra branches (see measured pairs above).
+
+## Rev DB `argparse.adv()` → dice string trick
+
+```py
+dice = ["1d20", "2d20kh1", "3d20kh1", "2d20kl1"][a.adv()]
+```
+
+This maps `adv()`’s integer encoding to the correct base d20 expression. It is **clean** (one dispatch site) and, under our probes, **more statement-efficient** than a long `if`/`elif` ladder for the same mapping.
+
+## When optimizing
+
+1. **Measure** with **`performance_examples-perf`** or a dedicated `*-perf` harness; use **`.cursor/rules/gvar-perf-boundaries.mdc`** (single-test probe + gallop + binary search).
+2. **Do not** sacrifice correctness or clarity for a tiny win unless the hot path is proven dominant.
+3. Re-run **`python3 .cursor/scripts/probe_perf_boundaries.py --preset performance_examples`** when you **edit the bodies** of **`bench_*`** in **`performance_examples.gvar`**, or when **avrae-ls / Avrae** updates might change how statements are counted—then refresh the **``-loops``** values in **`performance_examples-perf.alias-test`** so CI stays green and the table stays honest.

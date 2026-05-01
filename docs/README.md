@@ -15,6 +15,7 @@ Drac2 global-variable helpers live under `src/gvars/utils/`. Production workshop
 | lists | List → dict by key, random picks without replacement, list type check, search helpers. | [gvars/lists.md](gvars/lists.md) |
 | languages | 5e (2014-era) catalog; public API: `get_character_languages`, `language_comprehension_score`, `COMMUNICATION_METHODS`, `LANGUAGE_NAMES`; `languages` cvar. | [gvars/languages.md](gvars/languages.md) |
 | notes | Named per-character notebooks in cvars; append lines or replace whole notebooks. | [gvars/notes.md](gvars/notes.md) |
+| performance_examples | Micro-benchmarks comparing equivalent Drac2 patterns under the statement cap. | [gvars/performance_examples.md](gvars/performance_examples.md) |
 | random | Seeded or one-shot random integers for reproducible or isolated rolls. | [gvars/random.md](gvars/random.md) |
 | regex | Small regexp subset: compile once, match with low statement overhead (no `re` in Drac2). | [gvars/regex.md](gvars/regex.md) |
 | rolls | Skill/save/attack/passive dice strings, `vroll` via `get_roll`, and roll-formatting helpers. | [gvars/rolls.md](gvars/rolls.md) |

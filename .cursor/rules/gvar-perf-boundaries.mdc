@@ -49,9 +49,10 @@ If perf is only in the main `<name>.alias` testcases, you can still use a **one-
 
 ## Tooling and reference harnesses
 
-- **Script:** **`python3 .cursor/scripts/probe_perf_boundaries.py`** — `--preset regex` or `--preset rolls`, or **`--alias-dir`**, **`--stress-alias`**, and **`--dimension`** / **`--dimensions-file`** (see **`--help`**). Optional copy **`.cursor/templates/probe-perf-dimensions.example.txt`** when defining new dimensions.
+- **Script:** **`python3 .cursor/scripts/probe_perf_boundaries.py`** — `--preset regex`, `--preset rolls`, or **`--preset performance_examples`**, or **`--alias-dir`**, **`--stress-alias`**, and **`--dimension`** / **`--dimensions-file`** (see **`--help`**). Use **`--max-binary 20`** when re-probing from **already-high** committed baselines (see **`.cursor/templates/probe-performance_examples-from-committed.txt`**). Optional copy **`.cursor/templates/probe-perf-dimensions.example.txt`** when defining new dimensions.
 - **Regex:** **`regex-perf.alias`** + **`regex-perf.alias-test`**; ephemeral probe files under **`src/gvars/utils/**/_probe.*.alias-test`** are gitignored.
 - **Rolls (`get_roll`):** **`rolls-perf.alias`** + **`rolls-perf.alias-test`** (same gitignore pattern).
+- **Statement-pattern microbenches:** **`performance_examples-perf.alias`** + **`performance_examples-perf.alias-test`**, backed by **`performance_examples.gvar`**; preset **`performance_examples`** on the probe script.
 
 ## Anti-patterns
 
