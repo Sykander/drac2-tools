@@ -240,7 +240,15 @@ def _get_ability_to_use_from_args(args):
 
 
 def get_mod_override(character, ability_a: str | None = None, ability_b: str | None = None):
-    if ability_a == ability_b or character == None:
+    if character == None:
+        return 0
+
+    # ``ability_b`` is the override from args / caller; ``None`` means "use default ability" — the
+    # sheet skill/save ``value`` already includes the default ability mod, so there is no delta.
+    if ability_b == None:
+        return 0
+
+    if ability_a == ability_b:
         return 0
 
     ability_a_mod = character.stats.get_mod(ability_a) if ability_a != None else 0

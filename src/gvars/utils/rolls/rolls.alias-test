@@ -219,6 +219,235 @@ character:
 ---
 name: get_mod_override should return modifier delta for active character
 
+!rolls -testcase "get_roll check uses full skill bonus when no ability override (perception stealth)"
+---
+---
+name: get_roll check uses full skill bonus when no ability override (perception stealth)
+character:
+  race: Human
+  stats:
+    strength: 8
+    dexterity: 16
+    constitution: 16
+    intelligence: 8
+    wisdom: 16
+    charisma: 8
+    prof_bonus: 2
+  skills:
+    perception:
+      value: 5
+      prof: 1
+      bonus: 0
+      adv: null
+    stealth:
+      value: 5
+      prof: 1
+      bonus: 0
+      adv: null
+
+!rolls -testcase "get_roll check preset arcana persuasion athletics"
+---
+---
+name: get_roll check preset arcana persuasion athletics
+character:
+  race: Human
+  stats:
+    strength: 16
+    dexterity: 10
+    constitution: 10
+    intelligence: 14
+    wisdom: 10
+    charisma: 14
+    prof_bonus: 2
+  skills:
+    athletics:
+      value: 5
+      prof: 1
+      bonus: 0
+      adv: null
+    arcana:
+      value: 4
+      prof: 1
+      bonus: 0
+      adv: null
+    persuasion:
+      value: 4
+      prof: 1
+      bonus: 0
+      adv: null
+
+!rolls -testcase "get_roll check preset history with guidance and bonus list"
+---
+---
+name: get_roll check preset history with guidance and bonus list
+character:
+  race: Human
+  stats:
+    strength: 10
+    dexterity: 10
+    constitution: 10
+    intelligence: 16
+    wisdom: 10
+    charisma: 10
+    prof_bonus: 2
+  skills:
+    history:
+      value: 3
+      prof: 0
+      bonus: 0
+      adv: null
+
+!rolls -testcase "get_roll passive preset skill totals and strings"
+---
+---
+name: get_roll passive preset skill totals and strings
+character:
+  race: Human
+  stats:
+    strength: 10
+    dexterity: 10
+    constitution: 10
+    intelligence: 12
+    wisdom: 14
+    charisma: 10
+    prof_bonus: 2
+  cvars:
+    feats: Observant
+  skills:
+    perception:
+      value: 7
+      prof: 1
+      bonus: 0
+      adv: null
+    investigation:
+      value: 4
+      prof: 0
+      bonus: 0
+      adv: null
+
+!rolls -testcase "get_roll passive preset perception without observant"
+---
+---
+name: get_roll passive preset perception without observant
+character:
+  race: Human
+  stats:
+    strength: 10
+    dexterity: 10
+    constitution: 10
+    intelligence: 10
+    wisdom: 14
+    charisma: 10
+    prof_bonus: 2
+  skills:
+    perception:
+      value: 6
+      prof: 1
+      bonus: 0
+      adv: null
+
+!rolls -testcase "get_roll passive preset investigation with guidance flag"
+---
+---
+name: get_roll passive preset investigation with guidance flag
+character:
+  race: Human
+  stats:
+    strength: 10
+    dexterity: 10
+    constitution: 10
+    intelligence: 10
+    wisdom: 14
+    charisma: 10
+    prof_bonus: 2
+  skills:
+    survival:
+      value: 5
+      prof: 1
+      bonus: 0
+      adv: null
+
+!rolls -testcase "get_roll passive disadvantage flat penalty in string"
+---
+---
+name: get_roll passive disadvantage flat penalty in string
+character:
+  race: Human
+  stats:
+    strength: 10
+    dexterity: 10
+    constitution: 10
+    intelligence: 10
+    wisdom: 10
+    charisma: 10
+    prof_bonus: 2
+  skills:
+    insight:
+      value: 2
+      prof: 0
+      bonus: 0
+      adv: null
+
+!rolls -testcase "get_roll save preset constitution and wisdom"
+---
+---
+name: get_roll save preset constitution and wisdom
+character:
+  race: Human
+  stats:
+    strength: 10
+    dexterity: 10
+    constitution: 18
+    intelligence: 10
+    wisdom: 14
+    charisma: 10
+    prof_bonus: 2
+  saves:
+    constitution:
+      value: 7
+      adv: null
+    wisdom:
+      value: 2
+      adv: null
+
+!rolls -testcase "get_roll save preset wisdom with charisma override from args"
+---
+---
+name: get_roll save preset wisdom with charisma override from args
+character:
+  race: Human
+  stats:
+    strength: 10
+    dexterity: 10
+    constitution: 10
+    intelligence: 10
+    wisdom: 14
+    charisma: 10
+    prof_bonus: 2
+  saves:
+    wisdom:
+      value: 2
+      adv: null
+
+!rolls -testcase "get_roll save preset dexterity with bless and resistance"
+---
+---
+name: get_roll save preset dexterity with bless and resistance
+character:
+  race: Human
+  stats:
+    strength: 10
+    dexterity: 16
+    constitution: 10
+    intelligence: 10
+    wisdom: 10
+    charisma: 10
+    prof_bonus: 2
+  saves:
+    dexterity:
+      value: 5
+      adv: null
+
 !rolls -testcase "get_roll passive should omit natural_roll and skip crit flags"
 ---
 ---

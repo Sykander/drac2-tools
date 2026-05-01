@@ -92,7 +92,7 @@ Return `False` when `character` is `None`; otherwise check race, class levels, f
 
 ### `get_mod_override(character, ability_a: str | None = None, ability_b: str | None = None) -> int`
 
-Returns the difference between the two ability modifiers when overriding which ability applies; `0` when abilities match or `character` is `None`.
+Returns the difference between the two ability modifiers when overriding which ability applies: `mod(ability_b) - mod(ability_a)`. Returns `0` when `character` is `None`, when **`ability_b` is `None`** (no override — the sheet skill/save total already uses the default ability), or when **`ability_a` and `ability_b` are the same**.
 
 Module-level maps `skills_abilities`, `save_abilities`, and `attack_type_abilities` define default pairings used by the helpers above.
 
