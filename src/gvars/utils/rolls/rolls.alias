@@ -222,6 +222,80 @@ elif testcase == "get_mod_override should return modifier delta for active chara
     ch = character()
     expect(rolls.get_mod_override(ch, "strength", "dexterity")).to.be(-1)
     expect(rolls.get_mod_override(ch, "strength", "strength")).to.be(0)
+    expect(rolls.get_mod_override(ch, "wisdom", None)).to.be(0)
+    expect(rolls.get_mod_override(ch, "dexterity", None)).to.be(0)
+elif testcase == "get_roll check uses full skill bonus when no ability override (perception stealth)":
+    parsed = argparse("")
+    perc = rolls.get_roll(None, "perception", parsed, "check")
+    stl = rolls.get_roll(None, "stealth", parsed, "check")
+
+    expect("1d20+5" in perc.roll_string).to.be(True)
+    expect("1d20+5" in stl.roll_string).to.be(True)
+elif testcase == "get_roll check preset arcana persuasion athletics":
+    parsed = argparse("")
+    ath = rolls.get_roll(None, "athletics", parsed, "check")
+    arc = rolls.get_roll(None, "arcana", parsed, "check")
+    per = rolls.get_roll(None, "persuasion", parsed, "check")
+
+    expect("1d20+5" in ath.roll_string).to.be(True)
+    expect("1d20+4" in arc.roll_string).to.be(True)
+    expect("1d20+4" in per.roll_string).to.be(True)
+elif testcase == "get_roll check preset history with guidance and bonus list":
+    parsed = argparse("-guidance")
+    extra = rolls.get_roll(None, "history", parsed, "check", bonuses=["+2[heroism]"])
+
+    expect("1d20+3" in extra.roll_string).to.be(True)
+    expect("1d4[Guidance]" in extra.roll_string).to.be(True)
+    expect("+2[heroism]" in extra.roll_string).to.be(True)
+elif testcase == "get_roll passive preset skill totals and strings":
+    parsed = argparse("")
+    pp = rolls.get_roll(None, "perception", parsed, "passive")
+    pi = rolls.get_roll(None, "investigation", parsed, "passive")
+
+    expect(pp).to.have.property("name", "Passive Perception Check")
+    expect(pp).to.have.property("roll_string", "10+7+5[observant]")
+    expect(pp).to.have.property("total", 22)
+    expect(pi).to.have.property("name", "Passive Investigation Check")
+    expect(pi).to.have.property("roll_string", "10+4+5[observant]")
+    expect(pi).to.have.property("total", 19)
+elif testcase == "get_roll passive preset perception without observant":
+    parsed = argparse("")
+    plain = rolls.get_roll(None, "perception", parsed, "passive")
+
+    expect(plain).to.have.property("roll_string", "10+6")
+    expect(plain).to.have.property("total", 16)
+elif testcase == "get_roll passive preset investigation with guidance flag":
+    parsed = argparse("-guidance")
+    pg = rolls.get_roll(None, "survival", parsed, "passive")
+
+    expect("10+5" in pg.roll_string).to.be(True)
+    expect("1d4[Guidance]" in pg.roll_string).to.be(True)
+elif testcase == "get_roll passive disadvantage flat penalty in string":
+    parsed = argparse("")
+    dis = rolls.get_roll(None, "insight", parsed, "passive", adv=False)
+
+    expect("-5[disadvantage]" in dis.roll_string).to.be(True)
+    expect(dis.roll_string.startswith("10+2")).to.be(True)
+elif testcase == "get_roll save preset constitution and wisdom":
+    parsed = argparse("")
+    con_r = rolls.get_roll(None, "constitution", parsed, "save")
+    wis_r = rolls.get_roll(None, "wisdom", parsed, "save")
+
+    expect("1d20+7" in con_r.roll_string).to.be(True)
+    expect("1d20+2" in wis_r.roll_string).to.be(True)
+elif testcase == "get_roll save preset wisdom with charisma override from args":
+    parsed = argparse("-cha")
+    ovr = rolls.get_roll(None, "wisdom", parsed, "save")
+
+    expect(ovr).to.have.property("name", "Charisma (Wisdom) Saving Throw")
+    expect("1d20+0" in ovr.roll_string).to.be(True)
+elif testcase == "get_roll save preset dexterity with bless and resistance":
+    parsed = argparse("-bless -resistance")
+    br = rolls.get_roll(None, "dexterity", parsed, "save")
+
+    expect("1d20+5" in br.roll_string).to.be(True)
+    expect("1d4[Bless]" in br.roll_string).to.be(True)
+    expect("1d4[Resistance]" in br.roll_string).to.be(True)
 elif testcase == "get_roll passive should omit natural_roll and skip crit flags":
     parsed = argparse("")
     result = rolls.get_roll(None, "perception", parsed, "passive")
