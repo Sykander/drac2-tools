@@ -3,8 +3,6 @@
 **Public API** (unprefixed): ``get_character_languages``; ``language_comprehension_score`` (PHB-style implicit **Common**
 for scoring when the cvar omits it); ``COMMUNICATION_METHODS``; ``LANGUAGE_NAMES``. Everything else is ``_``-prefixed
 for maintainers and tests.
-
-Offline regen: ``python3 utils/_emit_languages_catalog.py`` (not run by Avrae).
 """
 
 _languages_cvar_key = "languages"
