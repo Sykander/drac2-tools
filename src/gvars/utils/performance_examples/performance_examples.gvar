@@ -3,14 +3,13 @@
 These functions exist so **``performance_examples-perf``** (and manual probes) can
 compare *equivalent-result* coding styles under Avrae's **per-invocation statement cap**.
 
-**Raw probed maxima** (``probe_perf_boundaries.py``, baselines from prior CI **``-loops``**, cap **120000**, ``--max-binary 20``):
-adv list **4313** vs if-chain **3421**; three-way list **4509** vs if **3968**;
-``dict.get`` for present ``"a"`` **6613** vs ``in``+subscript **5834**; tuple vs list ``in`` **4508** tie;
-known-key **``d["k"]``** **7629** vs **``d.get("k",0)``** **6611**; counter **``i=i+1``** vs **``i+=1``** both **10000**;
-string **``s=s+"x"``** **9015** vs **``s+="x"``** **9916**.
-CI **``-loops``** in **``performance_examples-perf.alias-test``** sit slightly below these for headroom. Re-validate with **``.cursor/templates/probe-performance_examples-from-committed.txt``** (omit ``--preset`` when using that file).
+**Raw probed maxima** (``probe_perf_boundaries.py``, **``-loops``** in **``performance_examples-perf.alias-test``** match these, cap **120000**, ``--max-binary 20``):
+adv list **4313** vs if-chain **3420**; three-way list **4509** vs if **3968**;
+``dict.get`` for present ``"a"`` **6612** vs ``in``+subscript **5834**; missing ``"key"`` default ``1`` **7085** vs ``a["key"] if "key" in a else 1`` **7084** (tie); tuple vs list ``in`` **4508** tie;
+known-key **``d["k"]``** **7628** vs **``d.get("k",0)``** **6610**; one-arg present **``a.get("key")``** **7627** vs **``a["key"]``** **8262**; counter **``i=i+1``** vs **``i+=1``** both **10000** at **``reps``** 1 (``max_loops`` plateau); with **``-reps``** inner increments **``i+=1``** allows more outer **``loops``** than assign (probe each counter testcase with the same **``-reps``**; see **``.cursor/scripts/probe_perf_boundaries.py``** ``--help`` epilog); string **``s=s+"x"``** **9013** vs **``s+="x"``** **9914**.
+Re-validate with ``python3 .cursor/scripts/probe_perf_boundaries.py --preset performance_examples --max-binary 20`` (see **``.cursor/README.md``**; preset baselines track this file’s **``-loops``**).
 
-Each pair keeps the same return value for the same ``loops`` so checksum assertions stay strict.
+Compared variants keep the same return value for the same ``loops`` so checksum assertions stay strict.
 """
 
 # Pair 1 — four-way d20 shape (list index vs if/elif). List index allows more loop iterations here.
@@ -107,6 +106,31 @@ def bench_dict_in_and_subscript(loops):
     return s
 
 
+# Pair 3b — **missing** key, numeric default ``1``: ``a.get("key", 1)`` vs ``a["key"] if "key" in a else 1``.
+
+
+def bench_dict_get_missing_key_default_one(loops):
+    """``key`` absent each time; ``.get`` returns ``1``."""
+    a = {"other": 0}
+    s = 0
+    i = 0
+    while i < loops:
+        s = s + a.get("key", 1)
+        i += 1
+    return s
+
+
+def bench_dict_in_else_subscript_missing_key_default_one(loops):
+    """Same checksum as ``bench_dict_get_missing_key_default_one`` (ternary avoids subscript when absent)."""
+    a = {"other": 0}
+    s = 0
+    i = 0
+    while i < loops:
+        s = s + (a["key"] if "key" in a else 1)
+        i += 1
+    return s
+
+
 # Pair 4 — fixed small membership: tuple vs list literal.
 
 
@@ -159,22 +183,70 @@ def bench_dict_get_known_key_with_default(loops):
     return s
 
 
-# Pair 6 — loop counter update (``regex.gvar`` uses ``i = i + 1`` throughout).
+# Pair 5b — key always present: one-arg ``a.get("key")`` (implicit ``None`` default unused) vs ``a["key"]``.
 
 
-def bench_counter_plus_assign(loops):
-    """``i = i + 1`` each iteration; returns final counter."""
+def bench_dict_get_bare_present_key(loops):
+    """``a.get("key")`` with ``key`` always present (same int as subscript)."""
+    a = {"key": 99, "other": 0}
+    s = 0
     i = 0
     while i < loops:
-        i = i + 1
+        s = s + a.get("key")
+        i += 1
+    return s
+
+
+def bench_dict_bracket_present_same_key(loops):
+    """``a["key"]`` when ``key`` is always present."""
+    a = {"key": 99, "other": 0}
+    s = 0
+    i = 0
+    while i < loops:
+        s = s + a["key"]
+        i += 1
+    return s
+
+
+# Pair 6 — loop counter update (``regex.gvar`` uses ``i = i + 1`` throughout).
+# With ``reps_per_iter > 1``, each outer step runs ``reps_per_iter`` increments inside an inner
+# ``while`` (more statements per outer trip than ``reps_per_iter == 1``). Use ``-reps`` on
+# ``performance_examples-perf`` to stress ``+=`` vs assign beyond the default ``max_loops`` plateau.
+
+
+def bench_counter_plus_assign(loops, reps_per_iter=1):
+    """``i = i + 1``; ``reps_per_iter`` times per outer step when ``reps_per_iter > 1``."""
+    if reps_per_iter == 1:
+        i = 0
+        while i < loops:
+            i = i + 1
+        return i
+    i = 0
+    n = 0
+    while n < loops:
+        r = 0
+        while r < reps_per_iter:
+            i = i + 1
+            r = r + 1
+        n = n + 1
     return i
 
 
-def bench_counter_plus_eq(loops):
-    """``i += 1`` when supported; same return as ``bench_counter_plus_assign``."""
+def bench_counter_plus_eq(loops, reps_per_iter=1):
+    """``i += 1`` when supported; same return shape as ``bench_counter_plus_assign``."""
+    if reps_per_iter == 1:
+        i = 0
+        while i < loops:
+            i += 1
+        return i
     i = 0
-    while i < loops:
-        i += 1
+    n = 0
+    while n < loops:
+        r = 0
+        while r < reps_per_iter:
+            i += 1
+            r = r + 1
+        n = n + 1
     return i
 
 
@@ -222,9 +294,17 @@ def expected_checksum_dict_known_key(loops):
     return 42 * loops
 
 
-def expected_checksum_counter(loops):
-    return loops
+def expected_checksum_counter(loops, reps_per_iter=1):
+    return loops * reps_per_iter
 
 
 def expected_checksum_string_len(loops):
     return loops
+
+
+def expected_checksum_missing_key_default_one(loops):
+    return loops
+
+
+def expected_checksum_dict_bare_present(loops):
+    return 99 * loops

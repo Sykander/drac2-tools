@@ -1,64 +1,64 @@
-!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "1275"
+!regex-perf -testcase "benchmark search loop should keep correct spans" -loops "1272"
 ---
 ---
-name: benchmark search boundary loops 1275
+name: benchmark search boundary loops 1272
 
 !regex-perf -testcase "benchmark class brace loop should keep full matches" -loops "3"
 ---
 ---
 name: benchmark class boundary loops 3
 
-!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "3"
+!regex-perf -testcase "benchmark quantified alternation loop should keep matches" -loops "4"
 ---
 ---
-name: benchmark quantified alternation boundary loops 3
+name: benchmark quantified alternation boundary loops 4
 
-!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "70"
+!regex-perf -testcase "benchmark compile multiple regexes in one invocation" -compiles "69"
 ---
 ---
-name: benchmark compile boundary compiles 70
+name: benchmark compile boundary compiles 69
 
-!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "766"
+!regex-perf -testcase "benchmark compile cache hit loop should keep matches" -compiles "760"
 ---
 ---
-name: benchmark compile cache hit boundary compiles 766
+name: benchmark compile cache hit boundary compiles 760
 
 !regex-perf -testcase "benchmark compile cache miss loop should keep matches" -compiles "54"
 ---
 ---
 name: benchmark compile cache miss boundary compiles 54
 
-!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "2396"
+!regex-perf -testcase "benchmark compiled full_match loop should keep matches" -loops "2390"
 ---
 ---
-name: benchmark compiled full_match boundary loops 2396
+name: benchmark compiled full_match boundary loops 2390
 
-!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "2396"
+!regex-perf -testcase "benchmark compiled fullmatch alias loop should keep matches" -loops "2390"
 ---
 ---
-name: benchmark compiled fullmatch alias boundary loops 2396
+name: benchmark compiled fullmatch alias boundary loops 2390
 
-!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "1807"
+!regex-perf -testcase "benchmark compiled match loop should keep end index" -loops "1800"
 ---
 ---
-name: benchmark compiled match boundary loops 1807
+name: benchmark compiled match boundary loops 1800
 
-!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "1275"
+!regex-perf -testcase "benchmark compiled search loop should keep span" -loops "1278"
 ---
 ---
-name: benchmark compiled search boundary loops 1275
+name: benchmark compiled search boundary loops 1278
 
-!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "1820"
+!regex-perf -testcase "benchmark compiled match_from loop should keep end index" -loops "1830"
 ---
 ---
-name: benchmark compiled match_from boundary loops 1820
+name: benchmark compiled match_from boundary loops 1830
 
-!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "118"
+!regex-perf -testcase "benchmark compiled match_from_captures loop should keep captures" -loops "122"
 ---
 ---
-name: benchmark compiled match_from_captures boundary loops 118
+name: benchmark compiled match_from_captures boundary loops 122
 
-!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "57"
+!regex-perf -testcase "benchmark compiled search_captures loop should keep captures" -loops "56"
 ---
 ---
-name: benchmark compiled search_captures boundary loops 57
+name: benchmark compiled search_captures boundary loops 56

@@ -4,7 +4,6 @@ globs:
   - "**/*-perf.alias-test"
   - "**/*-perf.alias"
   - "**/.cursor/scripts/probe_perf_boundaries.py"
-  - "**/.cursor/templates/probe-perf-dimensions.example.txt"
   - "**/_probe*.alias-test"
 alwaysApply: false
 ---
@@ -12,6 +11,10 @@ alwaysApply: false
 # Gvar performance boundary analysis
 
 Use this when re-tuning **stress / perf** `.alias-test` files for **any** `src/gvars/utils/<name>/` util (not only regex). The idea is the same everywhere Avrae enforces a **per-invocation statement cap** and your tests expose tunable load (`-loops`, `-compiles`, haystack size, depth, etc.).
+
+## `avrae-ls` and the statement cap
+
+`avrae-ls --run-tests` drives the **`draconic`** interpreter (default **`DraconicConfig`**, including **`max_statements`**). That is the same statement-budget machinery production Avrae uses for Drac2; **`avrae-ls`** supplies mocks for Discord/context, not a different counter. So probing via **`probe_perf_boundaries.py`** (which shells to **`avrae-ls`**) is an appropriate way to see how close code gets to **“too many statements”** without running the full bot. Pin **`avrae-ls`** (and thus bundled **`draconic`**) to the bot’s versions when you need strict parity.
 
 ## Goal
 
@@ -49,8 +52,8 @@ If perf is only in the main `<name>.alias` testcases, you can still use a **one-
 
 ## Tooling and reference harnesses
 
-- **Script:** **`python3 .cursor/scripts/probe_perf_boundaries.py`** — `--preset regex`, `--preset rolls`, or **`--preset performance_examples`**, or **`--alias-dir`**, **`--stress-alias`**, and **`--dimension`** / **`--dimensions-file`** (see **`--help`**). Use **`--max-binary 20`** when re-probing from **already-high** committed baselines (see **`.cursor/templates/probe-performance_examples-from-committed.txt`**). Optional copy **`.cursor/templates/probe-perf-dimensions.example.txt`** when defining new dimensions.
-- **Regex:** **`regex-perf.alias`** + **`regex-perf.alias-test`**; ephemeral probe files under **`src/gvars/utils/**/_probe.*.alias-test`** are gitignored.
+- **Script:** **`python3 .cursor/scripts/probe_perf_boundaries.py`** — **`--preset regex`**, **`--preset rolls`**, or **`--preset performance_examples`**, or **`--alias-dir`**, **`--stress-alias`**, and **`--dimension`** / **`--dimensions-file`** (see **`--help`** and **`.cursor/README.md`**). Each **dimension row** is one **`find_max`** for that testcase title; list **any number of rows** in one run (same **`--extra-suffix`** and/or different **5th-field** extras per row as needed). Preset **`performance_examples`** baselines track **`performance_examples-perf.alias-test`**; use **`--max-binary 20`** when re-probing from already-high committed values. Counter **`+=`** vs assign with **`-reps`**: two **`--dimension`** lines (5th field **`-reps "…"`**) or a local **`--dimensions-file`**—see script **`--help`** epilog.
+- **Regex:** **`regex-perf.alias`** + **`regex-perf.alias-test`**; preset **`regex`** baselines track committed **`regex-perf.alias-test`**; ephemeral probe files under **`src/gvars/utils/**/_probe.*.alias-test`** are gitignored.
 - **Rolls (`get_roll`):** **`rolls-perf.alias`** + **`rolls-perf.alias-test`** (same gitignore pattern).
 - **Statement-pattern microbenches:** **`performance_examples-perf.alias`** + **`performance_examples-perf.alias-test`**, backed by **`performance_examples.gvar`**; preset **`performance_examples`** on the probe script.
 

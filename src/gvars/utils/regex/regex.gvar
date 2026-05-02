@@ -17,6 +17,14 @@ Quantifiers backtrack; alternation tries each arm in source order.
 
 Module state: ``_RX_DIAG`` stores the last ``_rx_err`` payload for diagnostics (e.g. tests):
 ``(message, index_or_None)`` before ``err()`` fires.
+
+**Statement budget / dict reads (``performance_examples`` + ``.cursor/rules/python-drac2-style.mdc``):**
+Opcode nodes and atoms use **subscript** (``node["k"]``, ``atom["g"]``, …) where the compiler guarantees
+those keys—**``[]``** is cheaper than **``.get("k", default)``** when the key is always there. Optional
+fields (**``mc``** when there are no captures, **``cap``**, set memo **``m``**, compile-cache lookups) use
+**``.get(..., default)``** for correctness and because probes show **``.get(k, default)``** vs a conditional
+**``[]``** for the same missing-key default are **effectively tied**; replacing those with bare **``[]``**
+would risk **``KeyError``** (e.g. **``"mc"``**) without a real statement win.
 """
 _RX_DIAG = {"last": None}
 _RX_COMPILE_CACHE = {"map": {}, "order": [], "max_size": 64}
@@ -54,7 +62,7 @@ def _digit_val(ch: str) -> int:
     while k < 10:
         if ch == digits[k]:
             return k
-        k = k + 1
+        k += 1
     return 0
 
 
@@ -65,7 +73,7 @@ def _parse_int(pat: str, i: int):
     n = 0
     while i < n_pat and pat[i] >= "0" and pat[i] <= "9":
         n = n * 10 + _digit_val(pat[i])
-        i = i + 1
+        i += 1
     return n, i
 
 
@@ -81,18 +89,18 @@ def _parse_brace(pat: str, i: int):
         return min_n, min_n, j + 1
     if j >= len(pat) or pat[j] != ",":
         _rx_err("{ expected , or }", j)
-    j = j + 1
+    j += 1
     max_n = None
     if j < len(pat) and pat[j] == "}":
         max_n = None
-        j = j + 1
+        j += 1
     else:
         max_n, j = _parse_int(pat, j)
         if max_n == None:
             _rx_err("{ expected number after ,", j)
         if j >= len(pat) or pat[j] != "}":
             _rx_err("unclosed {", i)
-        j = j + 1
+        j += 1
     return min_n, max_n, j
 
 
@@ -179,13 +187,13 @@ def _range_expand(lo: str, hi: str, at_idx: int) -> str:
                 si = k
             if pool[k] == b:
                 ei = k
-            k = k + 1
+            k += 1
         if si == None or ei == None or si > ei:
             _rx_err("bad range", at_idx)
         out = ""
         while si <= ei:
             out += pool[si]
-            si = si + 1
+            si += 1
         return out
 
     if lo >= "a" and hi <= "z" and lo <= hi:
@@ -205,7 +213,7 @@ def _parse_class(pat: str, i: int):
     neg = False
     if pat[j] == "^":
         neg = True
-        j = j + 1
+        j += 1
     acc_parts = []
 
     def _acc_add(s: str):
@@ -229,19 +237,19 @@ def _parse_class(pat: str, i: int):
                 _rx_err("range end must be literal", j + 1)
             _acc_add(_range_expand(pending, hi, j))
             pending = None
-            j = j + 2
+            j += 2
             continue
         if c == "-":
             if pending != None:
                 _acc_add(pending)
                 pending = None
             pending = "-"
-            j = j + 1
+            j += 1
             continue
         if pending != None:
             _acc_add(pending)
         pending = c
-        j = j + 1
+        j += 1
     if j >= len(pat):
         _rx_err("unclosed [", i)
     if pending != None:
@@ -253,7 +261,7 @@ def _parse_class(pat: str, i: int):
     k = 0
     while k < len(acc):
         set_map[acc[k]] = True
-        k = k + 1
+        k += 1
     return {"k": "set", "n": neg, "s": acc, "m": set_map}, j + 1
 
 
@@ -262,7 +270,7 @@ def _char_in_set(ch: str, s: str) -> bool:
     while k < len(s):
         if ch == s[k]:
             return True
-        k = k + 1
+        k += 1
     return False
 
 
@@ -319,20 +327,20 @@ def _parse_seq_concat(pat: str, i: int, in_group: bool, cap_counter: list, group
             atom, i = _parse_class(pat, i)
         elif c == ".":
             atom = {"k": "dot"}
-            i = i + 1
+            i += 1
         elif c == "\\":
             atom, i = _parse_escape(pat, i)
         elif c == "^":
             atom = {"k": "beg"}
-            i = i + 1
+            i += 1
         elif c == "$":
             atom = {"k": "end"}
-            i = i + 1
+            i += 1
         elif c == "{" or c == "}" or c == "*" or c == "+" or c == "?" or c == "]":
             _rx_err(f"unexpected {c}", i)
         else:
             atom = {"k": "lit", "v": c}
-            i = i + 1
+            i += 1
         if atom["k"] == "beg" or atom["k"] == "end":
             if i < len(pat):
                 q = pat[i]
@@ -394,7 +402,7 @@ def _annotate_capture_mc_node(node) -> int:
             am = _annotate_capture_mc_nodes(arms[ai])
             if am > m:
                 m = am
-            ai = ai + 1
+            ai += 1
         node["mc"] = m
         return m
     if k == "rep":
@@ -413,7 +421,7 @@ def _annotate_capture_mc_nodes(nodes: list) -> int:
         nm = _annotate_capture_mc_node(nodes[i])
         if nm > m:
             m = nm
-        i = i + 1
+        i += 1
     return m
 
 
@@ -442,6 +450,7 @@ def _compile_program(pat: str) -> list:
     nodes, i = _parse_alt(pat, 0, False, cap_counter, None)
     if i != len(pat):
         _rx_err("trailing junk", i)
+    # When there are no captures, nodes are not annotated with ``mc``; matchers use ``.get("mc", 0)``.
     if cap_counter[0] > 0:
         _annotate_capture_mc_nodes(nodes)
     _RX_DIAG["last"] = None
@@ -467,7 +476,7 @@ def _caps_restore(dst, src):
     i = 0
     while i < len(src):
         dst[i] = src[i]
-        i = i + 1
+        i += 1
 
 
 def _nodes_capture_mc(nodes: list) -> int:
@@ -478,7 +487,7 @@ def _nodes_capture_mc(nodes: list) -> int:
         nm = nodes[i].get("mc", 0)
         if nm > m:
             m = nm
-        i = i + 1
+        i += 1
     return m
 
 
@@ -545,18 +554,18 @@ def _greedy_max_take(atom, text: str, pos: int, lim: int, hi):
     guard = 0
     max_guard = lim + lim + 128
     while guard < max_guard:
-        guard = guard + 1
+        guard += 1
         if hi != None and c >= hi:
             break
         nx = _match_one_unit(atom, text, p, lim, None)
         if nx < 0:
             break
         if nx == p:
-            c = c + 1
+            c += 1
             p = nx
             break
         p = nx
-        c = c + 1
+        c += 1
     return c, p
 
 
@@ -596,12 +605,12 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps, no
                     break
                 if snap_a != None:
                     _caps_restore(caps, snap_a)
-                ai = ai + 1
+                ai += 1
             if matched < 0:
                 if has_caps:
                     _caps_restore(caps, entry_snap)
                 return -1
-            i = i + 1
+            i += 1
             continue
         if node_k == "rep":
             lo = node["lo"]
@@ -617,9 +626,9 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps, no
                     if nx < 0:
                         return -1
                     pp = nx
-                    took = took + 1
+                    took += 1
                 p = pp
-                i = i + 1
+                i += 1
                 continue
             max_c, _p_g = _greedy_max_take(atom, text, p, lim, hi)
             if max_c < lo:
@@ -641,7 +650,7 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps, no
                     break
                 pp = nx
                 ends.append(pp)
-                built = built + 1
+                built += 1
                 if cap_snaps != None:
                     cap_snaps.append(_caps_clone(caps, rep_mc))
             if built < max_c:
@@ -668,7 +677,7 @@ def _match_seq_bt(nodes: list, text: str, pos: int, lim: int, idx: int, caps, no
                 _caps_restore(caps, entry_snap)
             return -1
         p = nx
-        i = i + 1
+        i += 1
     return p
 
 
@@ -682,7 +691,7 @@ def _search_prefilter_skip_anchors(program: list, idx: int) -> int:
     while idx < n:
         k = program[idx]["k"]
         if k == "beg" or k == "end":
-            idx = idx + 1
+            idx += 1
             continue
         break
     return idx
@@ -695,7 +704,7 @@ def _leading_beg_chain(nodes: list) -> bool:
     j = 0
     n = len(nodes)
     while j < n and nodes[j]["k"] == "beg":
-        j = j + 1
+        j += 1
     return j > 0
 
 
@@ -720,7 +729,7 @@ def _compute_program_requires_start_index_zero(program: list) -> bool:
     while ai < len(arms):
         if not _leading_beg_chain(arms[ai]):
             return False
-        ai = ai + 1
+        ai += 1
     return True
 
 
@@ -827,14 +836,14 @@ def _search_from_core(program, text, pos, lim, sm):
             if _match_node_plain(lead, text, s, lim) < 0:
                 if req0:
                     return None
-                s = s + 1
+                s += 1
                 continue
         e = _match_all(program, text, s, lim, None)
         if e >= 0:
             return {"start": s, "end": e}
         if req0:
             return None
-        s = s + 1
+        s += 1
     return None
 
 
@@ -862,7 +871,7 @@ def _search_from_captures_core(program, text, pos, lim, cfg):
             if _match_node_plain(lead, text, s, lim) < 0:
                 if req0:
                     return None
-                s = s + 1
+                s += 1
                 continue
         caps = [None] * (ng + 1)
         end = _match_all(program, text, s, lim, caps, program_mc)
@@ -871,7 +880,7 @@ def _search_from_captures_core(program, text, pos, lim, cfg):
             return {"start": s, "end": end, "groups": caps}
         if req0:
             return None
-        s = s + 1
+        s += 1
     return None
 
 
@@ -896,7 +905,7 @@ def _program_literal(program: list):
         if node["k"] != "lit":
             return None
         parts.append(node["v"])
-        i = i + 1
+        i += 1
     return "".join(parts)
 
 
@@ -913,7 +922,7 @@ def _compile_cache_get(key: str):
         if order[j] == key:
             order.pop(j)
             break
-        j = j + 1
+        j += 1
     order.append(key)
     return hit
 
@@ -930,7 +939,7 @@ def _compile_cache_put(key: str, compiled):
             if order[j] == key:
                 order.pop(j)
                 break
-            j = j + 1
+            j += 1
         order.append(key)
         return
     c_map[key] = compiled
