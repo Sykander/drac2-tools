@@ -6,8 +6,8 @@ compare *equivalent-result* coding styles under Avrae's **per-invocation stateme
 **Raw probed maxima** (``probe_perf_boundaries.py``, **``-loops``** in **``performance_examples-perf.alias-test``** match these, cap **120000**, ``--max-binary 20``):
 adv list **4313** vs if-chain **3420**; three-way list **4509** vs if **3968**;
 ``dict.get`` for present ``"a"`` **6612** vs ``in``+subscript **5834**; missing ``"key"`` default ``1`` **7085** vs ``a["key"] if "key" in a else 1`` **7084** (tie); tuple vs list ``in`` **4508** tie;
-known-key **``d["k"]``** **7628** vs **``d.get("k",0)``** **6610**; one-arg present **``a.get("key")``** **7627** vs **``a["key"]``** **8262**; counter **``i=i+1``** vs **``i+=1``** both **10000** at **``reps``** 1 (``max_loops`` plateau); with **``-reps``** inner increments **``i+=1``** allows more outer **``loops``** than assign (probe each counter testcase with the same **``-reps``**; see **``.cursor/scripts/probe_perf_boundaries.py``** ``--help`` epilog); string **``s=s+"x"``** **9013** vs **``s+="x"``** **9914**.
-Re-validate with ``python3 .cursor/scripts/probe_perf_boundaries.py --preset performance_examples --max-binary 20`` (see **``.cursor/README.md``**; preset baselines track this file’s **``-loops``**).
+known-key **``d["k"]``** **7628** vs **``d.get("k",0)``** **6610**; one-arg present **``a.get("key")``** **7627** vs **``a["key"]``** **8262**; counter **``i=i+1``** vs **``i+=1``** both **10000** outer **``loops``** at **``reps``** 1 (``max_loops`` plateau); **``performance_examples-perf``** stresses counters with **``-reps`` 10** at **805** vs **877** **``-loops``** (same **``-reps``**, **``i+=1``** allows more outer steps); string **``s=s+"x"``** **9013** vs **``s+="x"``** **9914**.
+Re-validate with ``python3 .cursor/scripts/probe_perf_boundaries.py --preset performance_examples --max-binary 20`` (see **``.cursor/README.md``**; preset baselines track **``-loops``** / **``-reps``** in **``performance_examples-perf.alias-test``**).
 
 Compared variants keep the same return value for the same ``loops`` so checksum assertions stay strict.
 """

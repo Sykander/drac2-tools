@@ -68,12 +68,12 @@ name: benchmark dict get bare present key loop should keep checksum
 ---
 name: benchmark dict bracket present same key loop should keep checksum
 
-!performance_examples-perf -testcase "benchmark counter plus assign loop should keep checksum" -loops "10000"
+!performance_examples-perf -testcase "benchmark counter plus assign loop should keep checksum" -loops "805" -reps "10"
 ---
 ---
 name: benchmark counter plus assign loop should keep checksum
 
-!performance_examples-perf -testcase "benchmark counter plus eq loop should keep checksum" -loops "10000"
+!performance_examples-perf -testcase "benchmark counter plus eq loop should keep checksum" -loops "877" -reps "10"
 ---
 ---
 name: benchmark counter plus eq loop should keep checksum

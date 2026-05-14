@@ -36,7 +36,7 @@ Each row is **equivalent checksum** for the same `loops`; higher `loops` max = m
 | `a.get("key", 1)` (**key absent**) | `a["key"] if "key" in a else 1` | **7085** vs **7084** (tie) |
 | `a.get("key")` (key present, one-arg) | `a["key"]` same value | **7627** vs **8262** |
 | `d["k"]` (key always present) | `d.get("k", 0)` same value | **7628** vs **6610** |
-| `i = i + 1` | `i += 1` | **10000** vs **10000** (``reps`` 1: ``max_loops`` plateau) |
+| `i = i + 1` | `i += 1` | **10000** vs **10000** at ``reps`` 1 (``max_loops`` plateau); **805** vs **877** outer ``loops`` at **``-reps`` 10** in **``performance_examples-perf``** |
 | `s = s + "x"` | `s += "x"` | **9013** vs **9914** |
 | `needle in (1,…,5)` tuple literal | same with list literal | **4508** vs **4508** (tie) |
 
