@@ -16,8 +16,10 @@ When behavior or user-facing surfaces change, update prose as needed in:
 - **`docs/`** — library consumers (API, behavior, workshop/deploy notes that affect them).
 - **`README.md`** — project overview, how to find deeper docs, high-level orientation.
 - **`DEVELOPMENT.md`** — local setup, envs, sourcemaps, deploy flow, contributor-facing workflow.
+- **`.cursor/README.md`** — Cursor-adjacent: orientation, perf probe workflow, how to run reference refresh.
+- **`.cursor/reference-cache.json`** — Upstream download URLs, canonical links, **`last_fetch`**, **`tracked_avrae_ls_version`** (edit URLs / version here; refresh scripts update **`last_fetch`**).
 
-Treat **`README.md`** and **`DEVELOPMENT.md`** as first-class documentation alongside **`docs/`**, not “out of scope” for edits when the change warrants it.
+Treat **`README.md`**, **`DEVELOPMENT.md`**, **`.cursor/README.md`**, and **`.cursor/reference-cache.json`** (when Cursor tooling, upstream URLs, or tracked versions change) as first-class alongside **`docs/`**, not “out of scope” for edits when the change warrants it.
 
 ## `docs/` style
 
@@ -30,11 +32,11 @@ Treat **`README.md`** and **`DEVELOPMENT.md`** as first-class documentation alon
 
 When you change **behavior or public API** (not typo-only or formatting):
 
-1. **Documentation** — Update any **markdown under `docs/`** that documents the changed surface (signatures, parameters, return shapes, edge cases, workshop or deploy notes). If you add a new public surface, add or extend the right doc path and link it from **`docs/README.md`** when appropriate (not only under `docs/gvars/`). Update **`README.md`** / **`DEVELOPMENT.md`** when the change affects onboarding, workflows, or how people discover or run the project.
+1. **Documentation** — Update any **markdown under `docs/`** that documents the changed surface (signatures, parameters, return shapes, edge cases, workshop or deploy notes). If you add a new public surface, add or extend the right doc path and link it from **`docs/README.md`** when appropriate (not only under `docs/gvars/`). Update **`README.md`** / **`DEVELOPMENT.md`** when the change affects onboarding, envs, sourcemaps, deploy, or general discovery. Update **`.cursor/README.md`** when **`.cursor/`** probe workflow or refresh commands change. Update **`.cursor/reference-cache.json`** when upstream URLs or **`tracked_avrae_ls_version`** change (refresh scripts set **`last_fetch`** automatically).
 
    In Drac2 snippets under product markdown (**`docs/`**, **`README.md`**, **`DEVELOPMENT.md`**, **`public/articles/`**), use **` ```py `** fences (see **`drac2-avrae-sources.mdc`** → Docs). Prefer attribute access (e.g. **`rx.fullmatch(...)`**, **`hit.start`**) over **`rx["fullmatch"]`** when the key is a valid identifier. For regex **pattern** literals with many backslashes, prefer **`r"..."`** over doubled escapes when it keeps the snippet readable (same **`drac2-avrae-sources.mdc`** → Conventions / Docs).
 
-   **Audience — `docs/` is for people using the artifacts** (imports, public API, runtime behavior, deploy/workshop notes that affect consumers). **Do not** put maintainer-only material in `docs/`, especially under **`docs/gvars/`**: how to run tests, **`avrae-ls`** / **`.alias-test`** mechanics, CI, mock profiles, coverage, or “where tests live.” Keep that in **`AGENTS.md`**, **`DEVELOPMENT.md`**, workflow files, or next to the tests themselves.
+   **Audience — `docs/` is for people using the artifacts** (imports, public API, runtime behavior, deploy/workshop notes that affect consumers). **Do not** put maintainer-only material in `docs/`, especially under **`docs/gvars/`**: how to run tests, **`avrae-ls`** / **`.alias-test`** mechanics, CI, mock profiles, coverage, or “where tests live.” Keep that in **`AGENTS.md`**, **`.cursor/README.md`**, **`.cursor/reference-cache.json`** (upstream URL metadata), **`DEVELOPMENT.md`** (env/sourcemaps/deploy), workflow files, or next to the tests themselves.
 2. **Tests** — For each `src/gvars/utils/<name>/` util, keep the trio aligned: `<name>.gvar` (logic), `<name>.alias` (testcase branches + `expect` assertions), `<name>.alias-test` (one `!name -testcase "..."` block per case). Add or adjust cases when behavior changes.
 3. **Verify** — After gvar or alias test edits, run `avrae-ls --run-tests src` from the repo root (requires `avrae-ls` on PATH). For **avrae-ls** semantics (`.alias-test` metadata, `.avraels.json`, `varFiles`), read **`.cursor/avrae-ls-reference/`** (see **`drac2-avrae-sources.mdc`**) instead of inventing behavior.
 

@@ -8,6 +8,8 @@ globs:
   - docs/**/*.md
   - .cursor/avrae-reference/**
   - .cursor/avrae-ls-reference/**
+  - .cursor/reference-cache.json
+  - .cursor/scripts/refresh_upstream_reference_cache.py
 alwaysApply: false
 ---
 
@@ -30,12 +32,12 @@ Official Read the Docs **RST sources** live next to Cursor rules under **`.curso
 
 - **Drac2 & aliasing:** `.cursor/avrae-reference/aliasing-api.rst.txt`
 - **Automation:** `.cursor/avrae-reference/automation-reference.rst.txt`
-- **Metadata, canonical HTML URLs, refresh steps:** `.cursor/avrae-reference/README.md`
-- **Refresh script:** `.cursor/avrae-reference/refresh-avrae-docs.sh`
+- **Canonical HTML URLs, download URLs, last fetch:** **`.cursor/reference-cache.json`** → **`avrae_rst`**
+- **Refresh:** **`.cursor/avrae-reference/refresh-avrae-docs.sh`** (runs **`.cursor/scripts/refresh_upstream_reference_cache.py` `avrae-rst`**)
 
-**When behavior surprises you:** (1) Search those `.rst.txt` files. (2) Open the **canonical HTML** URLs in `README.md`—if live text differs from the cache, run **`.cursor/avrae-reference/refresh-avrae-docs.sh`**, update the **Last RST fetch** line in **`.cursor/avrae-reference/README.md`**, and commit. (3) If the cache matches live docs but **`avrae-ls`** or local runs still disagree, treat it as a **tooling** issue; if the **Discord bot** disagrees with published docs, treat it as **Avrae** upstream—do not “fix” repo Drac2 to match a guess.
+**When behavior surprises you:** (1) Search those `.rst.txt` files. (2) Open **canonical HTML** URLs from **`reference-cache.json`**—if live text differs from the cache, run **`refresh-avrae-docs.sh`** (updates **`last_fetch`** in JSON), then commit. (3) If the cache matches live docs but **`avrae-ls`** or local runs still disagree, treat it as **tooling**; if the **Discord bot** disagrees with published docs, treat it as **Avrae** upstream—do not “fix” repo Drac2 to match a guess.
 
-**When URLs break** (404, moved `_sources/` paths): fix the URLs in **`refresh-avrae-docs.sh`** and in **`README.md`** in that folder, then refresh.
+**When URLs break** (404, moved `_sources/` paths): edit **`source_url`** / **`canonical_html`** in **`reference-cache.json`**, then run **`refresh-avrae-docs.sh`**.
 
 ### Cached avrae-ls documentation (Cursor-adjacent)
 
@@ -44,16 +46,16 @@ The **[avrae-ls](https://github.com/1drturtle/avrae-ls)** language server and **
 - **Alias tests format, metadata (`name`, `vars`, `character`), expectations:** `upstream/docs/alias-tests.md`
 - **`.avraels.json`**, profiles, `varFiles`, tokens, mock runtime:** `upstream/docs/configuration.md`
 - **Overview (install, VS Code, CLI, testing, troubleshooting):** `upstream/README.md`
-- **Metadata, refresh steps, tracked version:** `.cursor/avrae-ls-reference/README.md`
-- **Refresh script:** `.cursor/avrae-ls-reference/refresh-avrae-ls-docs.sh`
+- **Blob links, raw URLs, last fetch, tracked `avrae-ls` version:** **`.cursor/reference-cache.json`** → **`avrae_ls_upstream`**
+- **Refresh:** **`.cursor/avrae-ls-reference/refresh-avrae-ls-docs.sh`** (runs **`refresh_upstream_reference_cache.py` `avrae-ls`**)
 
-**When `.alias-test` / `.avraels.json` / `.varfile.json` behavior surprises you:** (1) Read the cached **`alias-tests.md`** and **`configuration.md`**. (2) Compare with the live GitHub links in **`.cursor/avrae-ls-reference/README.md`**. If upstream changed, run **`refresh-avrae-ls-docs.sh`**, bump **Last upstream fetch** and **Tracked avrae-ls version** in that README, and commit. (3) If the cache matches upstream but your local **`avrae-ls --version`** differs from the tracked version, align or note the drift.
+**When `.alias-test` / `.avraels.json` / `.varfile.json` behavior surprises you:** (1) Read the cached **`alias-tests.md`** and **`configuration.md`**. (2) Compare with **`github_blob`** URLs in **`reference-cache.json`**. If upstream changed, run **`refresh-avrae-ls-docs.sh`** (updates **`last_fetch`**), bump **`tracked_avrae_ls_version`** when you validate a new release, commit. (3) If the cache matches upstream but local **`avrae-ls --version`** differs from **`tracked_avrae_ls_version`**, align or note the drift.
 
 **`.varfile.json`** in this repo is **generated** (see **`drac2-tools-maintainer.mdc`**); how Avrae LS consumes **`varFiles`** is described in **`upstream/docs/configuration.md`**.
 
 ## `.alias-test` files
 
-- **Not deployed** — Inputs for **`avrae-ls --run-tests`** only (see `.github/workflows/test.yaml`, `DEVELOPMENT.md`). Full format, metadata YAML, and embed expectations: **`.cursor/avrae-ls-reference/upstream/docs/alias-tests.md`**.
+- **Not deployed** — Inputs for **`avrae-ls --run-tests`** only (see `.github/workflows/test.yaml`, **`AGENTS.md`**, **`.cursor/README.md`**, **`.cursor/reference-cache.json`**). Full format, metadata YAML, and embed expectations: **`.cursor/avrae-ls-reference/upstream/docs/alias-tests.md`**.
 - **Shape** — Blocks like `!pairedalias -testcase "unique case title"` (often separated by `---`); that string is the testcase id.
 - **Contract** — Paired **`.alias`** uses `testcase = args.last("testcase", None)` (or equivalent) and **`elif testcase == "exact same title":`** branches; titles must match **exactly**.
 

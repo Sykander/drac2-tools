@@ -14,6 +14,7 @@ You may also need the following environment variables:
 * AVRAE_TOKEN - [guide](https://www.npmjs.com/package/publish-avrae#avrae-token)
 
 You should now be able to run `make test` and run the tests locally.
+
 ## Deployment
 We use [publish-avrae](https://www.npmjs.com/package/publish-avrae) to automatically deploy the project via the Deploy Github Actions `.github/workflows/deploy.yaml`.
 ### Sourcemaps

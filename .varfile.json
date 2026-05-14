@@ -47,6 +47,9 @@
         },
         "b519d69b-7fa5-45e8-92c9-79244ff89dc1": {
             "filePath": "src/gvars/utils/tools/tools.gvar"
+        },
+        "99c86587-3aa6-4917-9dac-177a41177e62": {
+            "filePath": "src/gvars/utils/performance_examples/performance_examples.gvar"
         }
     }
 }

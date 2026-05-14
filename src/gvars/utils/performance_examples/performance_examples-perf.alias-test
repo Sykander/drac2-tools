@@ -1,0 +1,89 @@
+!performance_examples-perf -testcase "benchmark adv dice list index loop should keep checksum" -loops "4313"
+---
+---
+name: benchmark adv dice list index loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark adv dice if chain loop should keep checksum" -loops "3420"
+---
+---
+name: benchmark adv dice if chain loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark three way list index loop should keep checksum" -loops "4509"
+---
+---
+name: benchmark three way list index loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark three way if chain loop should keep checksum" -loops "3968"
+---
+---
+name: benchmark three way if chain loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict get loop should keep checksum" -loops "6612"
+---
+---
+name: benchmark dict get loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict in and subscript loop should keep checksum" -loops "5834"
+---
+---
+name: benchmark dict in and subscript loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict get missing key default one loop should keep checksum" -loops "7085"
+---
+---
+name: benchmark dict get missing key default one loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict in else subscript missing key default one loop should keep checksum" -loops "7084"
+---
+---
+name: benchmark dict in else subscript missing key default one loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark tuple membership loop should keep checksum" -loops "4508"
+---
+---
+name: benchmark tuple membership loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark list membership loop should keep checksum" -loops "4508"
+---
+---
+name: benchmark list membership loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict bracket known key loop should keep checksum" -loops "7628"
+---
+---
+name: benchmark dict bracket known key loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict get known key loop should keep checksum" -loops "6610"
+---
+---
+name: benchmark dict get known key loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict get bare present key loop should keep checksum" -loops "7627"
+---
+---
+name: benchmark dict get bare present key loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark dict bracket present same key loop should keep checksum" -loops "8262"
+---
+---
+name: benchmark dict bracket present same key loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark counter plus assign loop should keep checksum" -loops "805" -reps "10"
+---
+---
+name: benchmark counter plus assign loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark counter plus eq loop should keep checksum" -loops "877" -reps "10"
+---
+---
+name: benchmark counter plus eq loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark string concat assign loop should keep checksum" -loops "9013"
+---
+---
+name: benchmark string concat assign loop should keep checksum
+
+!performance_examples-perf -testcase "benchmark string concat plus eq loop should keep checksum" -loops "9914"
+---
+---
+name: benchmark string concat plus eq loop should keep checksum

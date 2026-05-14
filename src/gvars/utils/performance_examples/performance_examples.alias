@@ -1,0 +1,32 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    performance_examples = env.gvars.performance_examples,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+pe = performance_examples
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "performance_examples gvar loads":
+    expect(pe.expected_checksum_adv_dice(2)).to.be(14)
+elif testcase == "bench pair adv dice list and if agree":
+    expect(pe.bench_adv_dice_list_index(5)).to.be(pe.bench_adv_dice_if_chain(5))
+elif testcase == "bench pair dict get and in agree":
+    expect(pe.bench_dict_get_repeated(11)).to.be(pe.bench_dict_in_and_subscript(11))
+elif testcase == "bench pair dict get missing default one vs in else agree":
+    expect(pe.bench_dict_get_missing_key_default_one(20)).to.be(
+        pe.bench_dict_in_else_subscript_missing_key_default_one(20)
+    )
+elif testcase == "bench pair dict bracket and get known key agree":
+    expect(pe.bench_dict_bracket_known_key(9)).to.be(pe.bench_dict_get_known_key_with_default(9))
+elif testcase == "bench pair dict get bare and bracket present agree":
+    expect(pe.bench_dict_get_bare_present_key(8)).to.be(pe.bench_dict_bracket_present_same_key(8))
+elif testcase == "bench pair counter assign and plus eq agree":
+    expect(pe.bench_counter_plus_assign(50)).to.be(pe.bench_counter_plus_eq(50))
+    expect(pe.bench_counter_plus_assign(7, 10)).to.be(pe.bench_counter_plus_eq(7, 10))
+elif testcase == "bench pair string concat assign and plus eq agree":
+    expect(pe.bench_string_concat_assign(12)).to.be(pe.bench_string_concat_plus_eq(12))
+</drac2>

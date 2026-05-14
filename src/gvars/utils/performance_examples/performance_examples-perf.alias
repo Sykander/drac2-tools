@@ -1,0 +1,131 @@
+<drac2>
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    performance_examples = env.gvars.performance_examples,
+    expect = env.gvars.expect,
+)
+expect = expect.expect
+pe = performance_examples
+
+args = argparse(&ARGS&)
+testcase = args.last("testcase", None)
+
+if testcase == "benchmark adv dice list index loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_adv_dice_list_index(loops)
+    expect(got).to.be(pe.expected_checksum_adv_dice(loops))
+elif testcase == "benchmark adv dice if chain loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_adv_dice_if_chain(loops)
+    expect(got).to.be(pe.expected_checksum_adv_dice(loops))
+elif testcase == "benchmark three way list index loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_three_way_list_index(loops)
+    expect(got).to.be(pe.expected_checksum_three_way(loops))
+elif testcase == "benchmark three way if chain loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_three_way_if_chain(loops)
+    expect(got).to.be(pe.expected_checksum_three_way(loops))
+elif testcase == "benchmark dict get loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_dict_get_repeated(loops)
+    expect(got).to.be(pe.expected_checksum_dict(loops))
+elif testcase == "benchmark dict get missing key default one loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_dict_get_missing_key_default_one(loops)
+    expect(got).to.be(pe.expected_checksum_missing_key_default_one(loops))
+elif testcase == "benchmark dict in else subscript missing key default one loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_dict_in_else_subscript_missing_key_default_one(loops)
+    expect(got).to.be(pe.expected_checksum_missing_key_default_one(loops))
+elif testcase == "benchmark dict in and subscript loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_dict_in_and_subscript(loops)
+    expect(got).to.be(pe.expected_checksum_dict(loops))
+elif testcase == "benchmark tuple membership loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_membership_tuple_literal(loops)
+    expect(got).to.be(pe.expected_checksum_membership(loops))
+elif testcase == "benchmark list membership loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_membership_list_literal(loops)
+    expect(got).to.be(pe.expected_checksum_membership(loops))
+elif testcase == "benchmark dict bracket known key loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_dict_bracket_known_key(loops)
+    expect(got).to.be(pe.expected_checksum_dict_known_key(loops))
+elif testcase == "benchmark dict get known key loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_dict_get_known_key_with_default(loops)
+    expect(got).to.be(pe.expected_checksum_dict_known_key(loops))
+elif testcase == "benchmark dict get bare present key loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_dict_get_bare_present_key(loops)
+    expect(got).to.be(pe.expected_checksum_dict_bare_present(loops))
+elif testcase == "benchmark dict bracket present same key loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_dict_bracket_present_same_key(loops)
+    expect(got).to.be(pe.expected_checksum_dict_bare_present(loops))
+elif testcase == "benchmark counter plus assign loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    reps = int(args.last("reps", "1"))
+    if reps < 1:
+        reps = 1
+    if reps > 100:
+        reps = 100
+    got = pe.bench_counter_plus_assign(loops, reps)
+    expect(got).to.be(pe.expected_checksum_counter(loops, reps))
+elif testcase == "benchmark counter plus eq loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    reps = int(args.last("reps", "1"))
+    if reps < 1:
+        reps = 1
+    if reps > 100:
+        reps = 100
+    got = pe.bench_counter_plus_eq(loops, reps)
+    expect(got).to.be(pe.expected_checksum_counter(loops, reps))
+elif testcase == "benchmark string concat assign loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_string_concat_assign(loops)
+    expect(got).to.be(pe.expected_checksum_string_len(loops))
+elif testcase == "benchmark string concat plus eq loop should keep checksum":
+    loops = int(args.last("loops", "1"))
+    if loops < 1:
+        loops = 1
+    got = pe.bench_string_concat_plus_eq(loops)
+    expect(got).to.be(pe.expected_checksum_string_len(loops))
+</drac2>

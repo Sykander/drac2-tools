@@ -23,4 +23,4 @@ The following libraries are available freely for other developers to use in thei
 * Rolls
 * Time
 ### Docs
-You can read about each library in depth in the [docs](docs/README.md) section. For setup, tests, and tooling, see [DEVELOPMENT.md](DEVELOPMENT.md).
+You can read about each library in depth in the [docs](docs/README.md) section. For local setup, envs, and deployment, see [DEVELOPMENT.md](DEVELOPMENT.md). For Cursor rules, perf probing, and how upstream caches are refreshed, see [.cursor/README.md](.cursor/README.md); URL and version metadata live in [.cursor/reference-cache.json](.cursor/reference-cache.json).

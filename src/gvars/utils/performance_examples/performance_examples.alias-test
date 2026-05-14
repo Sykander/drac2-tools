@@ -1,0 +1,39 @@
+!performance_examples -testcase "performance_examples gvar loads"
+---
+---
+name: performance_examples gvar loads
+
+!performance_examples -testcase "bench pair adv dice list and if agree"
+---
+---
+name: bench pair adv dice list and if agree
+
+!performance_examples -testcase "bench pair dict get and in agree"
+---
+---
+name: bench pair dict get and in agree
+
+!performance_examples -testcase "bench pair dict get missing default one vs in else agree"
+---
+---
+name: bench pair dict get missing default one vs in else agree
+
+!performance_examples -testcase "bench pair dict bracket and get known key agree"
+---
+---
+name: bench pair dict bracket and get known key agree
+
+!performance_examples -testcase "bench pair dict get bare and bracket present agree"
+---
+---
+name: bench pair dict get bare and bracket present agree
+
+!performance_examples -testcase "bench pair counter assign and plus eq agree"
+---
+---
+name: bench pair counter assign and plus eq agree
+
+!performance_examples -testcase "bench pair string concat assign and plus eq agree"
+---
+---
+name: bench pair string concat assign and plus eq agree
