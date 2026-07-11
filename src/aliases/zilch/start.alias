@@ -1,0 +1,6 @@
+<drac2>
+ZILCH_GVAR_UUID = "00000000-0000-4000-8000-000000000000"
+
+zilch_mod = get_gvar(ZILCH_GVAR_UUID)
+return zilch_mod.start_open_multiline(combat())
+</drac2>

@@ -72,10 +72,19 @@ When editing an **`.alias`**, decide which role it plays before copying structur
 
 Per **`.cursor/avrae-reference/aliasing-api.rst.txt`** (*Draconic Blocks*): a **`<drac2>…</drac2>`** segment is replaced by a **non-`None` value returned with the `return` keyword**, stringified. A **bare trailing expression** (no **`return`**) is **not** documented as the block’s output there—side-effect code can run, but for **standalone** blocks (e.g. copy-paste Discord tests), **always `return ...`** if you need visible substitution. **`{{ … }}`** *expressions* are a different mechanism (evaluated value replaces the braces). **`avrae-ls`** runs **`.alias`** bodies in a harness; do not assume its implicit “last value” behavior matches the **Discord bot** if a snippet fails to print until you add **`return`**.
 
+## Avrae aliases, snippets, and multiline (execution limits)
+
+- **Multiline** — A `multiline` return queues **native Avrae commands** only (e.g. `embed`, `i`, …). **Multiline cannot invoke workshop aliases**; do not put `!yourAlias` lines in a multiline sequence and expect them to run as another alias.
+- **Alias → alias** — **Aliases cannot call other aliases.** One alias run is one user command; Drac2 cannot dispatch or “invoke” a separate workshop alias as a nested command.
+- **Snippets vs aliases** — **Snippet expansion runs before the alias’s Drac2.** Snippets can alter what the alias sees (e.g. injected args or text), but alias Drac2 **cannot** change how snippets were already evaluated for that message.
+
+Design table flows accordingly: multiline follow-ups must be **built-in commands** (e.g. `embed …`, `i begin …`), not `!zilch …` unless Avrae explicitly documents otherwise.
+
 ## Conventions in this repo (Drac2 code)
 
 - **Raw strings** — **`r"..."`** and **`r'...'`** are valid in Drac2 (Python-style: backslashes stay literal except before the closing quote). Prefer them for **backslash-heavy** literals (e.g. regex patterns: **`r"\d+"`** vs **`"\\d+"`**) so source stays readable. Covered by **`avrae-ls --run-tests`** in **`regex.alias`** (“compile should accept raw string pattern with backslashes”).
 - **`None`**, not `null`. **`err(...)`** for intentional hard failures.
+- **Avrae builtins — do not shadow** — Drac2 injects engine callables/globals (see **`.cursor/avrae-reference/aliasing-api.rst.txt`**). **Do not assign to their names** or use them as loop/target variables. Example: **`time = "2 hours"`** fails because **`time()`** is the UNIX-epoch builtin (`aliasing-api.rst.txt` → `time()`). Prefer descriptive names (`travel_txt`, `epoch_secs`, `route_hours`). Other names easy to collide with: **`character()`**, **`combat()`**, **`argparse()`**, **`vroll()`**, **`err()`**, **`randint()`**, **`randchoice()`**.
 - **Types** — Mirror the surrounding file (hints vs untyped).
 - **Naming** — `snake_case`; Avrae string keys (`"melee"`, `"sleightOfHand"`, …) stay consistent with domain maps.
 - **`== None` / `!= None`** — Match the dominant style in the file you are editing.

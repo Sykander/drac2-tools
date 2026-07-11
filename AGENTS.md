@@ -24,4 +24,6 @@ Project rules in **`.cursor/rules/`** spell this out: **`drac2-tools-maintainer.
 
 Use **`.cursor/rules/drac2-avrae-sources.mdc`** and the **cached RST** under **`.cursor/avrae-reference/`** (canonical URLs: **`.cursor/reference-cache.json`** → **`avrae_rst`**; refresh **`refresh-avrae-docs.sh`**). That material is Cursor-adjacent, not under `docs/`. Do not invent engine behavior—confirm against those files, then refresh if they lag Read the Docs.
 
-**Discord `<drac2>` blocks:** On the live bot, block substitution follows the **return**-based rules in **`aliasing-api.rst.txt`**—see **`.cursor/rules/drac2-avrae-sources.mdc`** → **Live Avrae `<drac2>` blocks**. One-liner tests should **`return "…"`**, not rely on a trailing expression alone.
+**Do not assign to `time` in Drac2** — it is the Avrae builtin **`time()`** (epoch seconds). Use another variable name for travel duration strings (e.g. **`travel_txt`**). See **drac2-avrae-sources.mdc** → **Avrae builtins — do not shadow**.
+
+**Discord `<drac2>` blocks:** On the live bot, block substitution follows the **return**-based rules in **`aliasing-api.rst.txt`**—see **`.cursor/rules/drac2-avrae-sources.mdc`** → **Live Avrae `<drac2>` blocks**. One-liner tests should **`return "…"`**, not rely on a trailing expression alone. **Alias / snippet / multiline limits** (what can chain in Discord) are spelled out in the same file → **Avrae aliases, snippets, and multiline (execution limits)**.
