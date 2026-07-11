@@ -1,0 +1,9 @@
+<drac2>
+# Paste your workshop UUID for ``zilch.gvar`` after ``!gvar create``:
+ZILCH_GVAR_UUID = "00000000-0000-4000-8000-000000000000"
+
+args = argparse(&ARGS&)
+argv = &ARGS&
+zilch_mod = get_gvar(ZILCH_GVAR_UUID)
+return zilch_mod.main_dispatch(character(), combat(), args, argv)
+</drac2>

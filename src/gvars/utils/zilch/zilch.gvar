@@ -1,0 +1,832 @@
+"""Zilch — Farkle-style dice game on Avrae initiative.
+
+Replace ``ZILCH_GVAR_UUID`` in ``src/aliases/zilch/*.alias`` with the id from ``!gvar create``.
+
+**``!zilch start``** (or ``start.alias``) when **not** in initiative: ``commands.get_multiline`` runs
+``!i begin Zilch`` then a rules **``embed``** (title **Zilch Rules**). Multiline cannot call workshop
+aliases, so Zilch state is **not** created there — the first **``!zilch``** (status, roll, etc.) in
+that initiative calls ``ensure_state`` and attaches metadata (combat should be named **Zilch**).
+
+This module uses the same workshop ``env`` id as ``embeds.gvar`` / ``rolls.gvar`` — change
+the UUID if your workshop differs.
+
+Combat metadata key ``zilch_v1`` stores JSON state; combatant notes hold ``Points: N``.
+Turn-ending outputs use ``commands.get_multiline`` (``embed`` then ``i next``) so initiative
+stays aligned with Zilch; ``!zilch start`` still syncs the stored turn index to ``combat().current``.
+"""
+
+using(env="844087ed-cb06-4b66-9b36-b640519aa86f")
+using(
+    commands = env.gvars.commands,
+    embeds = env.gvars.embeds,
+    rolls = env.gvars.rolls,
+)
+
+METADATA_KEY = "zilch_v1"
+GAME_NAME = "zilch"
+LABELS = "abcdef"
+ZILCH_COMBAT_NAME = "Zilch"
+
+
+def triple_val(face):
+    if face == 1:
+        return 1000
+    return 100 * face
+
+
+def _counts_from_values(vals):
+    ct = [0, 0, 0, 0, 0, 0]
+    for v in vals:
+        if v < 1 or v > 6:
+            err("Internal dice value out of range.")
+        ct[v - 1] += 1
+    return ct
+
+
+def _memo_key(ct):
+    return tuple(ct)
+
+
+def max_scorable_points(ct, memo):
+    """Best score from multiset ``ct``; may ignore (discard) dice at 0 points."""
+    k = _memo_key(ct)
+    if k in memo:
+        return memo[k]
+    s = sum(ct)
+    if s == 0:
+        memo[k] = 0
+        return 0
+    neg = -10**9
+    best = neg
+    if min(ct) >= 1:
+        nc = list(ct)
+        for j in range(6):
+            nc[j] -= 1
+        best = max(best, 2000 + max_scorable_points(nc, memo))
+    for i in range(6):
+        for j in range(i + 1, 6):
+            if ct[i] >= 3 and ct[j] >= 3:
+                nc = list(ct)
+                nc[i] -= 3
+                nc[j] -= 3
+                best = max(best, 1000 + max_scorable_points(nc, memo))
+    for i in range(6):
+        if ct[i] >= 4:
+            for j in range(6):
+                if j != i and ct[j] >= 2:
+                    nc = list(ct)
+                    nc[i] -= 4
+                    nc[j] -= 2
+                    best = max(best, 500 + max_scorable_points(nc, memo))
+    for i in range(6):
+        if ct[i] < 2:
+            continue
+        for j in range(i + 1, 6):
+            if ct[j] < 2:
+                continue
+            for kk in range(j + 1, 6):
+                if ct[kk] >= 2:
+                    nc = list(ct)
+                    nc[i] -= 2
+                    nc[j] -= 2
+                    nc[kk] -= 2
+                    best = max(best, 500 + max_scorable_points(nc, memo))
+    for i in range(6):
+        if ct[i] >= 6:
+            nc = list(ct)
+            nc[i] -= 6
+            tv = triple_val(i + 1)
+            best = max(best, tv * 8 + max_scorable_points(nc, memo))
+    for i in range(6):
+        if ct[i] >= 5:
+            nc = list(ct)
+            nc[i] -= 5
+            tv = triple_val(i + 1)
+            best = max(best, tv * 4 + max_scorable_points(nc, memo))
+    for i in range(6):
+        if ct[i] >= 4:
+            nc = list(ct)
+            nc[i] -= 4
+            tv = triple_val(i + 1)
+            best = max(best, tv * 2 + max_scorable_points(nc, memo))
+    for i in range(6):
+        if ct[i] >= 3:
+            nc = list(ct)
+            nc[i] -= 3
+            tv = triple_val(i + 1)
+            best = max(best, tv + max_scorable_points(nc, memo))
+    if ct[0] >= 1:
+        nc = list(ct)
+        nc[0] -= 1
+        best = max(best, 100 + max_scorable_points(nc, memo))
+    if ct[4] >= 1:
+        nc = list(ct)
+        nc[4] -= 1
+        best = max(best, 50 + max_scorable_points(nc, memo))
+    for i in range(6):
+        if ct[i] >= 1:
+            nc = list(ct)
+            nc[i] -= 1
+            cand = max_scorable_points(nc, memo)
+            if cand > neg // 2:
+                best = max(best, cand)
+    memo[k] = best
+    return best
+
+
+def strict_partition_score(ct, memo):
+    """Maximum score using every die in ``ct`` in scoring groups; impossible hands return large negative."""
+    k = _memo_key(ct)
+    if k in memo:
+        return memo[k]
+    s = sum(ct)
+    if s == 0:
+        memo[k] = 0
+        return 0
+    neg = -10**9
+    best = neg
+    if min(ct) >= 1:
+        nc = list(ct)
+        for j in range(6):
+            nc[j] -= 1
+        sub = strict_partition_score(nc, memo)
+        if sub > neg // 2:
+            best = max(best, 2000 + sub)
+    for i in range(6):
+        for j in range(i + 1, 6):
+            if ct[i] >= 3 and ct[j] >= 3:
+                nc = list(ct)
+                nc[i] -= 3
+                nc[j] -= 3
+                sub = strict_partition_score(nc, memo)
+                if sub > neg // 2:
+                    best = max(best, 1000 + sub)
+    for i in range(6):
+        if ct[i] >= 4:
+            for j in range(6):
+                if j != i and ct[j] >= 2:
+                    nc = list(ct)
+                    nc[i] -= 4
+                    nc[j] -= 2
+                    sub = strict_partition_score(nc, memo)
+                    if sub > neg // 2:
+                        best = max(best, 500 + sub)
+    for i in range(6):
+        if ct[i] < 2:
+            continue
+        for j in range(i + 1, 6):
+            if ct[j] < 2:
+                continue
+            for kk in range(j + 1, 6):
+                if ct[kk] >= 2:
+                    nc = list(ct)
+                    nc[i] -= 2
+                    nc[j] -= 2
+                    nc[kk] -= 2
+                    sub = strict_partition_score(nc, memo)
+                    if sub > neg // 2:
+                        best = max(best, 500 + sub)
+    for i in range(6):
+        if ct[i] >= 6:
+            nc = list(ct)
+            nc[i] -= 6
+            tv = triple_val(i + 1)
+            sub = strict_partition_score(nc, memo)
+            if sub > neg // 2:
+                best = max(best, tv * 8 + sub)
+    for i in range(6):
+        if ct[i] >= 5:
+            nc = list(ct)
+            nc[i] -= 5
+            tv = triple_val(i + 1)
+            sub = strict_partition_score(nc, memo)
+            if sub > neg // 2:
+                best = max(best, tv * 4 + sub)
+    for i in range(6):
+        if ct[i] >= 4:
+            nc = list(ct)
+            nc[i] -= 4
+            tv = triple_val(i + 1)
+            sub = strict_partition_score(nc, memo)
+            if sub > neg // 2:
+                best = max(best, tv * 2 + sub)
+    for i in range(6):
+        if ct[i] >= 3:
+            nc = list(ct)
+            nc[i] -= 3
+            tv = triple_val(i + 1)
+            sub = strict_partition_score(nc, memo)
+            if sub > neg // 2:
+                best = max(best, tv + sub)
+    if ct[0] >= 1:
+        nc = list(ct)
+        nc[0] -= 1
+        sub = strict_partition_score(nc, memo)
+        if sub > neg // 2:
+            best = max(best, 100 + sub)
+    if ct[4] >= 1:
+        nc = list(ct)
+        nc[4] -= 1
+        sub = strict_partition_score(nc, memo)
+        if sub > neg // 2:
+            best = max(best, 50 + sub)
+    memo[k] = best
+    return best
+
+
+def roll_best_points(vals):
+    return max_scorable_points(_counts_from_values(vals), {})
+
+
+def _mask_to_indices(mask, n):
+    out = []
+    for i in range(n):
+        if (mask >> i) & 1:
+            out.append(i)
+    return out
+
+
+def recommended_keep_mask(vals):
+    n = len(vals)
+    best_s = -1
+    best_mask = 0
+    best_sz = -1
+    memo = {}
+    for mask in range(1, 1 << n):
+        idxs = _mask_to_indices(mask, n)
+        sub = [vals[i] for i in idxs]
+        ct = _counts_from_values(sub)
+        sc = strict_partition_score(ct, memo)
+        if sc <= 0:
+            continue
+        sz = len(idxs)
+        if sc > best_s or (sc == best_s and sz > best_sz):
+            best_s = sc
+            best_mask = mask
+            best_sz = sz
+    return best_mask, best_s
+
+
+def all_scoring_keep_mask(vals):
+    """Same as maximum-scoring valid subset (full scoring partition of that subset)."""
+    return recommended_keep_mask(vals)
+
+
+def highest_single_pattern_mask(vals):
+    """Largest points from one atomic scoring pattern (subset of dice)."""
+    n = len(vals)
+    best_s = -1
+    best_mask = 0
+    memo = {}
+    for mask in range(1, 1 << n):
+        idxs = _mask_to_indices(mask, n)
+        sub = [vals[i] for i in idxs]
+        ct = _counts_from_values(sub)
+        sc = strict_partition_score(ct, memo)
+        if sc <= 0:
+            continue
+        if sc > best_s or (sc == best_s and len(idxs) > bin(best_mask).count("1")):
+            best_s = sc
+            best_mask = mask
+    return best_mask, best_s
+
+
+def parse_cheat_map(argv, n_active, labels):
+    cheats = {}
+    i = 0
+    while i < len(argv):
+        tok = str(argv[i]).lower()
+        if tok == "-cheat":
+            if i + 1 >= len(argv):
+                err("``-cheat`` needs a value like ``A1`` or ``A1B1`` (die face).")
+            piece = str(argv[i + 1]).upper()
+            i += 2
+            j = 0
+            while j < len(piece):
+                ch = piece[j]
+                if j + 1 >= len(piece):
+                    err(f"Incomplete ``-cheat`` segment in ``{piece}``: need die letter then digit 1–6.")
+                dch = piece[j + 1]
+                if ch not in labels:
+                    err(f"Invalid die label ``{ch}`` for this roll (use {labels!s}).")
+                if dch < "1" or dch > "6":
+                    err(f"Invalid face ``{dch}`` in ``-cheat`` (use 1–6).")
+                face = int(dch)
+                if ch in cheats:
+                    err(f"Duplicate cheat on die ``{ch}``.")
+                cheats[ch] = face
+                j += 2
+        else:
+            i += 1
+    for ch in cheats:
+        if ch not in labels:
+            err(f"Cheat label ``{ch}`` is not in the current pool {labels!s}.")
+    return cheats
+
+
+def _flatten_combatants(com):
+    out = []
+    for c in com.combatants:
+        t = getattr(c, "type", "combatant")
+        if t == "group":
+            for sub in c.combatants:
+                out.append(sub)
+        else:
+            out.append(c)
+    return out
+
+
+def _ordered_players(com):
+    xs = _flatten_combatants(com)
+    xs = sorted(xs, key=lambda c: (-c.init, str(c.name).lower()))
+    return xs
+
+
+def _load_state_raw(com):
+    raw = com.get_metadata(METADATA_KEY, None)
+    if raw == None or raw == "":
+        return None
+    return load_json(raw)
+
+
+def _save_state_raw(com, obj):
+    com.set_metadata(METADATA_KEY, dump_json(obj))
+
+
+def _default_state(com):
+    players = _ordered_players(com)
+    ids = [p.id for p in players]
+    scores = {}
+    on_board = {}
+    for pid in ids:
+        scores[pid] = 0
+        on_board[pid] = False
+    return {
+        "scores": scores,
+        "on_board": on_board,
+        "turn_idx": 0,
+        "player_ids": ids,
+        "phase": "playing",
+        "final_anchor_id": None,
+        "final_active": False,
+        "game_over": False,
+        "pending_roll": True,
+        "active_dice": 6,
+        "turn_accum": 0,
+        "last_values": None,
+        "last_cheated": False,
+        "last_cheat_labels": [],
+    }
+
+
+def ensure_state(com):
+    st = _load_state_raw(com)
+    if st == None:
+        st = _default_state(com)
+        _save_state_raw(com, st)
+    return st
+
+
+def is_zilch_channel(com):
+    if com == None:
+        return False
+    st = _load_state_raw(com)
+    if st != None:
+        return True
+    n = com.name
+    if n != None and str(n).lower() == GAME_NAME:
+        return True
+    return False
+
+
+def _current_id_for_state(com, st):
+    ids = st["player_ids"]
+    if len(ids) == 0:
+        return None
+    return ids[st["turn_idx"] % len(ids)]
+
+
+def _sync_turn_idx_to_current(com, st):
+    cur = com.current
+    if cur == None:
+        return
+    if getattr(cur, "type", "combatant") == "group":
+        return
+    cid = cur.id
+    ids = st["player_ids"]
+    if cid in ids:
+        st["turn_idx"] = ids.index(cid)
+
+
+def _set_points_note(c, pts):
+    c.set_note(f"Points: {pts}")
+
+
+def _persist_scores_to_notes(com, st):
+    for p in _ordered_players(com):
+        pid = p.id
+        if pid in st["scores"]:
+            _set_points_note(p, st["scores"][pid])
+
+
+def _persist_scores_to_notes(com, st):
+    n = len(st["player_ids"])
+    if n == 0:
+        return
+    st["turn_idx"] = (st["turn_idx"] + 1) % n
+    st["pending_roll"] = True
+    st["active_dice"] = 6
+    st["turn_accum"] = 0
+    st["last_values"] = None
+    st["last_cheated"] = False
+    st["last_cheat_labels"] = []
+    _save_state_raw(com, st)
+    nxt_id = _current_id_for_state(com, st)
+    if st["final_active"] and st["final_anchor_id"] != None and nxt_id == st["final_anchor_id"]:
+        st["game_over"] = True
+        _save_state_raw(com, st)
+
+
+def _merge_desc(desc, cheat_suffix):
+    parts = []
+    if desc != None and desc != "":
+        parts.append(desc)
+    if cheat_suffix != None and cheat_suffix != "":
+        parts.append(cheat_suffix)
+    if len(parts) == 0:
+        return None
+    return "\n\n".join(parts)
+
+
+def _embed_plain(title, desc, fields, footer, cheat_suffix=""):
+    if fields == None:
+        fields = []
+    return embeds.get_embed(
+        title = title,
+        desc = _merge_desc(desc, cheat_suffix),
+        fields = fields,
+        footer = footer,
+    )
+
+
+def _embed_then_i_next(title, desc, fields, footer, cheat_suffix=""):
+    em = _embed_plain(title, desc, fields, footer, cheat_suffix)
+    return commands.get_multiline([em, "i next"])
+
+
+def _rules_desc_and_fields():
+    desc = (
+        "**Opening:** You must bank a turn of **≥ 1000** points once to get on the board; until then, banking does nothing. "
+        "**Final round:** When someone's banked total reaches **>= 10,000**, everyone else gets one more lap; the game ends "
+        "at the **start** of that player’s next turn. Highest total wins.\n"
+        "**Scoring:** 1 = 100 · 5 = 50 · triple *n* (except three 1s = 1000) · four of a kind = triple×2 · five = four×2 · "
+        "six of a kind = five×2 · full house (four + different pair) = 500 · three pairs = 500 · two triples = 1000 · "
+        "1–6 straight = 2000. On each roll you may bank scoring dice and reroll the rest; if you roll **no** points, you "
+        "**zilch** and lose the whole turn’s points.\n"
+        "**Table play:** Dropped dice / bad rolls are table rules — this alias only enforces the sleight-of-hand check."
+    )
+    fields = [
+        embeds.get_field(
+            "Commands",
+            "`!zilch start` — only when **no** initiative is running: **`!i begin Zilch`** and this rules embed in one multiline. "
+            "If initiative is already open, close it first. After **`!i join`**, anyone’s first **`!zilch`** (status, roll, …) in that combat attaches Zilch state. "
+            "`!zilch` — status · `!zilch help` — this rules card · `!zilch roll` / `keep` / `bank` — play.",
+        ),
+        embeds.get_field(
+            "Cheating",
+            "``-cheat A1`` (optional): forces die **A** to show **1**. DC +5 per cheated die. Spoilers for observers appear on roll embeds when used.",
+        ),
+    ]
+    return desc, fields
+
+
+def rules_embed(title="Zilch — rules", footer=None):
+    desc, fields = _rules_desc_and_fields()
+    if footer == None:
+        footer = "When you bank, zilch, or fumble, the alias queues `!i next` after the embed so initiative stays in sync."
+    return embeds.get_embed(
+        title = title,
+        desc = desc,
+        fields = fields,
+        footer = footer,
+    )
+
+
+def help_text():
+    return rules_embed()
+
+
+def start_open_multiline(com):
+    if com != None:
+        return embeds.get_embed(
+            title = "Zilch",
+            desc = "Close initiative before starting a new Zilch game.",
+            fields = [],
+        )
+    begin_line = commands.get_command(["i", "begin", ZILCH_COMBAT_NAME], None)
+    rules_line = rules_embed(
+        title = "Zilch Rules",
+        footer = "Have everyone **`!i join`**, then run **`!zilch`** (or **`!zilch help`**) — the first Zilch command in this initiative saves game state.",
+    )
+    return commands.get_multiline([begin_line, rules_line])
+
+
+def start_message(com):
+    return start_open_multiline(com)
+
+
+def status_block(com, char):
+    if com == None:
+        return (
+            "You are not in initiative. Run **`!zilch start`** to open a Zilch table, or **`!zilch help`** for rules."
+        )
+    if not is_zilch_channel(com):
+        return "This initiative is not set up as Zilch (combat name should be **Zilch**, from **`!zilch start`** when no combat is open). Run **`!zilch`** once here to attach state if the name already matches."
+    st = ensure_state(com)
+    _sync_turn_idx_to_current(com, st)
+    _save_state_raw(com, st)
+    if st["game_over"]:
+        return leaderboard_embed(com, st)
+    cid = _current_id_for_state(com, st)
+    cur = com.get_combatant(cid, True) if cid != None else None
+    name = cur.name if cur != None else "?"
+    me = com.me
+    mine = me != None and me.id == cid if cid != None else False
+    lines = [
+        f"**Current turn:** {name}" + (" *(you)*" if mine else ""),
+        f"**Dice to roll next:** {st['active_dice']}",
+        f"**Points this turn (not banked):** {st['turn_accum']}",
+    ]
+    if st["last_values"] != None:
+        lbl = LABELS[0 : len(st["last_values"])]
+        dv = " ".join([f"`{lbl[i]}` **{st['last_values'][i]}**" for i in range(len(st["last_values"]))])
+        lines.append(f"**Last roll:** {dv}")
+        lines.append(f"**Best score available from that roll:** {roll_best_points(st['last_values'])}")
+    if st["pending_roll"]:
+        lines.append("**Action:** `!zilch roll`")
+    else:
+        lines.append("**Action:** `!zilch keep …` then `!zilch roll`, or `!zilch bank` to lock in this turn.")
+    if cid != None and char != None and char.id == cid:
+        ob = st["on_board"].get(cid, False)
+        lines.append(f"**On the board:** {'yes' if ob else 'no (need a turn >= 1000 to bank)'}")
+    foot = "Banking, zilching, or fumbling queues `!i next` for you after the embed."
+    return embeds.get_embed(title="Zilch — status", desc="\n".join(lines), fields=[], footer=foot)
+
+
+def _standings_desc(com, st):
+    rows = []
+    for pid in st["player_ids"]:
+        c = com.get_combatant(pid, True)
+        nm = c.name if c != None else pid
+        rows.append((nm, st["scores"].get(pid, 0)))
+    rows = sorted(rows, key=lambda r: -r[1])
+    medals = ["🥇", "🥈", "🥉"]
+    lines = []
+    for i in range(len(rows)):
+        med = medals[i] if i < 3 else f"{i+1}."
+        lines.append(f"{med} **{rows[i][0]}** — {rows[i][1]}")
+    return "**Final standings**\n" + "\n".join(lines)
+
+
+def leaderboard_embed(com, st):
+    desc = _standings_desc(com, st)
+    return embeds.get_embed(
+        title = "Zilch — results",
+        desc = desc,
+        fields = [],
+        footer = "Start a new combat or `!zilch start` to play again.",
+    )
+
+
+def main_dispatch(char, com, args, argv):
+    sub = ""
+    if argv != None and len(argv) > 0:
+        sub = str(argv[0]).lower()
+    if sub in ["help", "?", "h"]:
+        return help_text()
+    if sub == "start":
+        return start_message(com)
+    if com == None or not is_zilch_channel(com):
+        return (
+            "Run **`!zilch start`** to open initiative (then **`!zilch`** in that combat saves state), or **`!zilch help`** for rules. "
+            "In combat, `!zilch` alone shows status."
+        )
+    if sub == "":
+        return status_block(com, char)
+    if sub in ["keep", "roll", "bank"]:
+        return "Use **`!zilch " + sub + "`** (servalias) or run the matching sub-alias."
+    if sub not in ["help", "?", "h", "start"]:
+        return embeds.get_embed(
+            title = "Zilch",
+            desc = f"Unknown subcommand `{sub}`. See **`!zilch help`** or use the `keep` / `roll` / `bank` sub-aliases.",
+            fields = [],
+        )
+    return status_block(com, char)
+
+
+def keep_dispatch(char, com, args, argv):
+    if com == None or char == None:
+        err("You need an active character in initiative.")
+    if not is_zilch_channel(com):
+        err("Run `!zilch start` in this Zilch combat first.")
+    st = ensure_state(com)
+    _sync_turn_idx_to_current(com, st)
+    _save_state_raw(com, st)
+    if st["game_over"]:
+        return leaderboard_embed(com, st)
+    cid = _current_id_for_state(com, st)
+    if com.me == None or com.me.id != cid:
+        err("It is not your turn (or you are not on your character in this combat).")
+    if st["pending_roll"]:
+        err("Roll first with `!zilch roll`.")
+    vals = st["last_values"]
+    if vals == None:
+        err("No dice to keep.")
+    n = len(vals)
+    labels = LABELS[0:n]
+    tok = " ".join([str(x) for x in argv]).lower().strip() if argv != None else ""
+    if tok == "":
+        err("Specify dice to keep, or `recommended`, `all`, or `highest`.")
+    parts = tok.split()
+    mode = parts[0] if len(parts) == 1 else " ".join(parts)
+    if mode == "recommended":
+        mask, _ = recommended_keep_mask(vals)
+    elif mode == "all":
+        mask, _ = all_scoring_keep_mask(vals)
+    elif mode == "highest":
+        mask, _ = highest_single_pattern_mask(vals)
+    else:
+        sel = "".join(parts).replace(" ", "").upper()
+        mask = 0
+        for ch in sel:
+            if ch < "A" or ch > "Z":
+                err(f"Invalid character in keep list: `{ch}`.")
+            pos = ord(ch) - ord("A")
+            if pos < 0 or pos >= n:
+                err(f"Die `{ch}` is not in this roll (use {labels!s}).")
+            mask = mask | (1 << pos)
+    if mask == 0:
+        err("Choose at least one scoring die to keep.")
+    idxs = _mask_to_indices(mask, n)
+    picked_vals = [vals[i] for i in idxs]
+    memo = {}
+    sc = strict_partition_score(_counts_from_values(picked_vals), memo)
+    if sc <= 0:
+        err("That selection does not form a valid scoring set (only 1, 5, and listed combinations score).")
+    kept_vals = [vals[i] for i in idxs]
+    rem_vals = [vals[i] for i in range(n) if ((mask >> i) & 1) == 0]
+    st["turn_accum"] = st["turn_accum"] + sc
+    st["last_values"] = rem_vals if len(rem_vals) > 0 else None
+    st["pending_roll"] = True
+    if len(rem_vals) == 0:
+        st["active_dice"] = 6
+    else:
+        st["active_dice"] = len(rem_vals)
+    _save_state_raw(com, st)
+    kstr = " ".join([f"`{LABELS[idxs[j]]}` **{kept_vals[j]}**" for j in range(len(idxs))])
+    msg = (
+        f"Banked **{sc}** points from [{kstr}] for this turn.\n"
+        f"**Turn total (unbanked):** {st['turn_accum']}\n"
+    )
+    if len(rem_vals) == 0:
+        msg += "**Hot dice:** all six dice roll again on your next `!zilch roll`."
+    else:
+        msg += f"**Dice left to reroll:** {st['active_dice']}"
+    return embeds.get_embed(
+        title = "Zilch — keep",
+        desc = msg,
+        fields = [],
+        footer = "`!zilch roll` to continue, or `!zilch bank` to end your turn.",
+    )
+
+
+def bank_dispatch(char, com, args, argv):
+    if com == None or char == None:
+        err("You need an active character in initiative.")
+    if not is_zilch_channel(com):
+        err("Run `!zilch start` in this Zilch combat first.")
+    st = ensure_state(com)
+    _sync_turn_idx_to_current(com, st)
+    _save_state_raw(com, st)
+    if st["game_over"]:
+        return leaderboard_embed(com, st)
+    cid = _current_id_for_state(com, st)
+    if com.me == None or com.me.id != cid:
+        err("It is not your turn.")
+    ta = st["turn_accum"]
+    if ta <= 0:
+        err("You have no points to bank this turn.")
+    if not st["on_board"].get(cid, False) and ta < 1000:
+        err("You are not on the board yet — you need a turn scoring **at least 1000** before you can bank points.")
+    st["last_values"] = None
+    st["pending_roll"] = True
+    prev = st["scores"].get(cid, 0)
+    new_total = prev + ta
+    st["scores"][cid] = new_total
+    if ta >= 1000:
+        st["on_board"][cid] = True
+    final_note = None
+    if new_total >= 10000 and st["final_anchor_id"] == None:
+        st["final_active"] = True
+        st["final_anchor_id"] = cid
+        final_note = (
+            f"**{char.name}** reached **10,000+** — **final round** begins. "
+            "Everyone else gets a lap; the game ends at the **start** of this player’s next turn."
+        )
+    st["turn_accum"] = 0
+    st["active_dice"] = 6
+    _persist_scores_to_notes(com, st)
+    _advance_turn(com, st)
+    fields = []
+    if final_note != None:
+        fields.append(embeds.get_field("Final round", final_note))
+    foot = "Initiative advances automatically (`!i next` queued after this embed)."
+    body = f"Banked **{ta}** points. **New total:** {new_total}"
+    if st["game_over"]:
+        desc = body + "\n\n" + _standings_desc(com, st)
+        return _embed_then_i_next("Zilch — bank (game over)", desc, fields, foot)
+    return _embed_then_i_next("Zilch — bank", body, fields, foot)
+
+
+def roll_dispatch(char, com, args, argv):
+    if com == None or char == None:
+        err("You need an active character in initiative.")
+    if not is_zilch_channel(com):
+        err("Run `!zilch start` in this Zilch combat first.")
+    st = ensure_state(com)
+    _sync_turn_idx_to_current(com, st)
+    _save_state_raw(com, st)
+    if st["game_over"]:
+        return leaderboard_embed(com, st)
+    cid = _current_id_for_state(com, st)
+    if com.me == None or com.me.id != cid:
+        err("It is not your turn.")
+    if not st["pending_roll"]:
+        err("You still have dice set aside from the last roll — use `!zilch keep` first, or `!zilch bank`.")
+    n = st["active_dice"]
+    labels = LABELS[0:n]
+    cheats = parse_cheat_map(argv, n, labels)
+    dc = 4 + n + 5 * len(cheats)
+    meta = rolls.get_roll(char, "sleightOfHand", args, "check", dc=dc)
+    passed = meta["passed"]
+    if passed == None:
+        passed = True
+    raw = []
+    for _ in range(n):
+        raw.append(randint(1, 6))
+    cheat_labels = []
+    for ch, fv in cheats.items():
+        pos = ord(ch) - ord("A")
+        raw[pos] = fv
+        cheat_labels.append(ch)
+    st["last_cheated"] = len(cheats) > 0
+    st["last_cheat_labels"] = cheat_labels
+    if not passed:
+        st["turn_accum"] = 0
+        st["last_values"] = None
+        st["pending_roll"] = True
+        st["active_dice"] = 6
+        _save_state_raw(com, st)
+        _advance_turn(com, st)
+        desc = (
+            f"**Sleight of Hand** {meta['full']} vs **DC {dc}** — **failure**. You fumble the pickup/roll and **zilch**.\n"
+            f"**Dice would have been:** {' '.join([f'`{labels[i]}` {raw[i]}' for i in range(n)])}\n"
+            "**Turn over** with 0 points."
+        )
+        spoil = _cheat_spoiler(char, cheat_labels, raw, labels)
+        return _embed_then_i_next("Zilch — fumbled", desc, [], "", spoil)
+    bp = roll_best_points(raw)
+    st["last_values"] = raw
+    st["pending_roll"] = False
+    _save_state_raw(com, st)
+    dice_line = " ".join([f"`{labels[i]}` **{raw[i]}**" for i in range(n)])
+    desc = (
+        f"**Sleight of Hand** {meta['full']} vs **DC {dc}** — **success**.\n"
+        f"**Dice:** {dice_line}\n"
+        f"**Best score you can take from this roll:** {bp}"
+    )
+    if bp == 0:
+        st["turn_accum"] = 0
+        st["last_values"] = None
+        st["pending_roll"] = True
+        st["active_dice"] = 6
+        _save_state_raw(com, st)
+        _advance_turn(com, st)
+        desc += "\n**You zilched** — no scoring dice. This turn ends with **0** points."
+        spoil = _cheat_spoiler(char, cheat_labels, raw, labels)
+        return _embed_then_i_next("Zilch — zilch!", desc, [], "", spoil)
+    foot = "`!zilch keep …` then `!zilch roll`, or `!zilch bank` if you are done banking for this turn."
+    spoil = _cheat_spoiler(char, cheat_labels, raw, labels)
+    return _embed_plain("Zilch — roll", desc, [], foot, spoil)
+
+
+def _cheat_spoiler(char, cheat_labels, raw, labels):
+    if len(cheat_labels) == 0:
+        return ""
+    who = char.name if char != None else "The roller"
+    vis = ", ".join([f"{ch}={raw[ord(ch)-ord('A')]}" for ch in cheat_labels])
+    spoil = (
+        f"||**Perception / Insight (vs. the roller):** {who} manipulated the dice ({vis}). "
+        f"The forced faces do not match a natural throw.||"
+    )
+    return spoil

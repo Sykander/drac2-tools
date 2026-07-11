@@ -9,6 +9,8 @@ alwaysApply: true
 
 In Draconic / Avrae, **`using(...)`** binds a gvar module by the names it defines **without** a leading **`_`**. Names that start with **`_`** are **not** accessible from aliases (e.g. **`regex._compile_program`** is rejected). **Do not document `_*` symbols in `docs/`**—they are implementation details in **`.gvar`** sources for maintainers reading code, not a consumer API.
 
+**Drac2 reserved / builtin names:** Do not assign to **`time`** ( **`time()`** is Avrae’s epoch builtin) or shadow other engine names such as **`character`**, **`combat`**, **`argparse`**, **`vroll`**, **`err`**. Use names like **`travel_txt`** instead. Details: **`.cursor/rules/drac2-avrae-sources.mdc`** → **Avrae builtins — do not shadow**.
+
 ## Documentation surfaces (keep in sync)
 
 When behavior or user-facing surfaces change, update prose as needed in:
